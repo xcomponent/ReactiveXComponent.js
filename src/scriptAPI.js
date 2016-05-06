@@ -1,4 +1,61 @@
 
+/****************************PARSER******************************************/
+var Parser = function (xml) {
+    var _xml = xml;
+
+    this.getXml = function () {
+        return _xml;
+    }
+
+    var _xmlDom = (function (xml) {
+        if (window.DOMParser) {
+            xml = (new DOMParser).parseFromString(xml, 'text/xml');
+        } else if (window.ActiveXObject) {
+            xml = [new ActiveXObject('Microsoft.XMLDOM'), xml];
+            xml[0].async = false;
+            xml[0].loadXML(xml[1]);
+            xml = xml[0];
+        }
+        return xml;
+    })(xml);
+
+    this.getXmlDom = function () {
+        return _xmlDom;
+    }
+}
+
+Parser.prototype.getCodes = function (componentName, stateMachineName) {
+    var components = this.getXmlDom().getElementsByTagName("component");
+    for (var i = 0; i < components.length; i++) {
+        if (componentName.localeCompare(components[i].getAttributeNode("name").value) == 0) {
+            var componentCode = components[i].getAttributeNode("id").value;
+            var stateMachines = components[i].getElementsByTagName("stateMachine");
+            for (var j = 0; j < stateMachines.length; j++) {
+                if (stateMachineName.localeCompare(stateMachines[j].getAttribute("name").value == 0)) {
+                    return {
+                        "componentCode": components[i].getAttributeNode("id").value,
+                        "stateMachineCode": stateMachines[j].getAttributeNode("id").value
+                    };
+                }
+            }
+            break;
+        }
+    }
+    return null;
+}
+
+
+Parser.prototype.getPublish = function (componentCode, stateMachineCode) {
+    var publishs = this.getXmlDom().getElementsByTagName("publish");
+    for (var i = 0; i < publishs.length; i++) {
+        if (componentCode.localeCompare(publishs[i].getAttribute("componentCode")) == 0 &&
+            stateMachineCode.localeCompare(publishs[i].getAttribute("stateMachineCode")) == 0) {
+            return publishs[i];
+        }
+    }
+    return null;
+}
+
 
 
 function getStringXcApi() {
@@ -57,56 +114,13 @@ function getStringXcApi() {
 }
      
 
-function getXmlDom(xml) {
-    if (window.DOMParser) {
-        xml = (new DOMParser).parseFromString(xml, 'text/xml');
-    } else if (window.ActiveXObject) {
-        xml = [new ActiveXObject('Microsoft.XMLDOM'), xml];
-        xml[0].async = false;
-        xml[0].loadXML(xml[1]);
-        xml = xml[0];
-    }
-    return xml;
-}
-
-
-function getCodes(componentName, stateMachineName, xmlDom) {
-    var components = xmlDom.getElementsByTagName("component");
-    for (var i = 0; i < components.length; i++) {
-        if (componentName.localeCompare(components[i].getAttributeNode("name").value) == 0) {
-            var componentCode = components[i].getAttributeNode("id").value;
-            var stateMachines = components[i].getElementsByTagName("stateMachine");
-            for (var j = 0; j < stateMachines.length; j++) {
-                if (stateMachineName.localeCompare(stateMachines[j].getAttribute("name").value == 0)) {
-                    return {
-                        "componentCode": components[i].getAttributeNode("id").value,
-                        "stateMachineCode": stateMachines[j].getAttributeNode("id").value
-                    };
-                }
-            }
-            break;
-        }
-    }
-    return null;
-}
-
-
-function getPublish(componentCode, stateMachineCode, xmlDom) {
-    var publishs = xmlDom.getElementsByTagName("publish");
-    for (var i = 0; i < publishs.length; i++) {
-        if (componentCode.localeCompare(publishs[i].getAttribute("componentCode")) == 0 &&
-            stateMachineCode.localeCompare(publishs[i].getAttribute("stateMachineCode")) == 0) {
-            return publishs[i];
-        }
-    }
-    return null;
-}
 
 
 function getEventToSend(componentName, stateMachineName, jsonMessage, xml) {
-    var xmlDom = getXmlDom(xml);
-    var codes = getCodes(componentName, stateMachineName, xmlDom);
-    var publish = getPublish(codes.componentCode, codes.stateMachineCode, xmlDom);
+    //var xmlDom = getXmlDom(xml);
+    var parser = new Parser(xml);
+    var codes = parser.getCodes(componentName, stateMachineName);
+    var publish = parser.getPublish(codes.componentCode, codes.stateMachineCode);
     var routingKey = publish.getElementsByTagName("topic")[0].textContent;
 
     var event = {
@@ -141,9 +155,15 @@ var Api = function(host, port) {
         var data = getEventToSend(componentName, stateMachineName, jsonMessage, xml);
         var stringToSend = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
                             + " " + JSON.stringify(data.event);
-        tryToDo(function(param) {
-            _socket.send(param);
-        }, stringToSend);
+        if (_socket.readyState == 1) {
+            _socket.send(stringToSend);
+        } else {
+            _socket.addEventListener("open", function(event) {
+                event.currentTarget.send(stringToSend);
+            });
+        }
+        
+
     }
 
     //TODO
@@ -151,36 +171,42 @@ var Api = function(host, port) {
         
     }
 
-    //Exec callback(param) if connection already established 
-    //else wait and retry
-    function tryToDo(callback, param) {
-        if (_socket.readyState === 1) {
-            callback(param);
-        } else {
-            setTimeout(function () {
-                tryToDo(callback, param);
-            }, 200);
-        }
-    }
 
-    _socket.onmessage = function (e) {
+
+    /*var xcApiJson;
+    (function() {
+        var stringXcApi = getStringXcApi();
+        xcApiJson = getXcApiJson(stringXcApi);
+
+        var subscribers = xcApiJson.deployment.clientAPICommunication[0].subscribe;
+        for (var i = 0; i < subscribers.length; i++) {
+            var topic = subscribers[i].topic[0]._;
+            var data = {
+                "Header": { "IncomingType": 0 },
+                "JsonMessage": JSON.stringify({ "Topic": { "Key": topic } })
+            };
+            tryToDo(function (param) {
+                _socket.send(param);
+            }, "subscribe " + JSON.stringify(data));
+        }
+    })();*/
+
+    /*_socket.onmessage = function (e) {
         console.log("Message received");
         //var context = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
         //_contexts.push(context);
         //console.log(_contexts);
         //console.log(e.data);
-    }
+    }*/
 
-    _socket.onopen = function (e) {
-        console.log("connected to " + host + ":" + port);
-    }
 
     _socket.onclose = function(e) {
         console.log("connection on " + host + ":" + port + " closed.");
     }
+
 }
 
-var jsonMessage = { "Name": "HAZEM LALLALAL !!!!!!!!!!!!!!" };
+var jsonMessage = { "Name": "HAZEM CHAMPION" };
 var componentName = "HelloWorld";
 var stateMachineName = "HelloWorldManager";
 
@@ -189,4 +215,8 @@ var port = "443";
 var api = new Api(host, port);
 
 api.send(componentName, stateMachineName, jsonMessage);
+api.send(componentName, stateMachineName, jsonMessage);
 
+setTimeout(function() {
+    api.send(componentName, stateMachineName, { "Name": "OKKKKKKKKKKKKKKKKKKKKKKKK" });
+}, 5000);
