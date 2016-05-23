@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: '.',
 
 
     // frameworks to use
@@ -16,8 +16,12 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'test/test-main.js',
-      {pattern: 'src/*.js', included: false},
-      {pattern: 'test/**/*.spec.js', included: false}
+      { pattern: 'node_modules/rx/dist/rx.all.js', included: false },
+      { pattern: 'src/*.js', included: false },
+      { pattern: 'src/communication/*.js', included: false },
+      { pattern: 'src/configuration/*.js', included: false },
+      { pattern: 'test/**/*Spec.js', included: false }
+
     ],
 
 
@@ -34,8 +38,20 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'dots', 'coverage'],
+    reporters: ['junit','progress', 'dots', 'coverage'],
 
+    junitReporter : {
+        outputDir: 'test_out',
+        outputFile: 'unit-tests-results.xml',
+        suite: 'unit'
+    },
+
+    coverageReporter: {
+        reporters: [
+        { type: 'html', dir: 'coverage/html' },
+        { type: 'cobertura', dir: 'coverage/cobertura' }
+        ]
+    },
 
     // web server port
     port: 9876,
@@ -61,7 +77,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous

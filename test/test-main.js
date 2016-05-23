@@ -21,6 +21,7 @@ require.config({
 
     paths: {
         //'jquery': '../node_modules/jquery/dist/jquery',
+        'rx': '../node_modules/rx/dist/rx.all',
         'test': '../test'
     },
 

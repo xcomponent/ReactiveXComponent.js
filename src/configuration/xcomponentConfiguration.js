@@ -2,6 +2,21 @@
 define(function () {
     "use strict";
 
+    var tags = {};
+
+    tags.component = "component";
+    tags.name = "name";
+    tags.id = "id";
+    tags.stateMachine = "stateMachine";
+    tags.publish = "publish";
+    tags.componentCode = "componentCode";
+    tags.stateMachineCode = "stateMachineCode";
+    tags.eventCode = "eventCode";
+    tags.event = "event";
+    tags.topic = "topic";
+    tags.eventCode = "eventCode";
+    tags.subscribe = "subscribe";
+
     var _xcApiString = (function() {
         return `<?xml version="1.0" encoding="utf-8"?>
     <deployment environment="Dev" xcProjectName="HelloWorld" deploymentTargetCode="-487384339" deploymentTargetName="HelloWorldApi" version="1.0" frameworkType="Framework4" xmlns="http://xcomponent.com/DeploymentConfig.xsd">
@@ -57,11 +72,14 @@ define(function () {
     </deployment>`;
     })();
     
-    var Getter = function() {
+    var getXcApi = function() {
         //session.send
         return _xcApiString;
     };
 
 
-    return { Getter: Getter };
+    return {
+        getXcApi: getXcApi,
+        tags : tags
+    };
 });

@@ -54,17 +54,12 @@ var xml = (function() {
 </deployment>`;
 })();
     
-define(["Parser"], function (Parser) {
+define(["parser"], function (Parser) {
 
     describe("Test Parser module", function () {
         var parser = new Parser(xml);
 
-        it("Test getters", function() {
-            expect(parser.getXml()).toEqual(xml);
-        });
-
-
-        it("Test getCodes", function () {
+        it("Test getCodes with correct basic cases", function () {
             var codes, correctCodes;
 
             codes = parser.getCodes("HelloWorld", "HelloWorldManager");
@@ -76,17 +71,54 @@ define(["Parser"], function (Parser) {
             expect(codes).toEqual(correctCodes);
         });
 
+  
+        it("Test getCodes with error case", function() {
+            var messageError = "codes not found";
+            expect(function() {
+                parser.getCodes("random component", "random stateMachine");
+            }).toThrowError(messageError);
+            expect(function() {
+                parser.getCodes("HelloWorld", "random stateMachine");
+            }).toThrowError(messageError);
+            expect(function() {
+                parser.getCodes("random component", "HelloWorldManager");
+            }).toThrowError(messageError);
+        });
 
-        it("Test getPublish", function() {
+
+        it("Test getPublishsDetails with correct basic case", function() {
             var correctPublish = {
                 eventCode: "9",
                 messageType: "XComponent.HelloWorld.UserObject.SayHello",
                 routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
             };
-            var publish = parser.getPublish("-69981087", "-829536631");
+            var publish = parser.getPublishDetails("-69981087", "-829536631");
             expect(publish).toEqual(correctPublish);
         });
 
+
+        it("Test getPublishsDetails with error case", function() {
+            var messageError = "publishDetails not found";
+            expect(function() {
+                parser.getPublishDetails("random componentCode", "random stateMachineCode");
+            }).toThrowError(messageError);
+            expect(function() {
+                parser.getPublishDetails("-69981087", "random stateMachineCode");
+            }).toThrowError(messageError);
+            expect(function() {
+                parser.getPublishDetails("random componentCode", "-829536631");
+            }).toThrowError(messageError);
+        });
+
+        /*it("Test getSubscribe", function() {
+            var correctSubscribe = {
+                componentCode : "-69981087", 
+                stateMachineCode : "-343862282",
+                topic: "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse"
+            };
+            var subscribe = parser.getSubscribe("HelloWorld", "HelloWorldResponse");
+            expect(subscribe).toEqual(correctSubscribe);
+        });*/
 
     });
 
