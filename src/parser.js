@@ -2,48 +2,53 @@
 define(["javascriptHelper", "configuration/xcomponentConfiguration"], function (javascriptHelper, XComponentConfiguration) {
     "use strict";
 
-    var tags = XComponentConfiguration.tags;
 
     var Parser = function (xml) {
         var xmlDom = (new javascriptHelper.DOMParser()).parseFromString(xml, 'text/xml');
+        this.codes = getCodes(xmlDom);
+        this.publishsDetails = getPublihsDetails(xmlDom);
+    }
 
-        this.codes = (function() {
-            var codes = {}, key, value;
-            var componentName, stateMachineName;
-            var components = xmlDom.getElementsByTagName(tags.component);
-            for (var i = 0; i < components.length; i++) {
-                var stateMachines = components[i].getElementsByTagName(tags.stateMachine);
-                for (var j = 0; j < stateMachines.length; j++) {
-                    componentName = components[i].getAttribute(tags.name);
-                    stateMachineName = stateMachines[j].getAttribute(tags.name);
-                    key = getKey(componentName, stateMachineName);
-                    value = {
-                        "componentCode": components[i].getAttribute(tags.id),
-                        "stateMachineCode": stateMachines[j].getAttribute(tags.id)
-                    };
-                    codes[key] = value;
-                }
-            }
-            return codes;
-        })();
 
-        this.publishsDetails = (function () {
-            var publishsDetails = {}, key, value;
-            var componentCode, stateMachineCode;
-            var publishs = xmlDom.getElementsByTagName(tags.publish);
-            for (var i = 0; i < publishs.length; i++) {
-                componentCode = publishs[i].getAttribute(tags.componentCode);
-                stateMachineCode = publishs[i].getAttribute(tags.stateMachineCode);
-                key = getKey(componentCode, stateMachineCode);
+    var tags = XComponentConfiguration.tags;
+
+    var getCodes = function(xmlDom) {
+        var codes = {}, key, value;
+        var componentName, stateMachineName;
+        var components = xmlDom.getElementsByTagName(tags.component);
+        for (var i = 0; i < components.length; i++) {
+            var stateMachines = components[i].getElementsByTagName(tags.stateMachine);
+            for (var j = 0; j < stateMachines.length; j++) {
+                componentName = components[i].getAttribute(tags.name);
+                stateMachineName = stateMachines[j].getAttribute(tags.name);
+                key = getKey(componentName, stateMachineName);
                 value = {
-                    "eventCode": publishs[i].getAttribute(tags.eventCode),
-                    "messageType": publishs[i].getAttribute(tags.event),
-                    "routingKey": publishs[i].getElementsByTagName(tags.topic)[0].textContent
+                    "componentCode": components[i].getAttribute(tags.id),
+                    "stateMachineCode": stateMachines[j].getAttribute(tags.id)
                 };
-                publishsDetails[key] = value;
+                codes[key] = value;
             }
-            return publishsDetails;
-        })();
+        }
+        return codes;
+    }
+
+
+    var getPublihsDetails = function(xmlDom) {
+        var publishsDetails = {}, key, value;
+        var componentCode, stateMachineCode;
+        var publishs = xmlDom.getElementsByTagName(tags.publish);
+        for (var i = 0; i < publishs.length; i++) {
+            componentCode = publishs[i].getAttribute(tags.componentCode);
+            stateMachineCode = publishs[i].getAttribute(tags.stateMachineCode);
+            key = getKey(componentCode, stateMachineCode);
+            value = {
+                "eventCode": publishs[i].getAttribute(tags.eventCode),
+                "messageType": publishs[i].getAttribute(tags.event),
+                "routingKey": publishs[i].getElementsByTagName(tags.topic)[0].textContent
+            };
+            publishsDetails[key] = value;
+        }
+        return publishsDetails;
     }
 
 
@@ -69,6 +74,15 @@ define(["javascriptHelper", "configuration/xcomponentConfiguration"], function (
         return component + " " + stateMachine;
     }
 
+    var ComponentNotFoundException = function(name) {
+        this.name = "ComponentNotFoundException";
+    }
+
+    var StateMachineNotFoundException = function (name) {
+        this.name = "StateMachineNotFoundException";
+    }
+
+    //ComponentNotFoundException and StateMachineNotFoundException
 
     /*Parser.prototype.getSubscribe = function (componentName, stateMachineName) {
         var codes = this.getCodes(componentName, stateMachineName);

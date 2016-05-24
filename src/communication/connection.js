@@ -1,10 +1,16 @@
 
-define(["communication/session"], function (Session) {
+define(["communication/session"], function (SessionFactory) {
     "use strict";
 
-    var Connection = function (serverUrl, callback, callbackError, publisher) {
-        this.session = new Session(serverUrl, publisher);
-        this.session.init(callback, callbackError);
+    var Connection = function () {
+        this.sessions = [];
+    }
+
+    Connection.prototype.createSession = function (serverUrl, callback) {
+        var session = SessionFactory.create(serverUrl);
+        session.init(callback);
+        this.sessions.push(session);
+        return session;
     }
 
     return Connection;

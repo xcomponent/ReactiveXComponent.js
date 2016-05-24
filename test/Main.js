@@ -21,17 +21,18 @@ requirejs.config({
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
 
-            var callback = function(session) {
-                session.send(componentName, stateMachineName, jsonMessage1);
-                session.send(componentName, stateMachineName, jsonMessage2);
-                session.send(componentName, stateMachineName, jsonMessage3);
+            var callback = function (error, session) {
+                if (error) {
+                    console.log(error);
+                    return;
+                }
+                var publisher = session.createPublisher();
+                publisher.send(componentName, stateMachineName, jsonMessage1);
+                publisher.send(componentName, stateMachineName, jsonMessage2);
+                publisher.send(componentName, stateMachineName, jsonMessage3);
             }
 
-            var callbackError = function(e) {
-                console.log("Exec callback error!!!");
-            }
-
-            XComponentAPI.create(serverUrl, callback, callbackError);
+            XComponentAPI.createApi(serverUrl, callback);
 
         });
 

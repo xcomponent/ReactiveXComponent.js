@@ -21,7 +21,7 @@ module.exports = function(config) {
       { pattern: 'src/communication/*.js', included: false },
       { pattern: 'src/configuration/*.js', included: false },
       { pattern: 'test/**/*Spec.js', included: false },
-       { pattern: 'test/karma.conf.js', included: false }
+      { pattern: 'test/karma.conf.js', included: false }
     ],
 
 

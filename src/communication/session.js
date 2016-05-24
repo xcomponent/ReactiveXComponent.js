@@ -1,26 +1,33 @@
 
-define(["javascriptHelper"], function (javascriptHelper) {
+define(["javascriptHelper", "communication/xcomponentWebSocketPublisher"], function (javascriptHelper, Publisher) {
     "use strict";
 
 
-    var Session = function (serverUrl, publisher) {
-        this.serverUrl = serverUrl;
-        this.webSocket = new javascriptHelper.WebSocket(serverUrl);
-        this.publisher = publisher;
+    var SessionFactory = function (serverUrl) {
+        var webSocket = new javascriptHelper.WebSocket(serverUrl);
+        var session = new Session(serverUrl, webSocket);
+        return session;
     }
 
 
-    Session.prototype.init = function (callback, callbackError) {
+    var Session = function (serverUrl, webSocket) {
+        this.serverUrl = serverUrl;
+        this.webSocket = webSocket;
+        this.publishers = [];
+    }
+
+
+    Session.prototype.init = function (callback) {
         var thisObject = this;
 
         this.webSocket.onopen = function (e) {
             console.log("connection started on " + thisObject.serverUrl + ".");
-            callback(thisObject);
+            callback(null, thisObject);
         }
 
         this.webSocket.onerror = function (e) {
             console.error("Error on " + thisObject.serverUrl + ".");
-            callbackError(e);
+            callback(e, null);
         }
 
         this.webSocket.onclose = function (e) {
@@ -29,12 +36,14 @@ define(["javascriptHelper"], function (javascriptHelper) {
     }
 
 
-    Session.prototype.send = function (componentName, stateMachineName, jsonMessage) {
-        var data = this.publisher.getEventToSend(componentName, stateMachineName, jsonMessage);
-        var stringToSend = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
-                            + " " + JSON.stringify(data.event);
-        this.webSocket.send(stringToSend);
+    Session.prototype.createPublisher = function() {
+        var publisher = new Publisher(this.webSocket);
+        this.publishers.push(publisher);
+        return publisher;
     }
 
-    return Session;
+
+    return {
+        create : SessionFactory
+    };
 });

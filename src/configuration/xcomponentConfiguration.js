@@ -78,8 +78,20 @@ define(function () {
     };
 
 
+    var parser;
+
+    function getParser() {
+        return parser;
+    }
+
+    function setParser(newParser) {
+        parser = newParser;
+    }
+
     return {
         getXcApi: getXcApi,
-        tags : tags
+        tags: tags,
+        getParser: getParser,
+        setParser: setParser
     };
 });
