@@ -5,7 +5,7 @@ module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '.',
+    basePath: '../',
 
 
     // frameworks to use
@@ -20,8 +20,8 @@ module.exports = function(config) {
       { pattern: 'src/*.js', included: false },
       { pattern: 'src/communication/*.js', included: false },
       { pattern: 'src/configuration/*.js', included: false },
-      { pattern: 'test/**/*Spec.js', included: false }
-
+      { pattern: 'test/**/*Spec.js', included: false },
+       { pattern: 'test/karma.conf.js', included: false }
     ],
 
 
