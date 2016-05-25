@@ -76,30 +76,30 @@ define(["parser"], function (Parser) {
             var messageError = "codes not found";
             expect(function() {
                 parser.getCodes("random component", "random stateMachine");
-            }).toThrowError(messageError);
-            expect(function() {
+            }).toThrowError("Component 'random component' not found");
+           /*expect(function() {
                 parser.getCodes("HelloWorld", "random stateMachine");
             }).toThrowError(messageError);
             expect(function() {
                 parser.getCodes("random component", "HelloWorldManager");
-            }).toThrowError(messageError);
+            }).toThrowError(messageError);*/
         });
 
 
-        it("Test getPublishsDetails with correct basic case", function() {
+        it("Test getPublisherDetails with correct basic case", function() {
             var correctPublish = {
                 eventCode: "9",
                 messageType: "XComponent.HelloWorld.UserObject.SayHello",
                 routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
             };
-            var publish = parser.getPublishDetails("-69981087", "-829536631");
+            var publish = parser.getPublisherDetails("-69981087", "-829536631");
             expect(publish).toEqual(correctPublish);
         });
 
 
         it("Test getPublishsDetails with error case", function() {
             var messageError = "publishDetails not found";
-            expect(function() {
+            /*expect(function() {
                 parser.getPublishDetails("random componentCode", "random stateMachineCode");
             }).toThrowError(messageError);
             expect(function() {
@@ -107,7 +107,7 @@ define(["parser"], function (Parser) {
             }).toThrowError(messageError);
             expect(function() {
                 parser.getPublishDetails("random componentCode", "-829536631");
-            }).toThrowError(messageError);
+            }).toThrow(messageError);*/
         });
 
         /*it("Test getSubscribe", function() {

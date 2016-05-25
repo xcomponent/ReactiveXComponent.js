@@ -1,33 +1,32 @@
 
-define(["javascriptHelper", "communication/xcomponentWebSocketPublisher"], function (javascriptHelper, Publisher) {
+define(["javascriptHelper", "communication/xcWebSocketPublisher"], function (javascriptHelper, Publisher) {
     "use strict";
 
-
-    var SessionFactory = function (serverUrl) {
+    var SessionFactory = function (serverUrl, configuration) {
         var webSocket = new javascriptHelper.WebSocket(serverUrl);
-        var session = new Session(serverUrl, webSocket);
+        var session = new Session(serverUrl, webSocket, configuration);
         return session;
     }
 
 
-    var Session = function (serverUrl, webSocket) {
+    var Session = function (serverUrl, webSocket, configuration) {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
-        this.publishers = [];
+        this.configuration = configuration;
     }
 
 
-    Session.prototype.init = function (callback) {
+    Session.prototype.init = function (sessionListener) {
         var thisObject = this;
 
         this.webSocket.onopen = function (e) {
             console.log("connection started on " + thisObject.serverUrl + ".");
-            callback(null, thisObject);
+            sessionListener(null, thisObject);
         }
 
         this.webSocket.onerror = function (e) {
             console.error("Error on " + thisObject.serverUrl + ".");
-            callback(e, null);
+            sessionListener(e, null);
         }
 
         this.webSocket.onclose = function (e) {
@@ -37,8 +36,7 @@ define(["javascriptHelper", "communication/xcomponentWebSocketPublisher"], funct
 
 
     Session.prototype.createPublisher = function() {
-        var publisher = new Publisher(this.webSocket);
-        this.publishers.push(publisher);
+        var publisher = new Publisher(this.webSocket, this.configuration);
         return publisher;
     }
 

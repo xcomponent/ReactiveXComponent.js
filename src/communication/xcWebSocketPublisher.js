@@ -1,15 +1,15 @@
-define(["configuration/xcomponentConfiguration"], function (XComponentConfiguration) {
+define(["configuration/xcConfiguration"], function (XComponentConfiguration) {
 	"use strict"
 
-
-	var Publisher = function (webSocket) {
+	var Publisher = function (webSocket, configuration) {
 	    this.webSocket = webSocket;
+	    this.configuration = configuration;
 	}
 
 
     Publisher.prototype.getEventToSend = function (componentName, stateMachineName, jsonMessage) {
-        var codes = XComponentConfiguration.getParser().getCodes(componentName, stateMachineName);
-        var publish = XComponentConfiguration.getParser().getPublishDetails(codes.componentCode, codes.stateMachineCode);
+        var codes = this.configuration.getCodes(componentName, stateMachineName);
+        var publish = this.configuration.getPublisherDetails(codes.componentCode, codes.stateMachineCode);
 
         var event = {
             "Header": {
@@ -30,11 +30,11 @@ define(["configuration/xcomponentConfiguration"], function (XComponentConfigurat
 
     Publisher.prototype.send = function(componentName, stateMachineName, jsonMessage) {
         var data = this.getEventToSend(componentName, stateMachineName, jsonMessage);
-        this.webSocket.send(getStringToSend(data));
+        this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
 
-    function getStringToSend(data) {
+    function convertToWebsocketInputFormat(data) {
         var stringToSend = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
                     + " " + JSON.stringify(data.event);
         return stringToSend;

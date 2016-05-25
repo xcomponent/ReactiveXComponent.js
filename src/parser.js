@@ -1,40 +1,48 @@
 
-define(["javascriptHelper", "configuration/xcomponentConfiguration"], function (javascriptHelper, XComponentConfiguration) {
+define(["javascriptHelper", "configuration/xcConfiguration"], function (javascriptHelper, XComponentConfiguration) {
     "use strict";
 
-
-    var Parser = function (xml) {
-        var xmlDom = (new javascriptHelper.DOMParser()).parseFromString(xml, 'text/xml');
-        this.codes = getCodes(xmlDom);
-        this.publishsDetails = getPublihsDetails(xmlDom);
+    var Parser = function () {
     }
 
 
-    var tags = XComponentConfiguration.tags;
+    Parser.prototype.parse = function (xml, tags) {
+        var xmlDom = (new javascriptHelper.DOMParser()).parseFromString(xml, 'text/xml');
+        this.codes = getCodes(xmlDom, tags);
+        this.publishersDetails = getPublihersDetails(xmlDom, tags);
+    }
 
-    var getCodes = function(xmlDom) {
+
+    var getCodes = function (xmlDom, tags) {
         var codes = {}, key, value;
-        var componentName, stateMachineName;
+        var componentName, stateMachineName, stateMachines;
         var components = xmlDom.getElementsByTagName(tags.component);
         for (var i = 0; i < components.length; i++) {
-            var stateMachines = components[i].getElementsByTagName(tags.stateMachine);
-            for (var j = 0; j < stateMachines.length; j++) {
-                componentName = components[i].getAttribute(tags.name);
-                stateMachineName = stateMachines[j].getAttribute(tags.name);
-                key = getKey(componentName, stateMachineName);
-                value = {
-                    "componentCode": components[i].getAttribute(tags.id),
-                    "stateMachineCode": stateMachines[j].getAttribute(tags.id)
-                };
-                codes[key] = value;
-            }
+            componentName = components[i].getAttribute(tags.name);
+            stateMachines = components[i].getElementsByTagName(tags.stateMachine);
+            codes[componentName] = {
+                "componentCode": components[i].getAttribute(tags.id),
+                "stateMachineCodes": getStateMachineCodes(stateMachines, tags)
+            };
         }
         return codes;
     }
 
 
-    var getPublihsDetails = function(xmlDom) {
-        var publishsDetails = {}, key, value;
+    var getStateMachineCodes = function (stateMachines, tags) {
+        var stateMachineCodes = {};
+        var stateMachineName, stateMachineCode;
+        for (var j = 0; j < stateMachines.length; j++) {
+            stateMachineName = stateMachines[j].getAttribute(tags.name);
+            stateMachineCode = stateMachines[j].getAttribute(tags.id);
+            stateMachineCodes[stateMachineName] = stateMachineCode;
+        }
+        return stateMachineCodes;
+    }
+
+
+    var getPublihersDetails = function (xmlDom, tags) {
+        var publishersDetails = {}, key, value;
         var componentCode, stateMachineCode;
         var publishs = xmlDom.getElementsByTagName(tags.publish);
         for (var i = 0; i < publishs.length; i++) {
@@ -46,27 +54,40 @@ define(["javascriptHelper", "configuration/xcomponentConfiguration"], function (
                 "messageType": publishs[i].getAttribute(tags.event),
                 "routingKey": publishs[i].getElementsByTagName(tags.topic)[0].textContent
             };
-            publishsDetails[key] = value;
+            publishersDetails[key] = value;
         }
-        return publishsDetails;
+        return publishersDetails;
     }
 
 
     Parser.prototype.getCodes = function (componentName, stateMachineName) {
-        var codes = this.codes[getKey(componentName, stateMachineName)];
-        if (codes == undefined)
-            throw new Error("codes not found");
-        else
-            return codes;
+        var componentCode, stateMachineCode;
+        if (this.codes[componentName] == undefined) {
+            throw new Error("Component '" + componentName + "' not found");
+        } else {
+            componentCode = this.codes[componentName].componentCode;
+        }
+
+        var stateMachineCodes = this.codes[componentName].stateMachineCodes;
+        if (stateMachineCodes[stateMachineName] == undefined) {
+            throw new Error("StateMachine '" + stateMachineName + "' not found");
+        } else {
+            stateMachineCode = stateMachineCodes[stateMachineName];
+        }
+        return {
+            "componentCode": componentCode,
+            "stateMachineCode": stateMachineCode
+        }
     }
 
 
-    Parser.prototype.getPublishDetails = function (componentCode, stateMachineCode) {
-        var publishesDetails = this.publishsDetails[getKey(componentCode, stateMachineCode)];
-        if (publishesDetails == undefined)
-            throw new Error("publishDetails not found");
-        else
-            return publishesDetails;
+    Parser.prototype.getPublisherDetails = function (componentCode, stateMachineCode) {
+        var publisherDetails = this.publishersDetails[getKey(componentCode, stateMachineCode)];
+        if (publisherDetails == undefined) {
+            throw new Error("PublishDetails not found");
+        } else {
+            return publisherDetails;
+        }
     }
 
 
@@ -74,15 +95,8 @@ define(["javascriptHelper", "configuration/xcomponentConfiguration"], function (
         return component + " " + stateMachine;
     }
 
-    var ComponentNotFoundException = function(name) {
-        this.name = "ComponentNotFoundException";
-    }
+    
 
-    var StateMachineNotFoundException = function (name) {
-        this.name = "StateMachineNotFoundException";
-    }
-
-    //ComponentNotFoundException and StateMachineNotFoundException
 
     /*Parser.prototype.getSubscribe = function (componentName, stateMachineName) {
         var codes = this.getCodes(componentName, stateMachineName);

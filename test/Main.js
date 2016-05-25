@@ -21,7 +21,7 @@ requirejs.config({
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
 
-            var callback = function (error, session) {
+            var sessionListener = function (error, session) {
                 if (error) {
                     console.log(error);
                     return;
@@ -32,7 +32,8 @@ requirejs.config({
                 publisher.send(componentName, stateMachineName, jsonMessage3);
             }
 
-            XComponentAPI.createApi(serverUrl, callback);
+            var api = new XComponentAPI();
+            api.createSession(serverUrl, sessionListener);
 
         });
 

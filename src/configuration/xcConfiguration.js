@@ -78,20 +78,21 @@ define(function () {
     };
 
 
-    var parser;
-
-    function getParser() {
-        return parser;
+    var Configuration = function(parser) {
+        this.parser = parser;
     }
 
-    function setParser(newParser) {
-        parser = newParser;
+    Configuration.prototype.init = function() {
+        this.parser.parse(getXcApi(), tags);
     }
 
-    return {
-        getXcApi: getXcApi,
-        tags: tags,
-        getParser: getParser,
-        setParser: setParser
-    };
+    Configuration.prototype.getCodes = function(componentName, stateMachineName) {
+        return this.parser.getCodes(componentName, stateMachineName);
+    }
+
+    Configuration.prototype.getPublisherDetails = function(componentCode, stateMachineCode) {
+        return this.parser.getPublisherDetails(componentCode, stateMachineCode);
+    }
+
+    return Configuration;
 });
