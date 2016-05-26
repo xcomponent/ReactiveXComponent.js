@@ -1,8 +1,8 @@
 
-define(["javascriptHelper", "configuration/xcConfiguration"], function (javascriptHelper, XComponentConfiguration) {
+define(["javascriptHelper"], function (javascriptHelper) {
     "use strict";
 
-    var Parser = function () {
+    var Parser = function() {
     }
 
 
@@ -84,7 +84,7 @@ define(["javascriptHelper", "configuration/xcConfiguration"], function (javascri
     Parser.prototype.getPublisherDetails = function (componentCode, stateMachineCode) {
         var publisherDetails = this.publishersDetails[getKey(componentCode, stateMachineCode)];
         if (publisherDetails == undefined) {
-            throw new Error("PublishDetails not found");
+            throw new Error("PublisherDetails not found");
         } else {
             return publisherDetails;
         }

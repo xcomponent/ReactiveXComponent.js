@@ -1,4 +1,4 @@
-define(["configuration/xcConfiguration"], function (XComponentConfiguration) {
+define(function () {
 	"use strict"
 
 	var Publisher = function (webSocket, configuration) {
@@ -35,9 +35,9 @@ define(["configuration/xcConfiguration"], function (XComponentConfiguration) {
 
 
     function convertToWebsocketInputFormat(data) {
-        var stringToSend = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
+        var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
                     + " " + JSON.stringify(data.event);
-        return stringToSend;
+        return input;
     }
 
 

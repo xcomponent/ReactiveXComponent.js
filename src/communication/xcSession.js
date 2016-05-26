@@ -42,6 +42,7 @@ define(["javascriptHelper", "communication/xcWebSocketPublisher"], function (jav
 
 
     return {
-        create : SessionFactory
+        create: SessionFactory,
+        Session: Session
     };
 });

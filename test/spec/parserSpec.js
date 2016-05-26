@@ -53,11 +53,32 @@ var xml = (function() {
   </codesConverter>
 </deployment>`;
 })();
-    
+
+var tags = (function() {
+    var tags = {};
+    tags.component = "component";
+    tags.name = "name";
+    tags.id = "id";
+    tags.stateMachine = "stateMachine";
+    tags.publish = "publish";
+    tags.componentCode = "componentCode";
+    tags.stateMachineCode = "stateMachineCode";
+    tags.eventCode = "eventCode";
+    tags.event = "event";
+    tags.topic = "topic";
+    tags.eventCode = "eventCode";
+    tags.subscribe = "subscribe";
+    return tags;
+})();    
+
+
+
 define(["parser"], function (Parser) {
+    
+    var parser = new Parser();
+    parser.parse(xml, tags);
 
     describe("Test Parser module", function () {
-        var parser = new Parser(xml);
 
         it("Test getCodes with correct basic cases", function () {
             var codes, correctCodes;
@@ -71,18 +92,22 @@ define(["parser"], function (Parser) {
             expect(codes).toEqual(correctCodes);
         });
 
-  
-        it("Test getCodes with error case", function() {
-            var messageError = "codes not found";
+        
+        it("Test getCodes with error 'Component not found'", function() {
+            var componentName = "random component";
+            var messageError = "Component '" + componentName + "' not found";
             expect(function() {
-                parser.getCodes("random component", "random stateMachine");
-            }).toThrowError("Component 'random component' not found");
-           /*expect(function() {
-                parser.getCodes("HelloWorld", "random stateMachine");
+                parser.getCodes(componentName, null);
             }).toThrowError(messageError);
+        });
+
+
+        it("Test getCodes with error 'StateMachine not found'", function() {
+            var stateMachine = "random stateMachine";
+            var messageError = "StateMachine '" + stateMachine + "' not found"
             expect(function() {
-                parser.getCodes("random component", "HelloWorldManager");
-            }).toThrowError(messageError);*/
+                parser.getCodes("HelloWorld", stateMachine);
+            }).toThrowError(messageError);
         });
 
 
@@ -98,17 +123,12 @@ define(["parser"], function (Parser) {
 
 
         it("Test getPublishsDetails with error case", function() {
-            var messageError = "publishDetails not found";
-            /*expect(function() {
-                parser.getPublishDetails("random componentCode", "random stateMachineCode");
-            }).toThrowError(messageError);
+            var messageError = "PublisherDetails not found";
             expect(function() {
-                parser.getPublishDetails("-69981087", "random stateMachineCode");
+                parser.getPublisherDetails("random componentCode", "random stateMachineCode");
             }).toThrowError(messageError);
-            expect(function() {
-                parser.getPublishDetails("random componentCode", "-829536631");
-            }).toThrow(messageError);*/
         });
+
 
         /*it("Test getSubscribe", function() {
             var correctSubscribe = {
