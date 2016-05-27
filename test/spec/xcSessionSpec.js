@@ -5,12 +5,12 @@ define(["communication/xcSession", "communication/xcWebSocketPublisher"], functi
 
         var session = new xcSession.Session();
 
-        it("Test constructor", function () {
+        it("Test constructor : should instanciate session object", function () {
             expect(session.init).toEqual(jasmine.any(Function));
             expect(session.createPublisher).toEqual(jasmine.any(Function));
         });
 
-        it("Test createPublisher method", function () {
+        it("Test createPublisher method : should return an instance of Publisher", function () {
             var publisher = session.createPublisher();
             expect(publisher instanceof Publisher).toBe(true);
         });

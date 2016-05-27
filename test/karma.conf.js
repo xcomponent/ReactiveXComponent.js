@@ -17,9 +17,8 @@ module.exports = function(config) {
     files: [
       'test/test-main.js',
       { pattern: 'node_modules/rx/dist/rx.all.js', included: false },
-      { pattern: 'src/*.js', included: false },
-      { pattern: 'src/communication/*.js', included: false },
-      { pattern: 'src/configuration/*.js', included: false },
+      { pattern: 'node_modules/mock-socket/dist/mock-socket.js', included: false },
+      { pattern: 'src/**/*.js', included: false },
       { pattern: 'test/**/*Spec.js', included: false },
       { pattern: 'test/karma.conf.js', included: false }
     ],
@@ -33,9 +32,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'src/*.js': 'coverage',
-        'src/communication/*.js' : 'coverage',
-        'src/configuration/*.js' : 'coverage'
+        'src/**/*.js': 'coverage'
     },
 
 

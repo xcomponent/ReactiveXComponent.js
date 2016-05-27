@@ -1,14 +1,14 @@
 {
-    "name": "reactivexcomponent.js",
-    "version": "1.0.0",
-    "description": "Javascript reactive client API for XComponent",
-    "main": "index.html",
-    "directories": {
-        "test": "test"
-    },
-    "scripts": {
-        "test": "karma start test/karma.conf.js"
-    },
+  "name": "reactivexcomponent.js",
+  "version": "1.0.0",
+  "description": "Javascript reactive client API for XComponent",
+  "main": "index.html",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "karma start test/karma.conf.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xcomponent/ReactiveXComponent.js.git"
@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/xcomponent/ReactiveXComponent.js#readme",
   "dependencies": {
+    "mock-socket": "^2.0.0",
     "requirejs": "^2.2.0",
     "rx": "^4.1.0"
   },

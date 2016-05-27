@@ -75,60 +75,65 @@ var tags = (function() {
 
 define(["parser"], function (Parser) {
     
-    var parser = new Parser();
-    parser.parse(xml, tags);
-
     describe("Test Parser module", function () {
 
-        it("Test getCodes with correct basic cases", function () {
-            var codes, correctCodes;
+        var parser;
 
-            codes = parser.getCodes("HelloWorld", "HelloWorldManager");
-            correctCodes = {componentCode : "-69981087", stateMachineCode : "-829536631"};
-            expect(codes).toEqual(correctCodes);
-
-            codes = parser.getCodes("HelloWorld", "HelloWorldResponse");
-            correctCodes = {componentCode : "-69981087", stateMachineCode : "-343862282"};
-            expect(codes).toEqual(correctCodes);
-        });
-
-        
-        it("Test getCodes with error 'Component not found'", function() {
-            var componentName = "random component";
-            var messageError = "Component '" + componentName + "' not found";
-            expect(function() {
-                parser.getCodes(componentName, null);
-            }).toThrowError(messageError);
+        beforeEach(function() {
+            parser = new Parser();
+            parser.parse(xml, tags);
         });
 
 
-        it("Test getCodes with error 'StateMachine not found'", function() {
-            var stateMachine = "random stateMachine";
-            var messageError = "StateMachine '" + stateMachine + "' not found"
-            expect(function() {
-                parser.getCodes("HelloWorld", stateMachine);
-            }).toThrowError(messageError);
+        describe("Test getCodes method", function() {
+            it("should get the right codes given existing component and statemachine names", function () {
+                var codes, correctCodes;
+
+                codes = parser.getCodes("HelloWorld", "HelloWorldManager");
+                correctCodes = {componentCode : "-69981087", stateMachineCode : "-829536631"};
+                expect(codes).toEqual(correctCodes);
+
+                codes = parser.getCodes("HelloWorld", "HelloWorldResponse");
+                correctCodes = {componentCode : "-69981087", stateMachineCode : "-343862282"};
+                expect(codes).toEqual(correctCodes);
+            });
+            
+            it("using a no existing component name, should throw an error", function() {
+                var componentName = "random component";
+                var messageError = "Component '" + componentName + "' not found";
+                expect(function() {
+                    parser.getCodes(componentName, null);
+                }).toThrowError(messageError);
+            });
+
+            it("using a no existing stateMachine name, should throw an error", function() {
+                var stateMachine = "random stateMachine";
+                var messageError = "StateMachine '" + stateMachine + "' not found"
+                expect(function() {
+                    parser.getCodes("HelloWorld", stateMachine);
+                }).toThrowError(messageError);
+            });
         });
 
 
-        it("Test getPublisherDetails with correct basic case", function() {
-            var correctPublish = {
-                eventCode: "9",
-                messageType: "XComponent.HelloWorld.UserObject.SayHello",
-                routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
-            };
-            var publish = parser.getPublisherDetails("-69981087", "-829536631");
-            expect(publish).toEqual(correctPublish);
+        describe("Test getPublisherDetails method", function() {
+            it("should get the right publisher details given existing component and stateMachine codes", function() {
+                    var correctPublish = {
+                        eventCode: "9",
+                        messageType: "XComponent.HelloWorld.UserObject.SayHello",
+                        routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
+                    };
+                    var publish = parser.getPublisherDetails("-69981087", "-829536631");
+                    expect(publish).toEqual(correctPublish);
+                });
+
+            it("using a no existing stateMachine name, should throw an error", function() {
+                var messageError = "PublisherDetails not found";
+                expect(function() {
+                    parser.getPublisherDetails("random componentCode", "random stateMachineCode");
+                }).toThrowError(messageError);
+            });
         });
-
-
-        it("Test getPublishsDetails with error case", function() {
-            var messageError = "PublisherDetails not found";
-            expect(function() {
-                parser.getPublisherDetails("random componentCode", "random stateMachineCode");
-            }).toThrowError(messageError);
-        });
-
 
         /*it("Test getSubscribe", function() {
             var correctSubscribe = {

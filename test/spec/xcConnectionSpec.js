@@ -1,16 +1,42 @@
 
-define(["communication/xcConnection"], function (Connection) {
+define(["mock-socket", "communication/xcConnection"], function (MockSocket, Connection) {
 
-    var connection = new Connection();
 
-    describe("Test Connection module", function () {
+    describe("Test xcConnection module", function () {
 
-        it("Test constructor", function() {
-            expect(connection.createSession).toEqual(jasmine.any(Function));
+        var connection;
+
+        beforeEach(function () {
+            connection = new Connection();
         });
+
+        describe("Test createSession method", function() {
+            it("Connect to a not existing serverUrl and execute sessionListener callback with error argument", function (done) {
+                var serverUrl = "wss://wrongServerUrl";
+                var messageError = "Error on " + serverUrl + ".";
+
+                var sessionListener = function (error, session) {
+                    expect(error).toMatch(messageError);
+                    expect(session).toBe(null);
+                    done();
+                };
+                connection.createSession(serverUrl, sessionListener, MockWebSocket);
+            });
+
+            it("Connect to a mocket server and execute sessionListener callback with session argument", function (done) {
+                var serverUrl = "wss://serverUrl";
+                var server = new MockServer(serverUrl)
+                var sessionListener = function (error, session) {
+                    expect(error).toBe(null);
+                    expect(session).not.toBe(null);
+                    done();
+                };
+                connection.createSession(serverUrl, sessionListener, MockWebSocket);
+            });
+        });
+
+
 
     });
 
 });
-
-

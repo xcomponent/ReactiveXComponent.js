@@ -7,8 +7,8 @@ define(["communication/xcSession"], function (SessionFactory) {
     }
 
 
-    Connection.prototype.createSession = function (serverUrl, sessionListener) {
-        var session = SessionFactory.create(serverUrl, this.configuration);
+    Connection.prototype.createSession = function (serverUrl, sessionListener, WebSocket) {
+        var session = SessionFactory.create(serverUrl, this.configuration, WebSocket);
         session.init(sessionListener);
     }
 

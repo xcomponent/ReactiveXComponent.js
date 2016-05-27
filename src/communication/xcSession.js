@@ -1,9 +1,9 @@
 
-define(["javascriptHelper", "communication/xcWebSocketPublisher"], function (javascriptHelper, Publisher) {
+define(["communication/xcWebSocketPublisher"], function (Publisher) {
     "use strict";
 
-    var SessionFactory = function (serverUrl, configuration) {
-        var webSocket = new javascriptHelper.WebSocket(serverUrl);
+    var SessionFactory = function (serverUrl, configuration, WebSocket) {
+        var webSocket = new WebSocket(serverUrl);
         var session = new Session(serverUrl, webSocket, configuration);
         return session;
     }
@@ -25,8 +25,9 @@ define(["javascriptHelper", "communication/xcWebSocketPublisher"], function (jav
         }
 
         this.webSocket.onerror = function (e) {
-            console.error("Error on " + thisObject.serverUrl + ".");
-            sessionListener(e, null);
+            var messageError = "Error on " + thisObject.serverUrl + ".";
+            console.error(messageError);
+            sessionListener(messageError, null);
         }
 
         this.webSocket.onclose = function (e) {

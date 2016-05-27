@@ -20,8 +20,8 @@ require.config({
     baseUrl: '/base/src',
 
     paths: {
-        //'jquery': '../node_modules/jquery/dist/jquery',
         'rx': '../node_modules/rx/dist/rx.all',
+        'mock-socket': '../node_modules/mock-socket/dist/mock-socket',
         'test': '../test'
     },
 
