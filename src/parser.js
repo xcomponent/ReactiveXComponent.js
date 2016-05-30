@@ -7,7 +7,8 @@ define(["javascriptHelper"], function (javascriptHelper) {
 
 
     Parser.prototype.parse = function (xml, tags) {
-        var xmlDom = (new javascriptHelper.DOMParser()).parseFromString(xml, 'text/xml');
+        var DOMParser = javascriptHelper.getJavascriptHelper().DOMParser;
+        var xmlDom = (new DOMParser()).parseFromString(xml, 'text/xml');
         this.codes = getCodes(xmlDom, tags);
         this.publishersDetails = getPublihersDetails(xmlDom, tags);
     }

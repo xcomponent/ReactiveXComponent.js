@@ -7,6 +7,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
         var connection;
 
         beforeEach(function () {
+            window.WebSocket = MockWebSocket;
             connection = new Connection();
         });
 
@@ -20,7 +21,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                     expect(session).toBe(null);
                     done();
                 };
-                connection.createSession(serverUrl, sessionListener, MockWebSocket);
+                connection.createSession(serverUrl, sessionListener);
             });
 
             it("Connect to a mocket server and execute sessionListener callback with session argument", function (done) {
@@ -31,7 +32,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                     expect(session).not.toBe(null);
                     done();
                 };
-                connection.createSession(serverUrl, sessionListener, MockWebSocket);
+                connection.createSession(serverUrl, sessionListener);
             });
         });
 

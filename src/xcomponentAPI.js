@@ -1,5 +1,5 @@
 
-define(["javascriptHelper", "communication/xcConnection", "parser", "configuration/xcConfiguration", "rx"], function (javascriptHelper, Connection, Parser, Configuration, Rx) {
+define(["communication/xcConnection", "parser", "configuration/xcConfiguration", "rx"], function (Connection, Parser, Configuration, Rx) {
     "use strict";
 
     var XComponentAPI = function () {
@@ -11,7 +11,7 @@ define(["javascriptHelper", "communication/xcConnection", "parser", "configurati
         var configuration = new Configuration(parser);
         configuration.init();
         var connection = new Connection(configuration);
-        connection.createSession(serverUrl, sessionListener, javascriptHelper.WebSocket);
+        connection.createSession(serverUrl, sessionListener);
     }
 
 
