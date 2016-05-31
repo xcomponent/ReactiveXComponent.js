@@ -14,9 +14,9 @@ requirejs.config({
             
             var serverUrl = "wss://localhost:443";
 
-            var jsonMessage1 = { "Name": "HAZEM CHAMPION " };
-            var jsonMessage2 = { "Name": "HAZEM CHAMPION " };
-            var jsonMessage3 = { "Name": "HAZEM GAGNEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE " };
+            var jsonMessage1 = { "Name": "Test1" };
+            var jsonMessage2 = { "Name": "Test2" };
+            var jsonMessage3 = { "Name": "Test3" };
 
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";

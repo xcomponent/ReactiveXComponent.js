@@ -96,23 +96,5 @@ define(["javascriptHelper"], function (javascriptHelper) {
         return component + " " + stateMachine;
     }
 
-    
-
-
-    /*Parser.prototype.getSubscribe = function (componentName, stateMachineName) {
-        var codes = this.getCodes(componentName, stateMachineName);
-        var subscribes = this.getXmlDom().getElementsByTagName(tags.subscribe);
-        for (var i = 0; i < subscribes.length; i++) {
-            if (subscribes[i].getAttribute(tags.componentCode) == codes.componentCode &&
-                subscribes[i].getAttribute(tags.stateMachineCode) == codes.stateMachineCode) {
-                return {
-                    "componentCode": codes.componentCode,
-                    "stateMachineCode": codes.stateMachineCode,
-                    "topic": subscribes[i].getElementsByTagName(tags.topic)[0].textContent
-                };
-            }
-        }
-    }*/
-
     return Parser;
 });

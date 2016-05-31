@@ -98,7 +98,7 @@ define(["parser"], function (Parser) {
                 expect(codes).toEqual(correctCodes);
             });
             
-            it("using a no existing component name, should throw an error", function() {
+            it("should throw an error when using an unkonwn component name", function() {
                 var componentName = "random component";
                 var messageError = "Component '" + componentName + "' not found";
                 expect(function() {
@@ -106,7 +106,7 @@ define(["parser"], function (Parser) {
                 }).toThrowError(messageError);
             });
 
-            it("using a no existing stateMachine name, should throw an error", function() {
+            it("should throw an error when using an unknown stateMachine name", function() {
                 var stateMachine = "random stateMachine";
                 var messageError = "StateMachine '" + stateMachine + "' not found"
                 expect(function() {
@@ -127,23 +127,13 @@ define(["parser"], function (Parser) {
                     expect(publish).toEqual(correctPublish);
                 });
 
-            it("using a no existing stateMachine name, should throw an error", function() {
+            it("should throw an error when using an unknown stateMachine name", function() {
                 var messageError = "PublisherDetails not found";
                 expect(function() {
                     parser.getPublisherDetails("random componentCode", "random stateMachineCode");
                 }).toThrowError(messageError);
             });
         });
-
-        /*it("Test getSubscribe", function() {
-            var correctSubscribe = {
-                componentCode : "-69981087", 
-                stateMachineCode : "-343862282",
-                topic: "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse"
-            };
-            var subscribe = parser.getSubscribe("HelloWorld", "HelloWorldResponse");
-            expect(subscribe).toEqual(correctSubscribe);
-        });*/
 
     });
 

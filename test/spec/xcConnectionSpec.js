@@ -12,7 +12,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
         });
 
         describe("Test createSession method", function() {
-            it("Connect to a not existing serverUrl and execute sessionListener callback with error argument", function (done) {
+            it("given an unknown server url, should call the session listener with an error argument", function (done) {
                 var serverUrl = "wss://wrongServerUrl";
                 var messageError = "Error on " + serverUrl + ".";
 
@@ -24,7 +24,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                 connection.createSession(serverUrl, sessionListener);
             });
 
-            it("Connect to a mocket server and execute sessionListener callback with session argument", function (done) {
+            it("should call the sessionListener with the created session as argument", function (done) {
                 var serverUrl = "wss://serverUrl";
                 var server = new MockServer(serverUrl)
                 var sessionListener = function (error, session) {

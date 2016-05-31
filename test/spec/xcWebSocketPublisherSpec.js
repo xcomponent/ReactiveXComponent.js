@@ -5,9 +5,7 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
     describe("Test xcWebSocketPublisher module", function () {
 
 
-        /***********************************************************************************************/
-        /************************Mocking and Initialisation*********************************************/
-        /***********************************************************************************************/
+        // Mocking and Initialisation
         var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails']);
         configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
             return {
@@ -43,9 +41,7 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
         var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
              + " " + JSON.stringify(correctData.event);
 
-        /***********************************************************************************************/
-        /************************End Mocking and Initialisation*****************************************/
-        /***********************************************************************************************/
+        
         var publisher;
 
         beforeEach(function () {
@@ -54,7 +50,7 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
 
 
         describe("Test getEventToSend method", function () {
-            it("should return event with data to route the message to the right stateMachine", function () {
+            it("should return event with routing details (how to route the message to the right stateMachine)", function () {
                 var data = publisher.getEventToSend(null, null, jsonMessage);
                 expect(data).toEqual(correctData);
             });

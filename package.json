@@ -21,7 +21,7 @@
     "requirejs",
     "karma"
   ],
-  "author": "hazem mbarek",
+  "author": "xcomponent",
   "license": "Apache License V2",
   "bugs": {
     "url": "https://github.com/xcomponent/ReactiveXComponent.js/issues"
