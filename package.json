@@ -1,0 +1,44 @@
+{
+  "name": "reactivexcomponent.js",
+  "version": "1.0.0",
+  "description": "Javascript reactive client API for XComponent",
+  "main": "index.html",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "karma start test/karma.conf.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xcomponent/ReactiveXComponent.js.git"
+  },
+  "keywords": [
+    "rx",
+    "api",
+    "js",
+    "require",
+    "requirejs",
+    "karma"
+  ],
+  "author": "xcomponent",
+  "license": "Apache License V2",
+  "bugs": {
+    "url": "https://github.com/xcomponent/ReactiveXComponent.js/issues"
+  },
+  "homepage": "https://github.com/xcomponent/ReactiveXComponent.js#readme",
+  "dependencies": {
+    "mock-socket": "^2.0.0",
+    "requirejs": "^2.2.0",
+    "rx": "^4.1.0"
+  },
+  "devDependencies": {
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-coverage": "^1.0.0",
+    "karma-jasmine": "^1.0.2",
+    "karma-junit-reporter": "*",
+    "karma-requirejs": "^1.0.0"
+  }
+}
