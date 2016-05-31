@@ -20,6 +20,7 @@ requirejs.config({
 
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
+            var stateMachineResponse = "HelloWorldResponse";
 
             var sessionListener = function (error, session) {
                 if (error) {
@@ -30,6 +31,12 @@ requirejs.config({
                 publisher.send(componentName, stateMachineName, jsonMessage1);
                 publisher.send(componentName, stateMachineName, jsonMessage2);
                 publisher.send(componentName, stateMachineName, jsonMessage3);
+
+                var subscriber = session.createSubscriber();
+                var subscriberListener = function (jsonData) {
+                    console.log(jsonData);
+                }
+                subscriber.subscribe(componentName, stateMachineResponse, subscriberListener);
             }
 
             var api = new XComponentAPI();
