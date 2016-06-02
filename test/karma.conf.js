@@ -19,8 +19,7 @@ module.exports = function(config) {
       { pattern: 'node_modules/rx/dist/rx.all.js', included: false },
       { pattern: 'node_modules/mock-socket/dist/mock-socket.js', included: false },
       { pattern: 'src/**/*.js', included: false },
-      { pattern: 'test/**/*Spec.js', included: false },
-      { pattern: 'test/karma.conf.js', included: false }
+      { pattern: 'test/**/*Spec.js', included: false }
     ],
 
 

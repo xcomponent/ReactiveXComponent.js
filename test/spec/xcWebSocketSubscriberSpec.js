@@ -1,69 +1,82 @@
 
-define(["communication/xcWebSocketPublisher"], function (Publisher) {
+define(["mock-socket", "communication/xcWebSocketSubscriber"], function (MockSocket, Subscriber) {
 
 
-    describe("Test xcWebSocketPublisher module", function () {
-
+    describe("Test xcWebSocketSubscriber module", function () {
 
         // Mocking and Initialisation
-        var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails']);
+        var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes']);
+        configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
+            return "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
+        });
+        var componentCode = "-69981087";
+        var stateMachineCode = "-829536631";
         configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
             return {
-                componentCode: "-69981087",
-                stateMachineCode: "-829536631"
+                componentCode: componentCode,
+                stateMachineCode: stateMachineCode
             };
         });
-
-        configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
-            return {
-                eventCode: "9",
-                messageType: "XComponent.HelloWorld.UserObject.SayHello",
-                routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
-            };
-        });
-
+        
         var webSocket = jasmine.createSpyObj('webSocket', ['send']);
 
-        var jsonMessage = { "Name": "MY NAME" };
         var correctData = {
-            event: {
-                "Header": {
-                    "StateMachineCode": { "Case": "Some", "Fields": [-829536631] },
-                    "ComponentCode": { "Case": "Some", "Fields": [-69981087] },
-                    "EventCode": 9,
-                    "IncomingType": 0,
-                    "MessageType": { "Case": "Some", "Fields": ["XComponent.HelloWorld.UserObject.SayHello"] }
-                },
-                "JsonMessage": JSON.stringify(jsonMessage)
-            },
-            routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
+            "Header": { "IncomingType": 0 },
+            "JsonMessage": JSON.stringify({ "Topic": { "Key": "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse" } })
         };
-        var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
-             + " " + JSON.stringify(correctData.event);
 
-        
-        var publisher;
-
-        beforeEach(function () {
-            publisher = new Publisher(webSocket, configuration);
-        });
+        var corretWebsocketInputFormat = "subscribe " + JSON.stringify(correctData);
 
 
         describe("Test getEventToSend method", function () {
+            var subscriber;  
+            beforeEach(function () {
+                subscriber = new Subscriber(webSocket, configuration);
+            });
+
             it("should return event with routing details (how to route the message to the right stateMachine)", function () {
-                var data = publisher.getEventToSend(null, null, jsonMessage);
+                var data = subscriber.getEventToSend("component", "stateMachine");
                 expect(data).toEqual(correctData);
             });
         });
 
 
-        describe("Test send method", function() {
-            it("sould send a message to the given stateMachine and component", function () {
-                publisher.send("componentName", "stateMachineName", jsonMessage);
-                expect(webSocket.send).toHaveBeenCalledTimes(1);
-                expect(webSocket.send).toHaveBeenCalledWith(corretWebsocketInputFormat);
+        describe("Test subscribe method", function () {
+            var subscriber, mockServer, mockWebSocket;
+            beforeEach(function () {
+                var serverUrl = "wss://testSubscriber";
+                mockServer = new MockServer(serverUrl);
+                mockWebSocket = new MockWebSocket(serverUrl);
+                subscriber = new Subscriber(mockWebSocket, configuration);
+            });
+
+            it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
+                //jsonData should pass the filter
+                var jsonData = {
+                    Header: {
+                        ComponentCode: { Fields: [componentCode] },
+                        StateMachineCode: { Fields: [stateMachineCode] }
+                    }
+                };
+                mockWebSocket.onopen = function (e) {
+                    var subscriberListener = function (data) {
+                        expect(jsonData).toEqual(data);
+                        done();
+                    };
+                    //subscribe send a message (subscribe request)
+                    subscriber.subscribe("component", "stateMachine", subscriberListener);
+                }
+                
+                mockServer.on('connection', function (server) {
+                    //when subscribe request is received, we send send jsonData
+                    server.on('message', function (data) {
+                        server.send(JSON.stringify(jsonData));
+                    });
+                });
+
             });
         });
+
     });
 
 });

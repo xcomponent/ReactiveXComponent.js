@@ -4,10 +4,10 @@ define(["rx"], function (Rx) {
 	var Subscriber = function (webSocket, configuration) {
 	    this.webSocket = webSocket;
 	    this.configuration = configuration;
-	    this.observableMsg = Rx.Observable.fromEvent(webSocket, 'message');
+	    this.observableMsg = Rx.Observable.fromEvent(this.webSocket, 'message');
 	}
 
-    //	    this.subscribedTopic = []; TODOooooooooooooo
+
 	Subscriber.prototype.getEventToSend = function (componentName, stateMachineName) {
 	    var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName)
         var data = {
@@ -18,19 +18,26 @@ define(["rx"], function (Rx) {
     }
 
 
-	Subscriber.prototype.subscribe = function (componentName, stateMachineName, subscriberListener) {
+	Subscriber.prototype.getFilteredObservable = function (componentName, stateMachineName) {
 	    var codes = this.configuration.getCodes(componentName, stateMachineName);
+	    var filteredObservable = this.observableMsg
+            .map(function (e) {
+                return getJsonDataFromEvent(e);
+            })
+            .filter(function (jsonData) {
+                return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
+            })
+	    return filteredObservable;
+	}
+
+
+	Subscriber.prototype.subscribe = function (componentName, stateMachineName, subscriberListener) {
+	    this.getFilteredObservable(componentName, stateMachineName)
+            .subscribe(function (jsonData) {
+                subscriberListener(jsonData);
+            });
 	    var data = this.getEventToSend(componentName, stateMachineName);
 	    this.webSocket.send(convertToWebsocketInputFormat(data));
-	    this.observableMsg
-        .filter(function (e) {
-            var jsonData = getJsonDataFromEvent(e);
-            return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
-        })
-	    .subscribe(function (e) {
-	        var jsonData = getJsonDataFromEvent(e);
-	        subscriberListener(jsonData);
-	    });
     }
 
 
