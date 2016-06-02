@@ -41,5 +41,10 @@ define(function () {
     }
 
 
+    Publisher.prototype.sendContext = function (stateMachineRef, jsonMessage) {
+        
+    }
+
+
     return Publisher;
 });

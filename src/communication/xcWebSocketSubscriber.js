@@ -18,7 +18,7 @@ define(["rx"], function (Rx) {
     }
 
 
-	Subscriber.prototype.getFilteredObservable = function (componentName, stateMachineName) {
+	Subscriber.prototype.getStateMachineUpdates = function (componentName, stateMachineName) {
 	    var codes = this.configuration.getCodes(componentName, stateMachineName);
 	    var filteredObservable = this.observableMsg
             .map(function (e) {
@@ -31,10 +31,10 @@ define(["rx"], function (Rx) {
 	}
 
 
-	Subscriber.prototype.subscribe = function (componentName, stateMachineName, subscriberListener) {
-	    this.getFilteredObservable(componentName, stateMachineName)
+	Subscriber.prototype.subscribe = function (componentName, stateMachineName, stateMachineUpdateListener) {
+	    this.getStateMachineUpdates(componentName, stateMachineName)
             .subscribe(function (jsonData) {
-                subscriberListener(jsonData);
+                stateMachineUpdateListener(jsonData);
             });
 	    var data = this.getEventToSend(componentName, stateMachineName);
 	    this.webSocket.send(convertToWebsocketInputFormat(data));

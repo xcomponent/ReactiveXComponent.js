@@ -33,10 +33,10 @@ requirejs.config({
                 publisher.send(componentName, stateMachineName, jsonMessage3);
 
                 var subscriber = session.createSubscriber();
-                var subscriberListener = function (jsonData) {
+                var stateMachineUpdateListener = function (jsonData) {
                     console.log(jsonData);
                 }
-                subscriber.subscribe(componentName, stateMachineResponse, subscriberListener);
+                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
             }
 
             var api = new XComponentAPI();

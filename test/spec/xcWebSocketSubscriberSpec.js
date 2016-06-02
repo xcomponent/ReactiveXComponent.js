@@ -59,12 +59,12 @@ define(["mock-socket", "communication/xcWebSocketSubscriber"], function (MockSoc
                     }
                 };
                 mockWebSocket.onopen = function (e) {
-                    var subscriberListener = function (data) {
+                    var stateMachineUpdateListener = function (data) {
                         expect(jsonData).toEqual(data);
                         done();
                     };
                     //subscribe send a message (subscribe request)
-                    subscriber.subscribe("component", "stateMachine", subscriberListener);
+                    subscriber.subscribe("component", "stateMachine", stateMachineUpdateListener);
                 }
                 
                 mockServer.on('connection', function (server) {
