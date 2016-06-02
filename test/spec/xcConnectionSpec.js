@@ -17,7 +17,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                 var messageError = "Error on " + serverUrl + ".";
 
                 var sessionListener = function (error, session) {
-                    expect(error).toMatch(messageError);
+                    expect(error).toEqual(messageError);
                     expect(session).toBe(null);
                     done();
                 };

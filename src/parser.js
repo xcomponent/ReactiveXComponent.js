@@ -11,6 +11,20 @@ define(["javascriptHelper"], function (javascriptHelper) {
         var xmlDom = (new DOMParser()).parseFromString(xml, 'text/xml');
         this.codes = getCodes(xmlDom, tags);
         this.publishersDetails = getPublihersDetails(xmlDom, tags);
+        this.subscribersTopics = getSubscribersTopics(xmlDom, tags);
+    }
+
+    var getSubscribersTopics = function (xmlDom, tags) {
+        var subscribersTopics = {};
+        var subscribers = xmlDom.getElementsByTagName(tags.subscribe);
+        var componentCode, stateMachineCode, topic;
+        for (var i = 0; i < subscribers.length; i++) {
+            componentCode = subscribers[i].getAttribute(tags.componentCode);
+            stateMachineCode = subscribers[i].getAttribute(tags.stateMachineCode);
+            topic = subscribers[i].getElementsByTagName(tags.topic)[0].textContent;
+            subscribersTopics[getKey(componentCode, stateMachineCode)] = topic;
+        }
+        return subscribersTopics;
     }
 
 
@@ -92,9 +106,18 @@ define(["javascriptHelper"], function (javascriptHelper) {
     }
 
 
+    Parser.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
+        var codes = this.getCodes(componentName, stateMachineName);
+        var key = getKey(codes.componentCode, codes.stateMachineCode);
+        var topic = this.subscribersTopics[key];
+        return topic;
+    }
+
+
     function getKey(component, stateMachine) {
         return component + " " + stateMachine;
     }
+    
 
     return Parser;
 });

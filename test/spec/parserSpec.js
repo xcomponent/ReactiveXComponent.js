@@ -135,6 +135,15 @@ define(["parser"], function (Parser) {
             });
         });
 
+
+        describe("Test getSubscriberTopic method", function () {
+            it("should get the right topic given existing component and stateMachine", function () {
+                var correctTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
+                var topic = parser.getSubscriberTopic("HelloWorld", "HelloWorldResponse");
+                expect(topic).toEqual(correctTopic);
+            });
+        });
+
     });
 
 });

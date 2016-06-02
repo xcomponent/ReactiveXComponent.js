@@ -94,5 +94,9 @@ define(function () {
         return this.parser.getPublisherDetails(componentCode, stateMachineCode);
     }
 
+    Configuration.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
+        return this.parser.getSubscriberTopic(componentName, stateMachineName);
+    }
+
     return Configuration;
 });

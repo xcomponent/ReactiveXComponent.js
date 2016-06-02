@@ -7,7 +7,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
         var parser, configuration;
 
         beforeEach(function () {
-            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails']);
+            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic']);
             configuration = new Configuration(parser);
         });
 
@@ -35,6 +35,16 @@ define(["configuration/xcConfiguration"], function (Configuration) {
                 configuration.getPublisherDetails(componentCode, stateMachineCode);
                 expect(parser.getPublisherDetails).toHaveBeenCalledTimes(1);
                 expect(parser.getPublisherDetails).toHaveBeenCalledWith(componentCode, stateMachineCode);
+            });
+        });
+
+        describe("Test getSubscriberTopic method", function () {
+            it("should call getSubscriberTopic method of parser with the right component and stateMachine", function () {
+                var componentCode = "componentCode";
+                var stateMachineCode = "stateMachineCode";
+                configuration.getSubscriberTopic(componentCode, stateMachineCode);
+                expect(parser.getSubscriberTopic).toHaveBeenCalledTimes(1);
+                expect(parser.getSubscriberTopic).toHaveBeenCalledWith(componentCode, stateMachineCode);
             });
         });
     });
