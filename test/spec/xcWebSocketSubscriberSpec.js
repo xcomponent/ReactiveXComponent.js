@@ -69,7 +69,9 @@ define(["mock-socket", "communication/xcWebSocketSubscriber"], function (MockSoc
                 
                 mockServer.on('connection', function (server) {
                     //when subscribe request is received, we send send jsonData
-                    server.on('message', function (data) {
+                    server.on('message', function (susbcribeRequest) {
+                        var correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);
+                        expect(susbcribeRequest).toEqual(correctSubscribeRequest);
                         server.send(JSON.stringify(jsonData));
                     });
                 });
