@@ -52,15 +52,28 @@ define(["mock-socket", "communication/xcWebSocketSubscriber"], function (MockSoc
 
             it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
                 //jsonData should pass the filter
+                var jsonMessage = "JsonMessage";
                 var jsonData = {
                     Header: {
                         ComponentCode: { Fields: [componentCode] },
-                        StateMachineCode: { Fields: [stateMachineCode] }
+                        StateMachineCode: { Fields: [stateMachineCode] },
+                        StateMachineId: "",
+                        AgentId: "",
+                        JsonMessage: jsonMessage
                     }
+                };
+                var correctReceivedData = {
+                    stateMachineRef: {
+                        "StateMachineId": jsonData.Header.StateMachineId,
+                        "AgentId": jsonData.Header.AgentId,
+                        "StateMachineCode": jsonData.Header.StateMachineCode,
+                        "ComponentCode": jsonData.Header.ComponentCode
+                    },
+                    JsonMessage: jsonData.JsonMessage
                 };
                 mockWebSocket.onopen = function (e) {
                     var stateMachineUpdateListener = function (data) {
-                        expect(jsonData).toEqual(data);
+                        expect(data).toEqual(correctReceivedData);
                         done();
                     };
                     //subscribe send a message (subscribe request)

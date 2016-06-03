@@ -22,7 +22,6 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
             };
         });
 
-        var webSocket = jasmine.createSpyObj('webSocket', ['send']);
 
         var jsonMessage = { "Name": "MY NAME" };
         var correctData = {
@@ -41,10 +40,34 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
         var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
              + " " + JSON.stringify(correctData.event);
 
-        
-        var publisher;
+        var stateMachineRef = {
+            "AgentId": { "Case": "Some", "Fields": [0] },
+            "StateMachineId": { "Case": "Some", "Fields": [0] },
+            "StateMachineCode": { "Case": "Some", "Fields": [-829536631] },
+            "ComponentCode": { "Case": "Some", "Fields": [-69981087] },
+        };
+        var correctDataForSendContext = {
+            event: {
+                "Header": {
+                    "AgentId": stateMachineRef.AgentId,
+                    "StateMachineId": stateMachineRef.StateMachineId,
+                    "StateMachineCode": stateMachineRef.StateMachineCode,
+                    "ComponentCode": stateMachineRef.ComponentCode,
+                    "EventCode": 9,
+                    "IncomingType": 0,
+                    "MessageType": { "Case": "Some", "Fields": ["XComponent.HelloWorld.UserObject.SayHello"] }
+                },
+                "JsonMessage": JSON.stringify(jsonMessage)
+            },
+            routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
+        };
+        var corretWebsocketInputFormatForSendContext = correctDataForSendContext.routingKey + " " + correctDataForSendContext.event.Header.ComponentCode.Fields[0]
+             + " " + JSON.stringify(correctDataForSendContext.event);
+
+        var webSocket, publisher;
 
         beforeEach(function () {
+            webSocket = jasmine.createSpyObj('webSocket', ['send']);
             publisher = new Publisher(webSocket, configuration);
         });
 
@@ -64,6 +87,24 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
                 expect(webSocket.send).toHaveBeenCalledWith(corretWebsocketInputFormat);
             });
         });
+
+
+        describe("Test getEventToSendContext method", function () {
+            it("should return event with routing details (how to route the message to the right stateMachine instance and to the right agent)", function () {
+                var data = publisher.getEventToSendContext(stateMachineRef, jsonMessage);
+                expect(data).toEqual(correctDataForSendContext);
+            });
+        });
+
+
+        describe("Test sendContext method", function () {
+            it("sould send a message to the specific instance of a stateMachine", function () {
+                publisher.sendContext(stateMachineRef, jsonMessage);
+                expect(webSocket.send).toHaveBeenCalledTimes(1);
+                expect(webSocket.send).toHaveBeenCalledWith(corretWebsocketInputFormatForSendContext);
+            });
+        });
+
     });
 
 });

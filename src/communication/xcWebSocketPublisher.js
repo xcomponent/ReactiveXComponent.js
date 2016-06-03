@@ -10,7 +10,6 @@ define(function () {
     Publisher.prototype.getEventToSend = function (componentName, stateMachineName, jsonMessage) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
         var publish = this.configuration.getPublisherDetails(codes.componentCode, codes.stateMachineCode);
-
         var event = {
             "Header": {
                 "StateMachineCode": { "Case": "Some", "Fields": [parseInt(codes.stateMachineCode)] },
@@ -30,6 +29,35 @@ define(function () {
 
     Publisher.prototype.send = function(componentName, stateMachineName, jsonMessage) {
         var data = this.getEventToSend(componentName, stateMachineName, jsonMessage);
+        this.webSocket.send(convertToWebsocketInputFormat(data));
+    }
+
+
+    Publisher.prototype.getEventToSendContext = function (stateMachineRef, jsonMessage) {
+        var componentCode = stateMachineRef.ComponentCode.Fields[0];
+        var stateMachineCode = stateMachineRef.StateMachineCode.Fields[0];
+        var publish = this.configuration.getPublisherDetails(componentCode, stateMachineCode);
+        var event = {
+            "Header": {
+                "AgentId": stateMachineRef.AgentId,
+                "StateMachineId": stateMachineRef.StateMachineId,
+                "StateMachineCode": stateMachineRef.StateMachineCode,
+                "ComponentCode": stateMachineRef.ComponentCode,
+                "EventCode": parseInt(publish.eventCode),
+                "IncomingType": 0,
+                "MessageType": { "Case": "Some", "Fields": [publish.messageType] }
+            },
+            "JsonMessage": JSON.stringify(jsonMessage)
+        };
+        return {
+            event: event,
+            routingKey: publish.routingKey
+        };
+    }
+
+
+    Publisher.prototype.sendContext = function (stateMachineRef, jsonMessage) {
+        var data = this.getEventToSendContext(stateMachineRef, jsonMessage);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 

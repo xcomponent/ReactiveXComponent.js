@@ -42,20 +42,29 @@ define(["rx"], function (Rx) {
 
 
 	function isSameComponent(jsonData, codes) {
-	    var sameComponent = jsonData.Header.ComponentCode.Fields[0] == parseInt(codes.componentCode);
+	    var sameComponent = jsonData.stateMachineRef.ComponentCode.Fields[0] == parseInt(codes.componentCode);
 	    return sameComponent;
 	}
 
 
 	function isSameStateMachine(jsonData, codes) {
-	    var sameStateMachine = jsonData.Header.StateMachineCode.Fields[0] == parseInt(codes.stateMachineCode);
+	    var sameStateMachine = jsonData.stateMachineRef.StateMachineCode.Fields[0] == parseInt(codes.stateMachineCode);
 	    return sameStateMachine;
 	}
 
 
 	function getJsonDataFromEvent(e) {
 	    var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-	    return jsonData;
+	    var stateMachineRef = {
+	        "StateMachineId": jsonData.Header.StateMachineId,
+	        "AgentId": jsonData.Header.AgentId,
+	        "StateMachineCode": jsonData.Header.StateMachineCode,
+	        "ComponentCode": jsonData.Header.ComponentCode
+	    };
+	    return {
+	        stateMachineRef: stateMachineRef,
+	        JsonMessage: jsonData.JsonMessage
+	    };
 	}
 
 
