@@ -1,12 +1,12 @@
-<snippet>
-  <content><![CDATA[
-# ${1:Reactive XComponent API}
-${1:Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
+## Reactive XComponent API
+Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
+
 ## Installation
 Download the project and execute the command 
-```js npm install .```
+``` npm install .```
+
 ## Usage
-TODO: Write usage instructions
+Example of XComponent API usage
 ```js
  
         require(["xcomponentAPI"], function (XComponentAPI) {
@@ -43,18 +43,14 @@ TODO: Write usage instructions
         });
 
 ```
+
 ## Contributing
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-## History
-TODO: Write history
-## Credits
-TODO: Write credits
+5. Submit a pull request
+
 ## License
 Apache License V2
-]]></content>
-  <tabTrigger>readme</tabTrigger>
-</snippet>
+
