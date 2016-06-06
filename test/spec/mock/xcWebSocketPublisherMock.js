@@ -1,5 +1,5 @@
 
-define(["communication/xcWebSocketPublisher"], function (Publisher) {
+define(function () {
     "use strict";
 
     // Mocking configuration
@@ -20,15 +20,14 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
     });
 
     // Mocking webSocket
-    var initPublisher = function () {
+    var createMockWebSocket = function () {
         var webSocket = jasmine.createSpyObj('webSocket', ['send']);
-        var publisher = new Publisher(webSocket, configuration);
-        return publisher;
+        return webSocket;
     }
 
-    //Initilisation of expected data
     var jsonMessage = { "Name": "MY NAME" };
 
+    //Initilisation of expected data
     var correctData = {
         event: {
             "Header": {
@@ -75,8 +74,8 @@ define(["communication/xcWebSocketPublisher"], function (Publisher) {
 
 
     return {
-        initPublisher: initPublisher,
         configuration: configuration,
+        createMockWebSocket:createMockWebSocket,
         jsonMessage: jsonMessage,
         correctData: correctData,
         corretWebsocketInputFormat: corretWebsocketInputFormat,
