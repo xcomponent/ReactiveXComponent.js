@@ -1,8 +1,8 @@
 
 define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcriber, MockSocket) {
     "use strict";
-    
-    // Mocking and Initialisation
+
+    // Mocking configuration
     var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes']);
     configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
         return "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
@@ -16,8 +16,10 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         };
     });
 
+    // Mocking webSocket
     var webSocket = jasmine.createSpyObj('webSocket', ['send', 'addEventListener']);
 
+    //Initilisation of expected data
     var correctData = {
         "Header": { "IncomingType": 0 },
         "JsonMessage": JSON.stringify({ "Topic": { "Key": "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse" } })

@@ -10,7 +10,6 @@ define(function () {
             stateMachineCode: "-829536631"
         };
     });
-
     configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
         return {
             eventCode: "9",
@@ -75,7 +74,7 @@ define(function () {
 
     return {
         configuration: configuration,
-        createMockWebSocket:createMockWebSocket,
+        createMockWebSocket: createMockWebSocket,
         jsonMessage: jsonMessage,
         correctData: correctData,
         corretWebsocketInputFormat: corretWebsocketInputFormat,
