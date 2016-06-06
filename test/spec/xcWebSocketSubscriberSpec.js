@@ -35,7 +35,7 @@ define(["mock-socket", "communication/xcWebSocketSubscriber"], function (MockSoc
             });
 
             it("should return event with routing details (how to route the message to the right stateMachine)", function () {
-                var data = subscriber.getEventToSend("component", "stateMachine");
+                var data = subscriber.getjsonDataToSendSusbcribeRequest("component", "stateMachine");
                 expect(data).toEqual(correctData);
             });
         });

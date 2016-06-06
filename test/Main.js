@@ -16,7 +16,6 @@ requirejs.config({
 
             var jsonMessage1 = { "Name": "Test1" };
             var jsonMessage2 = { "Name": "Test2" };
-            var jsonMessage3 = { "Name": "Test3" };
 
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
@@ -29,15 +28,13 @@ requirejs.config({
                 }
                 var publisher = session.createPublisher();
                 publisher.send(componentName, stateMachineName, jsonMessage1);
-                //publisher.send(componentName, stateMachineName, jsonMessage2);
-                //publisher.send(componentName, stateMachineName, jsonMessage3);
 
                 var subscriber = session.createSubscriber();
                 var i = 0;
                 var stateMachineUpdateListener = function (jsonData) {
                     console.log(jsonData);
                     if (i == 0) {
-                        publisher.sendContext(jsonData.stateMachineRef, jsonMessage2);
+                        publisher.sendStatemachineRef(jsonData.stateMachineRef, jsonMessage2);
                         i++;
                     }
                 }

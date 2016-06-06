@@ -9,21 +9,31 @@ define(function () {
 
     Publisher.prototype.getEventToSend = function (componentName, stateMachineName, jsonMessage) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
-        var publish = this.configuration.getPublisherDetails(codes.componentCode, codes.stateMachineCode);
+        var eventWithoutStateMachineRef = this.getEventWithoutStateMachineRef(codes.componentCode, codes.stateMachineCode);
         var event = {
-            "Header": {
-                "StateMachineCode": { "Case": "Some", "Fields": [parseInt(codes.stateMachineCode)] },
-                "ComponentCode": { "Case": "Some", "Fields": [parseInt(codes.componentCode)] },
-                "EventCode": parseInt(publish.eventCode),
-                "IncomingType": 0,
-                "MessageType": { "Case": "Some", "Fields": [publish.messageType] }
-            },
+            "Header": eventWithoutStateMachineRef.header,
             "JsonMessage": JSON.stringify(jsonMessage)
         };
         return {
             event: event,
-            routingKey: publish.routingKey
+            routingKey: eventWithoutStateMachineRef.routingKey
         };
+    }
+
+
+    Publisher.prototype.getEventWithoutStateMachineRef = function (componentCode, stateMachineCode) {
+        var publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode);
+        var header = {
+            "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
+            "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+            "EventCode": parseInt(publisher.eventCode),
+            "IncomingType": 0,
+            "MessageType": { "Case": "Some", "Fields": [publisher.messageType] }
+        };
+        return {
+            header: header,
+            routingKey: publisher.routingKey
+        }
     }
 
 
@@ -31,33 +41,28 @@ define(function () {
         var data = this.getEventToSend(componentName, stateMachineName, jsonMessage);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
+    
 
-
-    Publisher.prototype.getEventToSendContext = function (stateMachineRef, jsonMessage) {
+    Publisher.prototype.getEventToSendUsingStateMachineRef = function (stateMachineRef, jsonMessage) {
         var componentCode = stateMachineRef.ComponentCode.Fields[0];
         var stateMachineCode = stateMachineRef.StateMachineCode.Fields[0];
-        var publish = this.configuration.getPublisherDetails(componentCode, stateMachineCode);
-        var event = {
-            "Header": {
-                "AgentId": stateMachineRef.AgentId,
-                "StateMachineId": stateMachineRef.StateMachineId,
-                "StateMachineCode": stateMachineRef.StateMachineCode,
-                "ComponentCode": stateMachineRef.ComponentCode,
-                "EventCode": parseInt(publish.eventCode),
-                "IncomingType": 0,
-                "MessageType": { "Case": "Some", "Fields": [publish.messageType] }
-            },
-            "JsonMessage": JSON.stringify(jsonMessage)
+        var eventWithoutStateMachineRef = this.getEventWithoutStateMachineRef(componentCode, stateMachineCode);
+        var headerStateMachineRef = {
+            "AgentId": stateMachineRef.AgentId,
+            "StateMachineId": stateMachineRef.StateMachineId,
         };
         return {
-            event: event,
-            routingKey: publish.routingKey
+            event: {
+                "Header": mergeJsonObjects(headerStateMachineRef, eventWithoutStateMachineRef.header),
+                "JsonMessage": JSON.stringify(jsonMessage)
+            },
+            routingKey: eventWithoutStateMachineRef.routingKey
         };
     }
 
 
-    Publisher.prototype.sendContext = function (stateMachineRef, jsonMessage) {
-        var data = this.getEventToSendContext(stateMachineRef, jsonMessage);
+    Publisher.prototype.sendStatemachineRef = function (stateMachineRef, jsonMessage) {
+        var data = this.getEventToSendUsingStateMachineRef(stateMachineRef, jsonMessage);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
@@ -66,6 +71,16 @@ define(function () {
         var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
                     + " " + JSON.stringify(data.event);
         return input;
+    }
+
+
+    var mergeJsonObjects = function (obj1, obj2) {
+        var merged = {};
+        for (var key in obj1)
+            merged[key] = obj1[key];
+        for (var key in obj2)
+            merged[key] = obj2[key];
+        return merged;
     }
 
 

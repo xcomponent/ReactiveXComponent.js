@@ -8,7 +8,7 @@ define(["rx"], function (Rx) {
 	}
 
 
-	Subscriber.prototype.getEventToSend = function (componentName, stateMachineName) {
+	Subscriber.prototype.getjsonDataToSendSusbcribeRequest = function (componentName, stateMachineName) {
 	    var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName)
         var data = {
             "Header": { "IncomingType": 0 },
@@ -36,7 +36,7 @@ define(["rx"], function (Rx) {
             .subscribe(function (jsonData) {
                 stateMachineUpdateListener(jsonData);
             });
-	    var data = this.getEventToSend(componentName, stateMachineName);
+	    var data = this.getjsonDataToSendSusbcribeRequest(componentName, stateMachineName);
 	    this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 

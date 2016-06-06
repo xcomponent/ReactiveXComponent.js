@@ -1,7 +1,7 @@
 ## Reactive XComponent API
 Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
 
-## Installation
+## Build
 Download the project and execute the command 
 ``` npm install .```
 
