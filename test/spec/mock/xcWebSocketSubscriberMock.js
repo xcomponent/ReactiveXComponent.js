@@ -33,18 +33,19 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
             ComponentCode: { Fields: [componentCode] },
             StateMachineCode: { Fields: [stateMachineCode] },
             StateMachineId: "",
-            AgentId: "",
-            JsonMessage: jsonMessage
-        }
+            AgentId: ""
+        },
+        JsonMessage: jsonMessage
     };
+
     var correctReceivedData = {
         stateMachineRef: {
-            "StateMachineId": jsonData.Header.StateMachineId,
-            "AgentId": jsonData.Header.AgentId,
             "StateMachineCode": jsonData.Header.StateMachineCode,
-            "ComponentCode": jsonData.Header.ComponentCode
+            "ComponentCode": jsonData.Header.ComponentCode,
+            "send": function (jsonMessage) {
+            }
         },
-        JsonMessage: jsonData.JsonMessage
+        jsonMessage: jsonData.JsonMessage
     };
 
     var correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);

@@ -138,20 +138,46 @@ define(function () {
         this.parser = parser;
     }
 
+
     Configuration.prototype.init = function() {
         this.parser.parse(getXcApi(), tags);
     }
+
 
     Configuration.prototype.getCodes = function(componentName, stateMachineName) {
         return this.parser.getCodes(componentName, stateMachineName);
     }
 
+
     Configuration.prototype.getPublisherDetails = function(componentCode, stateMachineCode) {
         return this.parser.getPublisherDetails(componentCode, stateMachineCode);
     }
 
+
     Configuration.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
         return this.parser.getSubscriberTopic(componentName, stateMachineName);
+    }
+
+
+    Configuration.prototype.getEventWithoutStateMachineRef = function (componentCode, stateMachineCode) {
+        var publisher = this.getPublisherDetails(componentCode, stateMachineCode);
+        var header = {
+            "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
+            "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+            "EventCode": parseInt(publisher.eventCode),
+            "IncomingType": 0,
+            "MessageType": { "Case": "Some", "Fields": [publisher.messageType] }
+        };
+        return {
+            header: header,
+            routingKey: publisher.routingKey
+        }
+    }
+
+    Configuration.prototype.convertToWebsocketInputFormat = function(data) {
+        var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
+                    + " " + JSON.stringify(data.event);
+        return input;
     }
 
     return Configuration;

@@ -2,74 +2,62 @@
 define(function () {
     "use strict";
 
+    //Initialisation
+    var componentCode = "-69981087";
+    var stateMachineCode = "-829536631";
+    var eventCode = "9";
+    var messageType = "XComponent.HelloWorld.UserObject.SayHello";
+    var routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
+    var header = {
+        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
+        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+        "EventCode": parseInt(eventCode),
+        "IncomingType": 0,
+        "MessageType": { "Case": "Some", "Fields": [messageType] }
+    };
+    var jsonMessage = { "Name": "MY NAME" };
+    var correctData = {
+        event: {
+            "Header": header,
+            "JsonMessage": JSON.stringify(jsonMessage)
+        },
+        routingKey: routingKey
+    };
+    var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
+     + " " + JSON.stringify(correctData.event);
+
+
     // Mocking configuration
-    var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails']);
-    configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
+    var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails', 'getEventWithoutStateMachineRef', 'convertToWebsocketInputFormat']);
+    configuration.getCodes.and.callFake(function () {
         return {
-            componentCode: "-69981087",
-            stateMachineCode: "-829536631"
+            componentCode: componentCode,
+            stateMachineCode: stateMachineCode
         };
+    });
+    configuration.convertToWebsocketInputFormat.and.callFake(function () {
+        return corretWebsocketInputFormat;
     });
     configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
         return {
-            eventCode: "9",
-            messageType: "XComponent.HelloWorld.UserObject.SayHello",
-            routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
+            eventCode: eventCode,
+            messageType: messageType,
+            routingKey: routingKey
         };
     });
+    configuration.getEventWithoutStateMachineRef.and.callFake(function (componentCode, stateMachineCode) {
+        return {
+            header: header,
+            routingKey: routingKey
+        }
+    });
+    
 
     // Mocking webSocket
     var createMockWebSocket = function () {
         var webSocket = jasmine.createSpyObj('webSocket', ['send']);
         return webSocket;
     }
-
-    var jsonMessage = { "Name": "MY NAME" };
-
-    //Initilisation of expected data
-    var correctData = {
-        event: {
-            "Header": {
-                "StateMachineCode": { "Case": "Some", "Fields": [-829536631] },
-                "ComponentCode": { "Case": "Some", "Fields": [-69981087] },
-                "EventCode": 9,
-                "IncomingType": 0,
-                "MessageType": { "Case": "Some", "Fields": ["XComponent.HelloWorld.UserObject.SayHello"] }
-            },
-            "JsonMessage": JSON.stringify(jsonMessage)
-        },
-        routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
-    };
-
-    var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
-         + " " + JSON.stringify(correctData.event);
-
-    var stateMachineRef = {
-        "AgentId": { "Case": "Some", "Fields": [0] },
-        "StateMachineId": { "Case": "Some", "Fields": [0] },
-        "StateMachineCode": { "Case": "Some", "Fields": [-829536631] },
-        "ComponentCode": { "Case": "Some", "Fields": [-69981087] },
-    };
-
-    var correctDataForSendStateMachineRef = {
-        event: {
-            "Header": {
-                "AgentId": stateMachineRef.AgentId,
-                "StateMachineId": stateMachineRef.StateMachineId,
-                "StateMachineCode": stateMachineRef.StateMachineCode,
-                "ComponentCode": stateMachineRef.ComponentCode,
-                "EventCode": 9,
-                "IncomingType": 0,
-                "MessageType": { "Case": "Some", "Fields": ["XComponent.HelloWorld.UserObject.SayHello"] }
-            },
-            "JsonMessage": JSON.stringify(jsonMessage)
-        },
-        routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
-    };
-
-    var corretWebsocketInputFormatForStateMachineRef = correctDataForSendStateMachineRef.routingKey + " "
-        + correctDataForSendStateMachineRef.event.Header.ComponentCode.Fields[0]
-         + " " + JSON.stringify(correctDataForSendStateMachineRef.event);
 
 
     return {
@@ -78,8 +66,5 @@ define(function () {
         jsonMessage: jsonMessage,
         correctData: correctData,
         corretWebsocketInputFormat: corretWebsocketInputFormat,
-        stateMachineRef: stateMachineRef,
-        correctDataForSendStateMachineRef: correctDataForSendStateMachineRef,
-        corretWebsocketInputFormatForStateMachineRef: corretWebsocketInputFormatForStateMachineRef
     }
 });

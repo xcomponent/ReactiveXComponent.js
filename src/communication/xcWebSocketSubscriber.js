@@ -8,21 +8,12 @@ define(["rx"], function (Rx) {
 	}
 
 
-	Subscriber.prototype.getjsonDataToSendSusbcribeRequest = function (componentName, stateMachineName) {
-	    var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName)
-        var data = {
-            "Header": { "IncomingType": 0 },
-            "JsonMessage": JSON.stringify({ "Topic": { "Key": topic }})
-        };
-        return data;
-    }
-
-
 	Subscriber.prototype.getStateMachineUpdates = function (componentName, stateMachineName) {
 	    var codes = this.configuration.getCodes(componentName, stateMachineName);
+	    var thisObject = this;
 	    var filteredObservable = this.observableMsg
             .map(function (e) {
-                return getJsonDataFromEvent(e);
+                return thisObject.getJsonDataFromEvent(e);
             })
             .filter(function (jsonData) {
                 return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
@@ -36,7 +27,11 @@ define(["rx"], function (Rx) {
             .subscribe(function (jsonData) {
                 stateMachineUpdateListener(jsonData);
             });
-	    var data = this.getjsonDataToSendSusbcribeRequest(componentName, stateMachineName);
+	    var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
+	    var data = {
+	        "Header": { "IncomingType": 0 },
+	        "JsonMessage": JSON.stringify({ "Topic": { "Key": topic } })
+	    };
 	    this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
@@ -53,18 +48,51 @@ define(["rx"], function (Rx) {
 	}
 
 
-	function getJsonDataFromEvent(e) {
+	Subscriber.prototype.getJsonDataFromEvent = function (e) {
 	    var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
+	    var thisObject = this;
 	    var stateMachineRef = {
-	        "StateMachineId": jsonData.Header.StateMachineId,
-	        "AgentId": jsonData.Header.AgentId,
 	        "StateMachineCode": jsonData.Header.StateMachineCode,
-	        "ComponentCode": jsonData.Header.ComponentCode
+	        "ComponentCode": jsonData.Header.ComponentCode,
+	        "send": function (jsonMessage) {
+	            thisObject.sendWithStateMachineRef(jsonData, jsonMessage);
+	        }
 	    };
 	    return {
 	        stateMachineRef: stateMachineRef,
-	        JsonMessage: jsonData.JsonMessage
+	        jsonMessage: jsonData.JsonMessage
 	    };
+	}
+
+
+	Subscriber.prototype.sendWithStateMachineRef = function (jsonData, jsonMessage) {
+	    var componentCode = jsonData.Header.ComponentCode.Fields[0];
+	    var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
+	    var eventWithoutStateMachineRef = this.configuration.getEventWithoutStateMachineRef(componentCode, stateMachineCode);
+	    var headerStateMachineRef = {
+	        "StateMachineId": jsonData.Header.StateMachineId,
+	        "AgentId": jsonData.Header.AgentId
+	    };
+	    var event = {
+	        "Header": mergeJsonObjects(headerStateMachineRef, eventWithoutStateMachineRef.header),
+	        "JsonMessage": JSON.stringify(jsonMessage)
+	    };
+	    var dataToSend = {
+	        event: event,
+	        routingKey: eventWithoutStateMachineRef.routingKey
+	    };
+	    var webSocketInputFormat = this.configuration.convertToWebsocketInputFormat(dataToSend);
+	    this.webSocket.send(webSocketInputFormat);
+	}
+
+
+	var mergeJsonObjects = function (obj1, obj2) {
+	    var merged = {};
+	    for (var key in obj1)
+	        merged[key] = obj1[key];
+	    for (var key in obj2)
+	        merged[key] = obj2[key];
+	    return merged;
 	}
 
 

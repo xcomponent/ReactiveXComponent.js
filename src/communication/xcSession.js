@@ -2,7 +2,7 @@
 define(["javascriptHelper", "communication/xcWebSocketPublisher", "communication/xcWebSocketSubscriber"], function (javascriptHelper, Publisher, Subscriber) {
     "use strict";
 
-    var SessionFactory = function (serverUrl, configuration, WebSocket) {
+    var SessionFactory = function (serverUrl, configuration) {
         var WebSocket = javascriptHelper.getJavascriptHelper().WebSocket;
         var webSocket = new WebSocket(serverUrl);
         var session = new Session(serverUrl, webSocket, configuration);

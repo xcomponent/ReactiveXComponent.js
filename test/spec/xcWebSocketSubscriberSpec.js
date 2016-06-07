@@ -5,19 +5,6 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/xcWebSocketSubscrib
     describe("Test xcWebSocketSubscriber module", function () {
 
 
-        describe("Test getEventToSend method", function () {
-            var subscriber;  
-            beforeEach(function () {
-                subscriber = new Subscriber(Mock.webSocket, Mock.configuration);
-            });
-
-            it("should return event with routing details (how to route the message to the right stateMachine)", function () {
-                var data = subscriber.getjsonDataToSendSusbcribeRequest("component", "stateMachine");
-                expect(data).toEqual(Mock.correctData);
-            });
-        });
-
-
         describe("Test subscribe method", function () {
             var subscriber, mockServer, mockWebSocket;
             beforeEach(function () {
@@ -30,7 +17,9 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/xcWebSocketSubscrib
             it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
                 mockWebSocket.onopen = function (e) {
                     var stateMachineUpdateListener = function (data) {
-                        expect(data).toEqual(Mock.correctReceivedData);
+                        expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
+                        expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
+                        expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
                         done();
                     };
                     //subscribe send a message (subscribe request)

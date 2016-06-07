@@ -32,9 +32,9 @@ requirejs.config({
                 var subscriber = session.createSubscriber();
                 var i = 0;
                 var stateMachineUpdateListener = function (jsonData) {
-                    console.log(jsonData);
-                    if (i == 0) {
-                        publisher.sendStatemachineRef(jsonData.stateMachineRef, jsonMessage2);
+                    console.log(jsonData.jsonMessage);
+                    if (i <= 5) {
+                        jsonData.stateMachineRef.send(jsonMessage2);
                         i++;
                     }
                 }
