@@ -19,6 +19,7 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
                     var stateMachineUpdateListener = function (data) {
                         expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                         expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
+                        expect(data.stateMachineRef.send).toEqual(jasmine.any(Function));
                         expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
                         done();
                     };
@@ -37,6 +38,19 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
             });
         });
 
+
+        describe("Test sendWithStateMachineRef method", function () {
+            var subscriber, webSocket;
+            beforeEach(function () {
+                webSocket = Mock.createWebSocket();
+                subscriber = new Subscriber(webSocket, Mock.configuration);
+            });
+
+            it("should return event with routing details (how to route the message to the right instance of stateMachine)", function () {
+                subscriber.sendWithStateMachineRef(Mock.jsonData, Mock.jsonMessage);
+                expect(webSocket.send).toHaveBeenCalledWith(Mock.correctInputToWebSocket);
+            });
+        });
     });
 
 });
