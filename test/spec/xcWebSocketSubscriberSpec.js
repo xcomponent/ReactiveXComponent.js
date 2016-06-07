@@ -1,5 +1,5 @@
 
-define(["communication/xcWebSocketSubscriber", "../spec/mock/xcWebSocketSubscriberMock"], function (Subscriber, Mock) {
+define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDependencies"], function (Subscriber, Mock) {
 
 
     describe("Test xcWebSocketSubscriber module", function () {

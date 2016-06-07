@@ -1,5 +1,5 @@
 
-define(["communication/xcWebSocketPublisher", "../spec/mock/xcWebSocketPublisherMock"], function (Publisher, Mock) {
+define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDependencies"], function (Publisher, Mock) {
 
 
     describe("Test xcWebSocketPublisher module", function () {
