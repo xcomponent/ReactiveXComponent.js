@@ -29,12 +29,16 @@ requirejs.config({
                 }
                 var publisher = session.createPublisher();
                 publisher.send(componentName, stateMachineName, jsonMessage1);
-                publisher.send(componentName, stateMachineName, jsonMessage2);
-                publisher.send(componentName, stateMachineName, jsonMessage3);
 
                 var subscriber = session.createSubscriber();
+                var i = 0;
                 var stateMachineUpdateListener = function (jsonData) {
-                    console.log(jsonData);
+                    console.log(jsonData.jsonMessage);
+                    if (i == 0) {
+                        jsonData.stateMachineRef.send(jsonMessage2);
+                        publisher.sendWithStateMachineRef(jsonData.stateMachineRef, jsonMessage3);
+                        i++;
+                    }
                 }
                 subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
             }
