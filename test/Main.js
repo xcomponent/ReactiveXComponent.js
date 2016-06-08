@@ -16,6 +16,7 @@ requirejs.config({
 
             var jsonMessage1 = { "Name": "Test1" };
             var jsonMessage2 = { "Name": "Test2" };
+            var jsonMessage3 = { "Name": "Test3" };
 
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
@@ -33,8 +34,9 @@ requirejs.config({
                 var i = 0;
                 var stateMachineUpdateListener = function (jsonData) {
                     console.log(jsonData.jsonMessage);
-                    if (i <= 5) {
+                    if (i == 0) {
                         jsonData.stateMachineRef.send(jsonMessage2);
+                        publisher.sendWithStateMachineRef(jsonData.stateMachineRef, jsonMessage3);
                         i++;
                     }
                 }

@@ -1,9 +1,10 @@
 define(["rx"], function (Rx) {
 	"use strict"
 
-	var Subscriber = function (webSocket, configuration) {
+	var Subscriber = function (webSocket, configuration, replyPublisher) {
 	    this.webSocket = webSocket;
 	    this.configuration = configuration;
+	    this.replyPublisher = replyPublisher;
 	    this.observableMsg = Rx.Observable.fromEvent(this.webSocket, 'message');
 	}
 
@@ -52,47 +53,18 @@ define(["rx"], function (Rx) {
 	    var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 	    var thisObject = this;
 	    var stateMachineRef = {
+	        "StateMachineId": jsonData.Header.StateMachineId,
+	        "AgentId": jsonData.Header.AgentId,
 	        "StateMachineCode": jsonData.Header.StateMachineCode,
 	        "ComponentCode": jsonData.Header.ComponentCode,
 	        "send": function (jsonMessage) {
-	            thisObject.sendWithStateMachineRef(jsonData, jsonMessage);
+	            thisObject.replyPublisher.sendWithStateMachineRef(this, jsonMessage);
 	        }
 	    };
 	    return {
 	        stateMachineRef: stateMachineRef,
 	        jsonMessage: jsonData.JsonMessage
 	    };
-	}
-
-
-	Subscriber.prototype.sendWithStateMachineRef = function (jsonData, jsonMessage) {
-	    var componentCode = jsonData.Header.ComponentCode.Fields[0];
-	    var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
-	    var eventWithoutStateMachineRef = this.configuration.getEventWithoutStateMachineRef(componentCode, stateMachineCode);
-	    var headerStateMachineRef = {
-	        "StateMachineId": jsonData.Header.StateMachineId,
-	        "AgentId": jsonData.Header.AgentId
-	    };
-	    var event = {
-	        "Header": mergeJsonObjects(headerStateMachineRef, eventWithoutStateMachineRef.header),
-	        "JsonMessage": JSON.stringify(jsonMessage)
-	    };
-	    var dataToSend = {
-	        event: event,
-	        routingKey: eventWithoutStateMachineRef.routingKey
-	    };
-	    var webSocketInputFormat = this.configuration.convertToWebsocketInputFormat(dataToSend);
-	    this.webSocket.send(webSocketInputFormat);
-	}
-
-
-	var mergeJsonObjects = function (obj1, obj2) {
-	    var merged = {};
-	    for (var key in obj1)
-	        merged[key] = obj1[key];
-	    for (var key in obj2)
-	        merged[key] = obj2[key];
-	    return merged;
 	}
 
 

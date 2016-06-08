@@ -30,5 +30,18 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
             });
         });
 
+        describe("Test sendWithStateMachineRef", function () {
+            var publisher;
+            beforeEach(function () {
+                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration);
+            });
+
+            it("sould send a message to the given instance of stateMachine", function () {
+                publisher.sendWithStateMachineRef(Mock.stateMachineRef, Mock.jsonMessage);
+                expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
+                expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.corretWebsocketInputFormatForSendSMRef);
+            });
+        });
+
     });
 });

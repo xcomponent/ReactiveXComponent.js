@@ -14,6 +14,7 @@ define(["javascriptHelper", "communication/xcWebSocketPublisher", "communication
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
+        this.replyPublisher = new Publisher(this.webSocket, this.configuration);
     }
 
 
@@ -44,7 +45,7 @@ define(["javascriptHelper", "communication/xcWebSocketPublisher", "communication
 
 
     Session.prototype.createSubscriber = function () {
-        var subscriber = new Subscriber(this.webSocket, this.configuration);
+        var subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher);
         return subscriber;
     }
 

@@ -3,7 +3,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
     "use strict";
 
     // Mocking configuration
-    var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes', 'getEventWithoutStateMachineRef', 'convertToWebsocketInputFormat']);
+    var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes', 'getHeaderConfig', 'convertToWebsocketInputFormat']);
     configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
         return "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
     });
@@ -15,29 +15,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
             stateMachineCode: stateMachineCode
         };
     });
-    var eventCode = "9";
-    var messageType = "XComponent.HelloWorld.UserObject.SayHello";
-    var routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
-    configuration.getEventWithoutStateMachineRef.and.callFake(function () {
-        var header = {
-            "StateMachineCode": {"Fields": [parseInt(stateMachineCode)] },
-            "ComponentCode": { "Fields": [parseInt(componentCode)] },
-            "EventCode": parseInt(eventCode),
-            "IncomingType": 0,
-            "MessageType": { "Fields": [messageType] }
-        };
-        return {
-            header: header,
-            routingKey: routingKey
-        }
-    });
 
-
-    configuration.convertToWebsocketInputFormat.and.callFake(function (data) {
-        var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
-               + " " + JSON.stringify(data.event);
-        return input;
-    });
 
     // Mocking webSocket
     var createWebSocket = function () {
@@ -78,22 +56,6 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
 
     var correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);
 
-    var eventToSendStateMachineRef = {
-        "Header": {
-            "StateMachineId": { Fields: [stateMachineId] },
-            "AgentId": { Fields: [agentId] },
-            "StateMachineCode": { Fields: [parseInt(stateMachineCode)] },
-            "ComponentCode": { Fields: [parseInt(componentCode)] },
-            "EventCode": parseInt(eventCode),
-            "IncomingType": 0,
-            "MessageType": {Fields: [messageType] }
-        },
-        "JsonMessage": JSON.stringify(jsonMessage)
-    };
-
-    var correctInputToWebSocket = routingKey + " " + eventToSendStateMachineRef.Header.ComponentCode.Fields[0]
-       + " " + JSON.stringify(eventToSendStateMachineRef);
-
     var createMockServer = function (serverUrl) {
         return new MockServer(serverUrl);
     }
@@ -107,12 +69,10 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         createWebSocket: createWebSocket,
         correctData: correctData,
         jsonMessage: jsonMessage,
-        corretWebsocketInputFormat: corretWebsocketInputFormat,
         jsonData: jsonData,
         correctReceivedData: correctReceivedData,
         correctSubscribeRequest: correctSubscribeRequest,
         createMockServer: createMockServer,
-        createMockWebSocket: createMockWebSocket,
-        correctInputToWebSocket: correctInputToWebSocket
+        createMockWebSocket: createMockWebSocket
     }
 });

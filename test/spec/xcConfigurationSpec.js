@@ -67,13 +67,6 @@ define(["configuration/xcConfiguration"], function (Configuration) {
             });
         });
 
-        describe("Test getEventWithoutStateMachineRef method", function () {
-            it("should get the right event to send, given the right componentCode and stateMachineCode", function () {
-                var event = configuration.getEventWithoutStateMachineRef(componentCode, stateMachineCode);
-                expect(event).toEqual(correctEvent);
-            });
-        });
-
     });
 
 });

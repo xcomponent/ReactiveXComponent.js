@@ -38,19 +38,6 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
             });
         });
 
-
-        describe("Test sendWithStateMachineRef method", function () {
-            var subscriber, webSocket;
-            beforeEach(function () {
-                webSocket = Mock.createWebSocket();
-                subscriber = new Subscriber(webSocket, Mock.configuration);
-            });
-
-            it("should return event with routing details (how to route the message to the right instance of stateMachine)", function () {
-                subscriber.sendWithStateMachineRef(Mock.jsonData, Mock.jsonMessage);
-                expect(webSocket.send).toHaveBeenCalledWith(Mock.correctInputToWebSocket);
-            });
-        });
     });
 
 });

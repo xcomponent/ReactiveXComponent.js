@@ -26,17 +26,38 @@ define(function () {
     var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
      + " " + JSON.stringify(correctData.event);
 
+    var stateMachineRef = {
+        "StateMachineId": { "Case": "Some", "Fields": [1] },
+        "AgentId": { "Case": "Some", "Fields": [2] },
+        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
+        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+    };
+    var correctDataForSMRef = {
+        event: {
+            "Header": {
+                "StateMachineId": stateMachineRef.StateMachineId,
+                "AgentId": stateMachineRef.AgentId,
+                "StateMachineCode": stateMachineRef.StateMachineCode,
+                "ComponentCode": stateMachineRef.ComponentCode,
+                "EventCode": parseInt(eventCode),
+                "IncomingType": 0,
+                "MessageType": { "Case": "Some", "Fields": [messageType] }
+            },
+            "JsonMessage": JSON.stringify(jsonMessage)
+        },
+        routingKey: routingKey
+    }
+    var corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " " + correctDataForSMRef.event.Header.ComponentCode.Fields[0]
+     + " " + JSON.stringify(correctDataForSMRef.event);
+
 
     // Mocking configuration
-    var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails', 'getEventWithoutStateMachineRef', 'convertToWebsocketInputFormat']);
+    var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails']);
     configuration.getCodes.and.callFake(function () {
         return {
             componentCode: componentCode,
             stateMachineCode: stateMachineCode
         };
-    });
-    configuration.convertToWebsocketInputFormat.and.callFake(function () {
-        return corretWebsocketInputFormat;
     });
     configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
         return {
@@ -44,12 +65,6 @@ define(function () {
             messageType: messageType,
             routingKey: routingKey
         };
-    });
-    configuration.getEventWithoutStateMachineRef.and.callFake(function (componentCode, stateMachineCode) {
-        return {
-            header: header,
-            routingKey: routingKey
-        }
     });
     
 
@@ -66,5 +81,7 @@ define(function () {
         jsonMessage: jsonMessage,
         correctData: correctData,
         corretWebsocketInputFormat: corretWebsocketInputFormat,
+        stateMachineRef: stateMachineRef,
+        corretWebsocketInputFormatForSendSMRef: corretWebsocketInputFormatForSendSMRef
     }
 });
