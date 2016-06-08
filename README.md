@@ -13,8 +13,10 @@ Example of XComponent API usage
             
             var serverUrl = "wss://localhost:443";
 
-            var jsonMessage = { "Name": "Test1" };
-      
+            var jsonMessage1 = { "Name": "Test1" };
+            var jsonMessage2 = { "Name": "Test2" };
+            var jsonMessage3 = { "Name": "Test3" };
+
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
             var stateMachineResponse = "HelloWorldResponse";
@@ -25,14 +27,17 @@ Example of XComponent API usage
                     return;
                 }
                 var publisher = session.createPublisher();
-                publisher.send(componentName, stateMachineName, jsonMessage);
-
+                publisher.send(componentName, stateMachineName, jsonMessage1);
 
                 var subscriber = session.createSubscriber();
+                var i = 0;
                 var stateMachineUpdateListener = function (jsonData) {
-                    console.log(jsonData);
-                    publisher.sendContext(jsonData.stateMachineRef, jsonMessage);
-                        
+                    console.log(jsonData.jsonMessage);
+                    if (i == 0) {
+                        jsonData.stateMachineRef.send(jsonMessage2);
+                        publisher.sendWithStateMachineRef(jsonData.stateMachineRef, jsonMessage3);
+                        i++;
+                    }
                 }
                 subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
             }
