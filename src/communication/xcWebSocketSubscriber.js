@@ -57,8 +57,8 @@ define(["rx"], function (Rx) {
 	        "AgentId": jsonData.Header.AgentId,
 	        "StateMachineCode": jsonData.Header.StateMachineCode,
 	        "ComponentCode": jsonData.Header.ComponentCode,
-	        "send": function (jsonMessage) {
-	            thisObject.replyPublisher.sendWithStateMachineRef(this, jsonMessage);
+	        "send": function (messageType, jsonMessage) {
+	            thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage);
 	        }
 	    };
 	    return {
