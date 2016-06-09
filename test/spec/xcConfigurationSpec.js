@@ -53,9 +53,9 @@ define(["configuration/xcConfiguration"], function (Configuration) {
 
         describe("Test getPublisherDetails method", function () {
             it("should call getPublisherDetails method of parser with the right component and stateMachine", function () {
-                configuration.getPublisherDetails(componentCode, stateMachineCode);
+                configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
                 expect(parser.getPublisherDetails).toHaveBeenCalledTimes(1);
-                expect(parser.getPublisherDetails).toHaveBeenCalledWith(componentCode, stateMachineCode);
+                expect(parser.getPublisherDetails).toHaveBeenCalledWith(componentCode, stateMachineCode, messageType);
             });
         });
 
