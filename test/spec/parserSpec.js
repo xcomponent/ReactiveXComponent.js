@@ -120,17 +120,16 @@ define(["parser"], function (Parser) {
             it("should get the right publisher details given existing component and stateMachine codes", function() {
                     var correctPublish = {
                         eventCode: "9",
-                        messageType: "XComponent.HelloWorld.UserObject.SayHello",
                         routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
                     };
-                    var publish = parser.getPublisherDetails("-69981087", "-829536631");
+                    var publish = parser.getPublisherDetails("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello");
                     expect(publish).toEqual(correctPublish);
                 });
 
             it("should throw an error when using an unknown stateMachine name", function() {
                 var messageError = "PublisherDetails not found";
                 expect(function() {
-                    parser.getPublisherDetails("random componentCode", "random stateMachineCode");
+                    parser.getPublisherDetails("random componentCode", "random stateMachineCode", "");
                 }).toThrowError(messageError);
             });
         });

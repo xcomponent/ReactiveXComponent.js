@@ -11,7 +11,7 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
             });
 
             it("should return event with routing details (how to route the message to the right stateMachine)", function () {
-                var data = publisher.getEventToSend("componentName", "stateMachineName", Mock.jsonMessage);
+                var data = publisher.getEventToSend("componentName", "stateMachineName", Mock.messageType, Mock.jsonMessage);
                 expect(data).toEqual(Mock.correctData);
             });
         });
@@ -24,7 +24,7 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
             });
 
             it("sould send a message to the given stateMachine and component", function () {
-                publisher.send("componentName", "stateMachineName", Mock.jsonMessage);
+                publisher.send("componentName", "stateMachineName", Mock.messageType, Mock.jsonMessage);
                 expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
                 expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.corretWebsocketInputFormat);
             });
@@ -37,7 +37,7 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
             });
 
             it("sould send a message to the given instance of stateMachine", function () {
-                publisher.sendWithStateMachineRef(Mock.stateMachineRef, Mock.jsonMessage);
+                publisher.sendWithStateMachineRef(Mock.stateMachineRef, Mock.messageType, Mock.jsonMessage);
                 expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
                 expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.corretWebsocketInputFormatForSendSMRef);
             });

@@ -22,7 +22,7 @@ define(["javascriptHelper"], function (javascriptHelper) {
             componentCode = subscribers[i].getAttribute(tags.componentCode);
             stateMachineCode = subscribers[i].getAttribute(tags.stateMachineCode);
             topic = subscribers[i].getElementsByTagName(tags.topic)[0].textContent;
-            subscribersTopics[getKey(componentCode, stateMachineCode)] = topic;
+            subscribersTopics[getKey([componentCode, stateMachineCode])] = topic;
         }
         return subscribersTopics;
     }
@@ -58,15 +58,15 @@ define(["javascriptHelper"], function (javascriptHelper) {
 
     var getPublihersDetails = function (xmlDom, tags) {
         var publishersDetails = {}, key, value;
-        var componentCode, stateMachineCode;
+        var componentCode, stateMachineCode, messageType;
         var publishs = xmlDom.getElementsByTagName(tags.publish);
         for (var i = 0; i < publishs.length; i++) {
             componentCode = publishs[i].getAttribute(tags.componentCode);
             stateMachineCode = publishs[i].getAttribute(tags.stateMachineCode);
-            key = getKey(componentCode, stateMachineCode);
+            messageType = publishs[i].getAttribute(tags.event);
+            key = getKey([componentCode, stateMachineCode, messageType]);
             value = {
                 "eventCode": publishs[i].getAttribute(tags.eventCode),
-                "messageType": publishs[i].getAttribute(tags.event),
                 "routingKey": publishs[i].getElementsByTagName(tags.topic)[0].textContent
             };
             publishersDetails[key] = value;
@@ -96,8 +96,8 @@ define(["javascriptHelper"], function (javascriptHelper) {
     }
 
 
-    Parser.prototype.getPublisherDetails = function (componentCode, stateMachineCode) {
-        var publisherDetails = this.publishersDetails[getKey(componentCode, stateMachineCode)];
+    Parser.prototype.getPublisherDetails = function (componentCode, stateMachineCode, messageType) {
+        var publisherDetails = this.publishersDetails[getKey([componentCode, stateMachineCode, messageType])];
         if (publisherDetails == undefined) {
             throw new Error("PublisherDetails not found");
         } else {
@@ -108,16 +108,19 @@ define(["javascriptHelper"], function (javascriptHelper) {
 
     Parser.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
         var codes = this.getCodes(componentName, stateMachineName);
-        var key = getKey(codes.componentCode, codes.stateMachineCode);
+        var key = getKey([codes.componentCode, codes.stateMachineCode]);
         var topic = this.subscribersTopics[key];
         return topic;
     }
 
 
-    function getKey(component, stateMachine) {
-        return component + " " + stateMachine;
+    var getKey = function (array) {
+        var key = "";
+        for (var i = 0; i < array.length; i++)
+            key += array[i];
+        return key;
     }
-    
+
 
     return Parser;
 });

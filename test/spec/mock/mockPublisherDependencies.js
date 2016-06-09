@@ -62,7 +62,6 @@ define(function () {
     configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
         return {
             eventCode: eventCode,
-            messageType: messageType,
             routingKey: routingKey
         };
     });
@@ -79,6 +78,7 @@ define(function () {
         configuration: configuration,
         createMockWebSocket: createMockWebSocket,
         jsonMessage: jsonMessage,
+        messageType:messageType,
         correctData: correctData,
         corretWebsocketInputFormat: corretWebsocketInputFormat,
         stateMachineRef: stateMachineRef,

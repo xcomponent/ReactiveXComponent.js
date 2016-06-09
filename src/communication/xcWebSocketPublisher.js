@@ -7,9 +7,9 @@ define(function () {
 	}
 
 
-    Publisher.prototype.getEventToSend = function (componentName, stateMachineName, jsonMessage) {
+	Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
-        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode);
+        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType);
         var event = {
             "Header": headerConfig.header,
             "JsonMessage": JSON.stringify(jsonMessage)
@@ -21,16 +21,16 @@ define(function () {
     }
 
 
-    Publisher.prototype.send = function(componentName, stateMachineName, jsonMessage) {
-        var data = this.getEventToSend(componentName, stateMachineName, jsonMessage);
+    Publisher.prototype.send = function (componentName, stateMachineName, messageType, jsonMessage) {
+        var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
     
     
-    Publisher.prototype.sendWithStateMachineRef = function (stateMachineRef, jsonMessage) {
+    Publisher.prototype.sendWithStateMachineRef = function (stateMachineRef, messageType, jsonMessage) {
         var componentCode = stateMachineRef.ComponentCode.Fields[0];
         var stateMachineCode = stateMachineRef.StateMachineCode.Fields[0];
-        var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode);
+        var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType);
         var headerStateMachineRef = {
             "StateMachineId": stateMachineRef.StateMachineId,
             "AgentId": stateMachineRef.AgentId
@@ -48,14 +48,14 @@ define(function () {
     }
 
 
-    Publisher.prototype.getHeaderConfig = function (componentCode, stateMachineCode) {
-        var publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode);
+    Publisher.prototype.getHeaderConfig = function (componentCode, stateMachineCode, messageType) {
+        var publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
         var header = {
             "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
             "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
             "EventCode": parseInt(publisher.eventCode),
             "IncomingType": 0,
-            "MessageType": { "Case": "Some", "Fields": [publisher.messageType] }
+            "MessageType": { "Case": "Some", "Fields": [messageType] }
         };
         return {
             header: header,
