@@ -1,5 +1,5 @@
 
-define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDependencies"], function (Subscriber, Mock) {
+define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDependencies", "rx"], function (Subscriber, Mock, Rx) {
 
 
     describe("Test xcWebSocketSubscriber module", function () {
@@ -29,14 +29,50 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
                 
                 mockServer.on('connection', function (server) {
                     //when subscribe request is received, we send send jsonData
-                    server.on('message', function (susbcribeRequest) {
-                        expect(susbcribeRequest).toEqual(Mock.correctSubscribeRequest);
+                    server.on('message', function (subscribeRequest) {
+                        expect(subscribeRequest).toEqual(Mock.correctSubscribeRequest);
                         server.send(JSON.stringify(Mock.jsonData));
                     });
                 });
 
             });
         });
+
+
+        describe("Test unsubscribe method", function () {
+            var subscriber, mockWebSocket;
+            var componentName = "componentName", stateMachineName = "stateMachineName";
+            beforeEach(function () {
+                mockWebSocket = Mock.createWebSocket();
+                subscriber = new Subscriber(mockWebSocket, Mock.configuration);
+            });
+
+            it("unsubscribe to a subscribed state machine", function () {
+                subscriber.addSubscribedStateMachines(componentName, stateMachineName);
+                subscriber.unsubscribe(componentName, stateMachineName);
+                expect(subscriber.webSocket.send).toHaveBeenCalledTimes(1);
+                expect(subscriber.webSocket.send).toHaveBeenCalledWith(Mock.correctUnsubscribeRequest);
+            });
+
+        });
+
+
+        describe("Test getStateMachineUpdates method", function () {
+            var subscriber, mockWebSocket;
+            beforeEach(function () {
+                mockWebSocket = Mock.createWebSocket();
+                subscriber = new Subscriber(mockWebSocket, Mock.configuration);
+            });
+
+            it("get an observable collection from a subscribed state machine", function () {
+                var observable = subscriber.getStateMachineUpdates();
+                expect(subscriber.webSocket.send).toHaveBeenCalledTimes(1);
+                expect(subscriber.webSocket.send).toHaveBeenCalledWith(Mock.correctSubscribeRequest);
+                expect(observable instanceof Rx.Observable).toBe(true);
+            });
+
+        });
+
 
     });
 

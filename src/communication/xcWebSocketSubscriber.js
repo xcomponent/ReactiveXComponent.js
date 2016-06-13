@@ -60,9 +60,11 @@ define(["rx"], function (Rx) {
 
 
 	Subscriber.prototype.unsubscribe = function (componentName, stateMachineName) {
-	    var data = this.getDataToSend(componentName, stateMachineName);
-	    this.webSocket.send(convertToWebsocketInputFormat("unsubscribe", data));
-	    this.removeSubscribedStateMachines(componentName, stateMachineName);
+	    if (isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
+	        var data = this.getDataToSend(componentName, stateMachineName);
+	        this.webSocket.send(convertToWebsocketInputFormat("unsubscribe", data));
+	        this.removeSubscribedStateMachines(componentName, stateMachineName);
+	    }
 	}
 
 
@@ -76,10 +78,8 @@ define(["rx"], function (Rx) {
 
 
 	Subscriber.prototype.removeSubscribedStateMachines = function (componentName, stateMachineName) {
-	    if (isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-	        var index = this.subscribedStateMachines[componentName].indexOf(stateMachineName);
-	        this.subscribedStateMachines[componentName].splice(index, 1);
-	    }
+	    var index = this.subscribedStateMachines[componentName].indexOf(stateMachineName);
+	    this.subscribedStateMachines[componentName].splice(index, 1);
 	}
 
 

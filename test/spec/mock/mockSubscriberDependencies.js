@@ -29,7 +29,6 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         "JsonMessage": JSON.stringify({ "Topic": { "Key": "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse" } })
     };
 
-    var corretWebsocketInputFormat = "subscribe " + JSON.stringify(correctData);
 
     var agentId = 1;
     var stateMachineId = 2;
@@ -55,6 +54,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
     };
 
     var correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);
+    var correctUnsubscribeRequest = "unsubscribe " + JSON.stringify(correctData);
 
     var createMockServer = function (serverUrl) {
         return new MockServer(serverUrl);
@@ -72,6 +72,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         jsonData: jsonData,
         correctReceivedData: correctReceivedData,
         correctSubscribeRequest: correctSubscribeRequest,
+        correctUnsubscribeRequest:correctUnsubscribeRequest,
         createMockServer: createMockServer,
         createMockWebSocket: createMockWebSocket
     }
