@@ -5,11 +5,19 @@ define(["rx"], function (Rx) {
 	    this.webSocket = webSocket;
 	    this.configuration = configuration;
 	    this.replyPublisher = replyPublisher;
+	    this.subscribedStateMachines = {};
 	    this.observableMsg = Rx.Observable.fromEvent(this.webSocket, 'message');
 	}
 
 
 	Subscriber.prototype.getStateMachineUpdates = function (componentName, stateMachineName) {
+	    var filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
+	    this.sendSubscribeRequest(componentName, stateMachineName);
+	    return filteredObservable;
+	}
+
+
+	Subscriber.prototype.prepareStateMachineUpdates = function (componentName, stateMachineName) {
 	    var codes = this.configuration.getCodes(componentName, stateMachineName);
 	    var thisObject = this;
 	    var filteredObservable = this.observableMsg
@@ -18,23 +26,68 @@ define(["rx"], function (Rx) {
             })
             .filter(function (jsonData) {
                 return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
-            })
+            });
 	    return filteredObservable;
 	}
 
 
 	Subscriber.prototype.subscribe = function (componentName, stateMachineName, stateMachineUpdateListener) {
-	    this.getStateMachineUpdates(componentName, stateMachineName)
+	    this.prepareStateMachineUpdates(componentName, stateMachineName)
             .subscribe(function (jsonData) {
                 stateMachineUpdateListener(jsonData);
             });
+	    this.sendSubscribeRequest(componentName, stateMachineName);
+    }
+
+
+	Subscriber.prototype.sendSubscribeRequest = function (componentName, stateMachineName) {
+	    if (!isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
+	        var data = this.getDataToSend(componentName, stateMachineName);
+	        this.webSocket.send(convertToWebsocketInputFormat("subscribe", data));
+	        this.addSubscribedStateMachines(componentName, stateMachineName);
+	    } 
+	}
+
+
+	Subscriber.prototype.getDataToSend = function (componentName, stateMachineName) {
 	    var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
 	    var data = {
 	        "Header": { "IncomingType": 0 },
 	        "JsonMessage": JSON.stringify({ "Topic": { "Key": topic } })
 	    };
-	    this.webSocket.send(convertToWebsocketInputFormat(data));
-    }
+	    return data;
+	}
+
+
+	Subscriber.prototype.unsubscribe = function (componentName, stateMachineName) {
+	    var data = this.getDataToSend(componentName, stateMachineName);
+	    this.webSocket.send(convertToWebsocketInputFormat("unsubscribe", data));
+	    this.removeSubscribedStateMachines(componentName, stateMachineName);
+	}
+
+
+	Subscriber.prototype.addSubscribedStateMachines = function (componentName, stateMachineName) {
+	    if (this.subscribedStateMachines[componentName] == undefined) {
+	        this.subscribedStateMachines[componentName] = [stateMachineName];
+	    } else {
+	        this.subscribedStateMachines[componentName].push(stateMachineName);
+	    }
+	}
+
+
+	Subscriber.prototype.removeSubscribedStateMachines = function (componentName, stateMachineName) {
+	    if (isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
+	        var index = this.subscribedStateMachines[componentName].indexOf(stateMachineName);
+	        this.subscribedStateMachines[componentName].splice(index, 1);
+	    }
+	}
+
+
+	function isSubscribed(subscribedStateMachines, componentName, stateMachineName) {
+	    var isSubscribed = subscribedStateMachines[componentName] != undefined
+        && subscribedStateMachines[componentName].indexOf(stateMachineName) > -1;
+	    return isSubscribed;
+	}
 
 
 	function isSameComponent(jsonData, codes) {
@@ -68,8 +121,8 @@ define(["rx"], function (Rx) {
 	}
 
 
-    function convertToWebsocketInputFormat(data) {
-        var input = "subscribe " + JSON.stringify(data);
+    function convertToWebsocketInputFormat(susbcribeRequest, data) {
+        var input = susbcribeRequest + " " + JSON.stringify(data);
         return input;
     }
 

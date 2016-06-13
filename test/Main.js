@@ -12,6 +12,7 @@ requirejs.config({
 
         require(["xcomponentAPI"], function (XComponentAPI) {
             
+            var xml;
             var serverUrl = "wss://localhost:443";
 
             var jsonMessage1 = { "Name": "Test1" };
@@ -26,6 +27,8 @@ requirejs.config({
             var componentName = "HelloWorld";
             var stateMachineName = "HelloWorldManager";
             var stateMachineResponse = "HelloWorldResponse";
+
+            var api = new XComponentAPI();
 
             var sessionListener = function (error, session) {
                 if (error) {
@@ -64,8 +67,8 @@ requirejs.config({
 
                     reader.onload = function (e) {
                         fileDisplayArea.innerText = reader.result;
-                        var api = new XComponentAPI();
-                        api.createSession(reader.result, serverUrl, sessionListener);
+                        xml = reader.result;
+                        api.createSession(xml, serverUrl, sessionListener);
                     }
 
                     reader.readAsText(file);
