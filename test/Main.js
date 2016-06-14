@@ -12,6 +12,7 @@ requirejs.config({
 
         require(["xcomponentAPI"], function (XComponentAPI) {
             
+            var xml;
             var serverUrl = "wss://localhost:443";
 
             var jsonMessage1 = { "Name": "Test1" };
@@ -27,13 +28,13 @@ requirejs.config({
             var stateMachineName = "HelloWorldManager";
             var stateMachineResponse = "HelloWorldResponse";
 
+            var api = new XComponentAPI();
+
             var sessionListener = function (error, session) {
                 if (error) {
                     console.log(error);
                     return;
                 }
-                var publisher = session.createPublisher();
-                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
 
                 var subscriber = session.createSubscriber();
                 var i = 0;
@@ -45,16 +46,36 @@ requirejs.config({
                         setTimeout(function () {
                             jsonData.stateMachineRef.send(messageType3, jsonMessage3);
                         }, 1000);
-                        //publisher.sendWithStateMachineRef(jsonData.stateMachineRef, jsonMessage3);
                         i++;
                     }
                 }
                 subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
+
+                var publisher = session.createPublisher();
+                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
             }
 
-            var api = new XComponentAPI();
-            api.createSession(serverUrl, sessionListener);
+            var fileInput = document.getElementById('fileInput');
+            var fileDisplayArea = document.getElementById('fileDisplayArea');
 
+            fileInput.addEventListener('change', function (e) {
+                var file = fileInput.files[0];
+                var textType = /text.*/;
+
+                if (file.type.match(textType)) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        fileDisplayArea.innerText = reader.result;
+                        xml = reader.result;
+                        api.createSession(xml, serverUrl, sessionListener);
+                    }
+
+                    reader.readAsText(file);
+                } else {
+                    fileDisplayArea.innerText = "File not supported!";
+                }
+            });
         });
 
     }

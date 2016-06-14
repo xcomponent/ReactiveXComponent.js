@@ -6,10 +6,10 @@ define(["communication/xcConnection", "parser", "configuration/xcConfiguration"]
     }
 
 
-    XComponentAPI.prototype.createSession = function (serverUrl, sessionListener) {
+    XComponentAPI.prototype.createSession = function (xml, serverUrl, sessionListener) {
         var parser = new Parser();
         var configuration = new Configuration(parser);
-        configuration.init();
+        configuration.init(xml);
         var connection = new Connection(configuration);
         connection.createSession(serverUrl, sessionListener);
     }
