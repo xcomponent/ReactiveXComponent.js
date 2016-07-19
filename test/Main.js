@@ -2,6 +2,10 @@
 requirejs.config({
     urlArgs: 'bustCache=' + (new Date()).getTime(),
 
+    paths: {
+        'rx': '../node_modules/rx/dist/rx.all'
+    },
+
     callback: function () {
         "use strict";
 
