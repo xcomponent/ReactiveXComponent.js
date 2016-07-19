@@ -1,5 +1,5 @@
 
-define(["communication/xcConnection", "parser", "configuration/xcConfiguration"], function (Connection, Parser, Configuration) {
+define(["./communication/xcConnection", "./parser", "./configuration/xcConfiguration"], function (Connection, Parser, Configuration) {
     "use strict";
 
     var XComponentAPI = function () {

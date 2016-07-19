@@ -1,5 +1,5 @@
 
-define(["javascriptHelper", "communication/xcWebSocketPublisher", "communication/xcWebSocketSubscriber"], function (javascriptHelper, Publisher, Subscriber) {
+define(["../javascriptHelper", "./xcWebSocketPublisher", "./xcWebSocketSubscriber"], function (javascriptHelper, Publisher, Subscriber) {
     "use strict";
 
     var SessionFactory = function (serverUrl, configuration) {

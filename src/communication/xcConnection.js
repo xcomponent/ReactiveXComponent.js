@@ -1,5 +1,5 @@
 
-define(["communication/xcSession"], function (SessionFactory) {
+define(["./xcSession"], function (SessionFactory) {
     "use strict";
 
     var Connection = function (configuration) {

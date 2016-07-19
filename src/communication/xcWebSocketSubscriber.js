@@ -1,4 +1,4 @@
-define(["rx"], function (Rx) {
+define(["../../node_modules/rx/dist/rx.all"], function (Rx) {
 	"use strict"
 
 	var Subscriber = function (webSocket, configuration, replyPublisher) {
