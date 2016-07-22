@@ -68,7 +68,6 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
                 var observable = subscriber.getStateMachineUpdates();
                 expect(subscriber.webSocket.send).toHaveBeenCalledTimes(1);
                 expect(subscriber.webSocket.send).toHaveBeenCalledWith(Mock.correctSubscribeRequest);
-                expect(observable instanceof Rx.Observable).toBe(true);
             });
 
         });

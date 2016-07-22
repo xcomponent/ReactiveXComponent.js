@@ -1,7 +1,6 @@
 
 requirejs.config({
     urlArgs: 'bustCache=' + (new Date()).getTime(),
-    baseUrl: '../src',
 
     paths: {
         'rx': '../node_modules/rx/dist/rx.all'
@@ -10,7 +9,7 @@ requirejs.config({
     callback: function () {
         "use strict";
 
-        require(["xcomponentAPI"], function (XComponentAPI) {
+        require(["../src/xcomponentAPI"], function (XComponentAPI) {
             
             var xml;
             var serverUrl = "wss://localhost:443";

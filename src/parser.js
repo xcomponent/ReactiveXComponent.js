@@ -1,5 +1,5 @@
 
-define(["javascriptHelper"], function (javascriptHelper) {
+define(["./javascriptHelper"], function (javascriptHelper) {
     "use strict";
 
     var Parser = function() {
