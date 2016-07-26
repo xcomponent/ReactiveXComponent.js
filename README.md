@@ -60,14 +60,16 @@ Example of XComponent API usage
 
 ## Build from source
 Download the source code and execute the following commands:
-``` npm install
-    npm run build    
+``` 
+npm install
+npm run build    
 ```
 *xcomponentapi.js* is built in the *dist* folder. 
 
 ## Run unit tests
 Execute the following command:
-``` npm test        
+``` 
+npm test        
 ```
 
 ## Contributing
