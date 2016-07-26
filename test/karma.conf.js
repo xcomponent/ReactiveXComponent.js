@@ -1,7 +1,8 @@
 // Karma configuration
-// Generated on Thu May 12 2016 12:24:04 GMT+0200 (Paris, Madrid (heure d’été))
+var webpack = require('webpack');
+var path = require('path');
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -10,47 +11,80 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine', 'requirejs'],
-
+    frameworks: ['jasmine'],
 
     // list of files / patterns to load in the browser
-    files: [
-      'test/test-main.js',
-      { pattern: 'node_modules/rx/dist/rx.all.js', included: false },
-      { pattern: 'node_modules/mock-socket/dist/mock-socket.js', included: false },
-      { pattern: 'src/**/*.js', included: false },
-      { pattern: 'test/**/*.js', included: false }
+    files: [      
+      'test/spec/*Spec.js'
     ],
-
 
     // list of files to exclude
     exclude: [
     ],
 
-
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'src/**/*.js': 'coverage'
+      'test/spec/*Spec.js': ['webpack', 'sourcemap']
     },
 
+    webpack: {
+      devtool: 'inline-source-map',
+      externals: {
+        'websocket': 'websocket',
+        'xmldoc': 'xmldoc'
+      },
+      resolve: {
+        modulesDirectories: [
+          'node_modules',
+          'src']
+      },
+      module: {
+        loaders: [
+          { test: /\.js$/, loader: 'babel-loader' }
+        ],
+        postLoaders: [{ //delays coverage til after tests are run, fixing transpiled source coverage error
+          test: /\.js$/,
+          include: path.resolve('src/'),
+          //exclude: /(test|node_modules|bower_components)\//,
+          loader: 'istanbul-instrumenter'
+        }]
+      }
+    },
+
+    webpackMiddleware: {
+      stats: 'errors-only'
+    },
+
+    webpackServer: {
+      noInfo: true //please don't spam the console when running in karma!
+    },
+
+    plugins: [
+      require("karma-webpack"),
+      require("karma-coverage"),
+      require("karma-junit-reporter"),
+      require("karma-jasmine"),
+      require("karma-chrome-launcher"),
+      require("karma-sourcemap-loader")
+    ],
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['junit','progress', 'dots', 'coverage'],
+    reporters: ['junit', 'progress', 'dots', 'coverage'],
 
     junitReporter : {
-        outputDir: 'test_out',
-        outputFile: 'unit-tests-results.xml',
-        suite: 'unit'
+      outputDir: 'test_out',
+      outputFile: 'unit-tests-results.xml',
+      suite: 'unit'
     },
 
     coverageReporter: {
-        reporters: [
+      reporters: [
         { type: 'html', dir: 'coverage/html' },
         { type: 'cobertura', dir: 'coverage/cobertura' }
-        ]
+      ]
     },
 
     // web server port

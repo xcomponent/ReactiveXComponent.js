@@ -1,60 +1,75 @@
 ## Reactive XComponent API
 Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
 
-## Build
-Download the source code and execute the following command:
-``` npm install .```
+## Install
+Use npm to install the latest version of the API:
+``` npm i reactivexcomponent.js ```
 
 ## Usage
+Import *xcomponentapi.js* in your main html file:
+```html
+<script src="xcomponentapi.js" type="text/javascript"></script>
+```
+
 Example of XComponent API usage
 ```js
-        require(["xcomponentAPI"], function (XComponentAPI) {
-            
-            var serverUrl = "wss://localhost:443";
+        var serverUrl = "wss://localhost:443";
 
-            var jsonMessage1 = { "Name": "Test1" };
-            var messageType1 = "XComponent.HelloWorld.UserObject.SayHello";
+        var jsonMessage1 = { "Name": "Test1" };
+        var messageType1 = "XComponent.HelloWorld.UserObject.SayHello";
 
-            var jsonMessage2 = { "Name": "Test2" };
-            var messageType2 = messageType1;
+        var jsonMessage2 = { "Name": "Test2" };
+        var messageType2 = messageType1;
 
-            var jsonMessage3 = { "Name": "Test3" };
-            var messageType3 = "XComponent.HelloWorld.UserObject.SayGoodBye";
+        var jsonMessage3 = { "Name": "Test3" };
+        var messageType3 = "XComponent.HelloWorld.UserObject.SayGoodBye";
 
-            var componentName = "HelloWorld";
-            var stateMachineName = "HelloWorldManager";
-            var stateMachineResponse = "HelloWorldResponse";
+        var componentName = "HelloWorld";
+        var stateMachineName = "HelloWorldManager";
+        var stateMachineResponse = "HelloWorldResponse";
 
-            var sessionListener = function (error, session) {
-                if (error) {
-                    console.log(error);
-                    return;
-                }
-
-                var subscriber = session.createSubscriber();
-                var i = 0;
-                var stateMachineUpdateListener = function (jsonData) {
-                    console.log(jsonData.jsonMessage);
-                    if (i == 0) {
-                        jsonData.stateMachineRef.send(messageType2, jsonMessage2);
-                        jsonData.stateMachineRef.send(messageType2, jsonMessage2);
-                        setTimeout(function () {
-                            jsonData.stateMachineRef.send(messageType3, jsonMessage3);
-                        }, 1000);
-                        i++;
-                    }
-                }
-                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
-
-                var publisher = session.createPublisher();
-                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
+        var sessionListener = function (error, session) {
+            if (error) {
+                console.log(error);
+                return;
             }
 
-            var xml = ...; //get your xcApi file configuration
-            var api = new XComponentAPI();
-            api.createSession(xml, serverUrl, sessionListener);
-        });
+            var subscriber = session.createSubscriber();
+            var i = 0;
+            var stateMachineUpdateListener = function (jsonData) {
+                console.log(jsonData.jsonMessage);
+                 if (i == 0) {
+                    jsonData.stateMachineRef.send(messageType2, jsonMessage2);
+                    jsonData.stateMachineRef.send(messageType2, jsonMessage2);                        
+                    setTimeout(function () {
+                        jsonData.stateMachineRef.send(messageType3, jsonMessage3);
+                    }, 1000);
+                    i++;
+                }
+            }
+            subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
 
+            var publisher = session.createPublisher();                
+            publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
+        }
+
+        var xml = ...; //get your xcApi file configuration            
+        xcomponentapi.createSession(xml, serverUrl, sessionListener);
+
+```
+
+## Build from source
+Download the source code and execute the following commands:
+``` 
+npm install
+npm run build    
+```
+*xcomponentapi.js* is built in the *dist* folder. 
+
+## Run unit tests
+Execute the following command:
+``` 
+npm test        
 ```
 
 ## Contributing
