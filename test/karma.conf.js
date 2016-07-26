@@ -1,5 +1,6 @@
 // Karma configuration
 var webpack = require('webpack');
+var path = require('path');
 
 module.exports = function (config) {
   config.set({
@@ -44,7 +45,8 @@ module.exports = function (config) {
         ],
         postLoaders: [{ //delays coverage til after tests are run, fixing transpiled source coverage error
           test: /\.js$/,
-          exclude: /(test|node_modules|bower_components)\//,
+          include: path.resolve('src/'),
+          //exclude: /(test|node_modules|bower_components)\//,
           loader: 'istanbul-instrumenter'
         }]
       }
