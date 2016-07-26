@@ -1,12 +1,13 @@
 {
   "name": "reactivexcomponent.js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Javascript reactive client API for XComponent",
-  "main": "index.html",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "dev": "webpack -d --watch",
+    "build": "webpack -p",
     "test": "karma start test/karma.conf.js"
   },
   "repository": {
@@ -20,23 +21,34 @@
     "websocket"
   ],
   "author": "xcomponent",
-  "license": "Apache License V2",
+  "license": "Apache-2.0",
+  "files": [
+    "LICENSE",
+    "Readme.md",
+    "dist/xcomponentapi.js"
+  ],
   "bugs": {
     "url": "https://github.com/xcomponent/ReactiveXComponent.js/issues"
   },
   "homepage": "https://github.com/xcomponent/ReactiveXComponent.js#readme",
   "dependencies": {
-    "requirejs": "^2.2.0",
-    "rx": "^4.1.0"
+    "websocket": "^1.0.23",
+    "xmldom": "^0.1.22"
   },
-    "devDependencies": {
-        "mock-socket": "^2.0.0",
-        "jasmine-core": "^2.4.1",
-        "karma": "^0.13.22",
-        "karma-chrome-launcher": "^1.0.1",
-        "karma-coverage": "^1.0.0",
-        "karma-jasmine": "^1.0.2",
-        "karma-junit-reporter": "*",
-        "karma-requirejs": "^1.0.0"
-    }
+  "devDependencies": {
+    "babel-core": "^6.11.4",
+    "babel-loader": "^6.2.4",
+    "istanbul-instrumenter-loader": "^0.2.0",
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-coverage": "^1.0.0",
+    "karma-jasmine": "^1.0.2",
+    "karma-junit-reporter": "*",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^1.7.0",
+    "mock-socket": "^2.0.0",
+    "rx": "^4.1.0",
+    "webpack": "^1.13.1"
+  }
 }
