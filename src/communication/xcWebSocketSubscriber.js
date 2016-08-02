@@ -20,7 +20,7 @@ define(["rx", "pako"], function (Rx, pako) {
 				snapshotListener(jsonArray);
 			});
 		var dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName);
-		this.webSocket.send(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode + " " + Json.stringify(dataToSendSnapshot.data));
+		this.webSocket.send(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode + " " + JSON.stringify(dataToSendSnapshot.data));
 	}
 
 
@@ -36,10 +36,10 @@ define(["rx", "pako"], function (Rx, pako) {
 		var topic = this.configuration.getSnapshotTopic(componentName);
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
 		var jsonMessage = {
-			"StateMachineCode": codes.stateMachineCode,
-			"ComponentCode": codes.componentCode,
+			"StateMachineCode": parseInt(codes.stateMachineCode),
+			"ComponentCode": parseInt(codes.componentCode),
 			"ReplyTopic": { "Case": "Some", "Fields": ["c3069fb6-d0e0-450b-bd17"] },
-			"PrivateTopic": { "Case": "Some", "Fields": ["45d50151-2206-401e-9dc3"] }
+			"PrivateTopic": { "Case": "Some", "Fields": [["45d50151-2206-401e-9dc3"]] }
 		};
 		var dataToSendSnapshot = {
 			topic: topic,
@@ -167,13 +167,16 @@ define(["rx", "pako"], function (Rx, pako) {
 	var getJsonArrayFromSnapshot = function (e) {
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		//TODO nodejs atob
-		var b64Data = jsonData.JsonMessage.Items;
+		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
+		console.log(b64Data);
 		var strData = window.atob(b64Data);
 		var charData = strData.split('').map(function (x) { return x.charCodeAt(0); });
 		var binData = new Uint8Array(charData);
 		var data = pako.inflate(binData);
 		var strData = String.fromCharCode.apply(null, new Uint16Array(data));
-		return JSON.parse(strData);
+		//console.log(strData);
+		return strData;
+		//return JSON.parse(strData);
 	}
 
 
