@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/xcomponent/ReactiveXComponent.js#readme",
   "dependencies": {
+    "pako": "^1.0.3",
     "websocket": "^1.0.23",
     "xmldom": "^0.1.22"
   },

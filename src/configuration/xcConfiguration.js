@@ -16,6 +16,7 @@ define(function () {
     tags.topic = "topic";
     tags.eventCode = "eventCode";
     tags.subscribe = "subscribe";
+    tags.snapshot = "snapshot";
 
 
     var Configuration = function(parser) {
@@ -42,6 +43,15 @@ define(function () {
         return this.parser.getSubscriberTopic(componentName, stateMachineName);
     }
 
+
+    Configuration.prototype.getSnapshotTopic = function (componentName) {
+        return this.parser.getSnapshotTopic(componentName);
+    }
+
+
+    Configuration.prototype.getAllStateMachineNames = function (componentName) {
+        return this.parser.getAllStateMachineNames(componentName);
+    }
 
     return Configuration;
 });
