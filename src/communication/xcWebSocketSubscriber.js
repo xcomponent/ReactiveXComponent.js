@@ -1,4 +1,4 @@
-define(["rx", "pako"], function (Rx, pako) {
+define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pako) {
 	"use strict"
 
 	var Subscriber = function (webSocket, configuration, replyPublisher) {
@@ -180,7 +180,8 @@ define(["rx", "pako"], function (Rx, pako) {
 		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
-		var strData = window.atob(b64Data);
+		var atob = javascriptHelper.getJavascriptHelper().atob;
+		var strData = atob(b64Data);
 		var charData = strData.split('').map(function (x) {
 			return x.charCodeAt(0);
 		});
