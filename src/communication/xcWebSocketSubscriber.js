@@ -181,8 +181,7 @@ define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, p
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
 		var atob = javascriptHelper.getJavascriptHelper().atob;
-		var strData = atob(b64Data);
-		var charData = strData.split('').map(function (x) {
+		var charData = atob(b64Data).split('').map(function (x) {
 			return x.charCodeAt(0);
 		});
 		var binData = new Uint8Array(charData);
