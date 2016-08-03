@@ -16,7 +16,7 @@ define(["rx", "pako"], function (Rx, pako) {
 		this.observableMsg
 			.map(function (e) {
 				try {
-					return getJsonArrayFromSnapshot(e);
+					return getJsonDataFromSnapshot(e);
 				} catch (e) {
 					return null;
 				}
@@ -176,7 +176,7 @@ define(["rx", "pako"], function (Rx, pako) {
 	}
 
 
-	var getJsonArrayFromSnapshot = function (e) {
+	var getJsonDataFromSnapshot = function (e) {
 		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
