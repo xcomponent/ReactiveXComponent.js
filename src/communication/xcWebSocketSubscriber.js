@@ -7,39 +7,43 @@ define(["rx", "pako"], function (Rx, pako) {
 		this.replyPublisher = replyPublisher;
 		this.subscribedStateMachines = {};
 		this.observableMsg = Rx.Observable.fromEvent(this.webSocket, 'message');
-		this.observableSnaphots = Rx.Observable.fromEvent(this.webSocket, 'message');
 	}
-
 
 
 	Subscriber.prototype.getSnapshot = function (componentName, stateMachineName, snapshotListener) {
-		this.observableSnaphots
+		var codes = this.configuration.getCodes(componentName, stateMachineName);
+		var replyTopic = createGuid();
+		this.observableMsg
 			.map(function (e) {
-				return getJsonArrayFromSnapshot(e);
-			}).subscribe(function (jsonArray) {
-				snapshotListener(jsonArray);
+				try {
+					return getJsonArrayFromSnapshot(e);
+				} catch (e) {
+					return null;
+				}
+			})
+			.filter(function (data) {
+				try {
+					return data.replyTopic == replyTopic;
+				} catch (e) {
+					return false;
+				}
+			})
+			.subscribe(function (data) {
+				snapshotListener(data.items);
 			});
-		var dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName);
-		this.webSocket.send(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode + " " + JSON.stringify(dataToSendSnapshot.data));
+		var dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
+		this.webSocket.send(convertToWebsocketInputFormat(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode, dataToSendSnapshot.data));
 	}
 
 
-	/**
-	 * var m = 'snapshot.1_0.HelloWorldMicroservice.HelloWorld -69981087 {"Header":{"IncomingType":0},
-	 * "JsonMessage":"{\\"StateMachineCode\\":-343862282,
-	 * \\"ComponentCode\\":-69981087,
-	 * \\"ReplyTopic\\":{\\"Case\\":\\"Some\\",\\"Fields\\":[\\"c3069fb6-d0e0-450b-bd17\\"]},
-	 * \\"PrivateTopic\\":{\\"Case\\":\\"Some\\",\\"Fields\\":[[\\"45d50151-2206-401e-9dc3\\"]]}}"}'
-	 * 
-	 */
-	Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName) {
+	Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName, replyTopic) {
 		var topic = this.configuration.getSnapshotTopic(componentName);
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
 		var jsonMessage = {
 			"StateMachineCode": parseInt(codes.stateMachineCode),
 			"ComponentCode": parseInt(codes.componentCode),
-			"ReplyTopic": { "Case": "Some", "Fields": ["c3069fb6-d0e0-450b-bd17"] },
-			"PrivateTopic": { "Case": "Some", "Fields": [["45d50151-2206-401e-9dc3"]] }
+			"ReplyTopic": { "Case": "Some", "Fields": [replyTopic] },
+			"PrivateTopic": { "Case": "Some", "Fields": [[createGuid()]] }
 		};
 		var dataToSendSnapshot = {
 			topic: topic,
@@ -65,10 +69,18 @@ define(["rx", "pako"], function (Rx, pako) {
 		var thisObject = this;
 		var filteredObservable = this.observableMsg
             .map(function (e) {
-                return thisObject.getJsonDataFromEvent(e);
+				try {
+					return thisObject.getJsonDataFromEvent(e);
+				} catch (e) {
+					return null;
+				}
             })
             .filter(function (jsonData) {
-                return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
+				try {
+					return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
+				} catch (e) {
+					return false;
+				}
             });
 		return filteredObservable;
 	}
@@ -165,25 +177,37 @@ define(["rx", "pako"], function (Rx, pako) {
 
 
 	var getJsonArrayFromSnapshot = function (e) {
+		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-		//TODO nodejs atob
 		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
-		console.log(b64Data);
 		var strData = window.atob(b64Data);
-		var charData = strData.split('').map(function (x) { return x.charCodeAt(0); });
+		var charData = strData.split('').map(function (x) {
+			return x.charCodeAt(0);
+		});
 		var binData = new Uint8Array(charData);
-		var data = pako.inflate(binData);
+		var data = pako.inflate(binData).filter(function (x) {
+			return x != 0;
+		});
 		var strData = String.fromCharCode.apply(null, new Uint16Array(data));
-		//console.log(strData);
-		return strData;
-		//return JSON.parse(strData);
+		return {
+			items: JSON.parse(strData),
+			replyTopic: replyTopic
+		};
 	}
 
 
-    function convertToWebsocketInputFormat(susbcribeRequest, data) {
-        var input = susbcribeRequest + " " + JSON.stringify(data);
+    function convertToWebsocketInputFormat(request, data) {
+        var input = request + " " + JSON.stringify(data);
         return input;
     }
+
+
+	function createGuid() {
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+	}
 
 
     return Subscriber;

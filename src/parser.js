@@ -146,12 +146,6 @@ define(["./javascriptHelper"], function (javascriptHelper) {
         return this.snapshotTopics[componentCode];
     }
 
-    Parser.prototype.getAllStateMachineNames = function (componentName) {
-        //Waring: error case TODO
-        var stateMachineNames = Object.keys(this.codes[componentName].stateMachineCodes);
-        return stateMachineNames;
-    }
-
 
     var getKey = function (array) {
         var key = "";
