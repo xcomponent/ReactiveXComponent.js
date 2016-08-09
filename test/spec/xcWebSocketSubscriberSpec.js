@@ -99,7 +99,7 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
                         server.send(Mock.snapshotResponse);
                     });
                 });
-            });
+            }, 20000);
 
         });
 
