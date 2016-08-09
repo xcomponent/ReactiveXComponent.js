@@ -1,5 +1,5 @@
 
-var xml = (function() {
+var xml = (function () {
     return `<?xml version="1.0" encoding="utf-8"?>
 <deployment environment="Dev" xcProjectName="HelloWorld" deploymentTargetCode="-487384339" deploymentTargetName="HelloWorldApi" version="1.0" frameworkType="Framework4" xmlns="http://xcomponent.com/DeploymentConfig.xsd">
   <threading />
@@ -54,7 +54,7 @@ var xml = (function() {
 </deployment>`;
 })();
 
-var tags = (function() {
+var tags = (function () {
     var tags = {};
     tags.component = "component";
     tags.name = "name";
@@ -68,67 +68,68 @@ var tags = (function() {
     tags.topic = "topic";
     tags.eventCode = "eventCode";
     tags.subscribe = "subscribe";
+    tags.snapshot = "snapshot";
     return tags;
-})();    
+})();
 
 
 
 define(["parser"], function (Parser) {
-    
+
     describe("Test Parser module", function () {
 
         var parser;
 
-        beforeEach(function() {
+        beforeEach(function () {
             parser = new Parser();
             parser.parse(xml, tags);
         });
 
 
-        describe("Test getCodes method", function() {
+        describe("Test getCodes method", function () {
             it("should get the right codes given existing component and statemachine names", function () {
                 var codes, correctCodes;
 
                 codes = parser.getCodes("HelloWorld", "HelloWorldManager");
-                correctCodes = {componentCode : "-69981087", stateMachineCode : "-829536631"};
+                correctCodes = { componentCode: "-69981087", stateMachineCode: "-829536631" };
                 expect(codes).toEqual(correctCodes);
 
                 codes = parser.getCodes("HelloWorld", "HelloWorldResponse");
-                correctCodes = {componentCode : "-69981087", stateMachineCode : "-343862282"};
+                correctCodes = { componentCode: "-69981087", stateMachineCode: "-343862282" };
                 expect(codes).toEqual(correctCodes);
             });
-            
-            it("should throw an error when using an unkonwn component name", function() {
+
+            it("should throw an error when using an unkonwn component name", function () {
                 var componentName = "random component";
                 var messageError = "Component '" + componentName + "' not found";
-                expect(function() {
+                expect(function () {
                     parser.getCodes(componentName, null);
                 }).toThrowError(messageError);
             });
 
-            it("should throw an error when using an unknown stateMachine name", function() {
+            it("should throw an error when using an unknown stateMachine name", function () {
                 var stateMachine = "random stateMachine";
                 var messageError = "StateMachine '" + stateMachine + "' not found"
-                expect(function() {
+                expect(function () {
                     parser.getCodes("HelloWorld", stateMachine);
                 }).toThrowError(messageError);
             });
         });
 
 
-        describe("Test getPublisherDetails method", function() {
-            it("should get the right publisher details given existing component and stateMachine codes", function() {
-                    var correctPublish = {
-                        eventCode: "9",
-                        routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
-                    };
-                    var publish = parser.getPublisherDetails("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello");
-                    expect(publish).toEqual(correctPublish);
-                });
+        describe("Test getPublisherDetails method", function () {
+            it("should get the right publisher details given existing component and stateMachine codes", function () {
+                var correctPublish = {
+                    eventCode: "9",
+                    routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
+                };
+                var publish = parser.getPublisherDetails("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello");
+                expect(publish).toEqual(correctPublish);
+            });
 
-            it("should throw an error when using an unknown stateMachine name", function() {
+            it("should throw an error when using an unknown stateMachine name", function () {
                 var messageError = "PublisherDetails not found";
-                expect(function() {
+                expect(function () {
                     parser.getPublisherDetails("random componentCode", "random stateMachineCode", "");
                 }).toThrowError(messageError);
             });
@@ -142,6 +143,24 @@ define(["parser"], function (Parser) {
                 expect(topic).toEqual(correctTopic);
             });
         });
+
+
+        describe("Test getSnapshotTopic method", function () {
+            it("should get the right snapshot topic given existing component", function () {
+                var correctTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
+                var topic = parser.getSnapshotTopic("HelloWorld");
+                expect(topic).toEqual(correctTopic);
+            });
+
+            it("should throw an exeption when using an unknown component name", function () {
+                var componentName = "random component";
+                var messageError = "Component '" + componentName + "' not found";
+                expect(function () {
+                    parser.getSnapshotTopic("random component");
+                }).toThrowError(messageError);
+            });
+        });
+
 
     });
 

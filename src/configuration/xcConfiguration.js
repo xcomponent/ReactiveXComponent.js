@@ -49,9 +49,5 @@ define(function () {
     }
 
 
-    Configuration.prototype.getAllStateMachineNames = function (componentName) {
-        return this.parser.getAllStateMachineNames(componentName);
-    }
-
     return Configuration;
 });

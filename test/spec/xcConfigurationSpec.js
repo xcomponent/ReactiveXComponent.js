@@ -24,7 +24,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
         }
         var parser, configuration;
         beforeEach(function () {
-            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic']);
+            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic']);
             parser.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
                 return {
                     eventCode: eventCode,
@@ -61,9 +61,17 @@ define(["configuration/xcConfiguration"], function (Configuration) {
 
         describe("Test getSubscriberTopic method", function () {
             it("should call getSubscriberTopic method of parser with the right component and stateMachine", function () {
-                configuration.getSubscriberTopic(componentCode, stateMachineCode);
+                configuration.getSubscriberTopic(componentName, stateMachineName);
                 expect(parser.getSubscriberTopic).toHaveBeenCalledTimes(1);
-                expect(parser.getSubscriberTopic).toHaveBeenCalledWith(componentCode, stateMachineCode);
+                expect(parser.getSubscriberTopic).toHaveBeenCalledWith(componentName, stateMachineName);
+            });
+        });
+
+        describe("Test getSnapshotTopic method", function () {
+            it("should call getSnapshotTopic method of parser with the right component", function () {
+                configuration.getSnapshotTopic(componentName);
+                expect(parser.getSnapshotTopic).toHaveBeenCalledTimes(1);
+                expect(parser.getSnapshotTopic).toHaveBeenCalledWith(componentName);
             });
         });
 
