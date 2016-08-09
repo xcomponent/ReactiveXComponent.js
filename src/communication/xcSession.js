@@ -1,5 +1,5 @@
 
-define(["../javascriptHelper", "./xcWebSocketPublisher", "./xcWebSocketSubscriber"], function (javascriptHelper, Publisher, Subscriber) {
+define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSocketSubscriber"], function (javascriptHelper, Guid, Publisher, Subscriber) {
     "use strict";
 
     var SessionFactory = function (serverUrl, configuration) {
@@ -45,7 +45,7 @@ define(["../javascriptHelper", "./xcWebSocketPublisher", "./xcWebSocketSubscribe
 
 
     Session.prototype.createSubscriber = function () {
-        var subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher);
+        var subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, new Guid());
         return subscriber;
     }
 

@@ -1,22 +1,24 @@
-define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pako) {
+define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pako) {
 	"use strict"
 
-	var Subscriber = function (webSocket, configuration, replyPublisher) {
+	var Subscriber = function (webSocket, configuration, replyPublisher, guid) {
 		this.webSocket = webSocket;
 		this.configuration = configuration;
 		this.replyPublisher = replyPublisher;
 		this.subscribedStateMachines = {};
 		this.observableMsg = Rx.Observable.fromEvent(this.webSocket, 'message');
+		this.guid = guid;
 	}
 
 
 	Subscriber.prototype.getSnapshot = function (componentName, stateMachineName, snapshotListener) {
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
-		var replyTopic = createGuid();
+		var replyTopic = this.guid.create();
+		var thisObject = this;
 		this.observableMsg
 			.map(function (e) {
 				try {
-					return getJsonDataFromSnapshot(e);
+					return thisObject.getJsonDataFromSnapshot(e);
 				} catch (e) {
 					return null;
 				}
@@ -39,11 +41,12 @@ define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, p
 	Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName, replyTopic) {
 		var topic = this.configuration.getSnapshotTopic(componentName);
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
+		var privateTopic = this.guid.create();
 		var jsonMessage = {
 			"StateMachineCode": parseInt(codes.stateMachineCode),
 			"ComponentCode": parseInt(codes.componentCode),
 			"ReplyTopic": { "Case": "Some", "Fields": [replyTopic] },
-			"PrivateTopic": { "Case": "Some", "Fields": [[createGuid()]] }
+			"PrivateTopic": { "Case": "Some", "Fields": [[privateTopic]] }
 		};
 		var dataToSendSnapshot = {
 			topic: topic,
@@ -176,7 +179,7 @@ define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, p
 	}
 
 
-	var getJsonDataFromSnapshot = function (e) {
+	Subscriber.prototype.getJsonDataFromSnapshot = function (e) {
 		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
@@ -189,8 +192,23 @@ define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, p
 			return x != 0;
 		});
 		var strData = String.fromCharCode.apply(null, new Uint16Array(data));
+		var items = JSON.parse(strData);
+		var thisObject = this;
+		for (var i = 0; i < items.length; i++) {
+			(function (item) {
+				item.send = function (messageType, jsonMessage) {
+					var stateMachineRef = {
+						StateMachineCode: { "Case": "Some", "Fields": [parseInt(item.StateMachineCode)] },
+						ComponentCode: { "Case": "Some", "Fields": [parseInt(item.ComponentCode)] },
+						AgentId : { "Case": "Some", "Fields": [parseInt(item.AgentId)] },
+						StateMachineid : { "Case": "Some", "Fields": [parseInt(item.StateMachineid)] }
+					};
+					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage);
+				};
+			})(items[i]);
+		}
 		return {
-			items: JSON.parse(strData),
+			items: items,
 			replyTopic: replyTopic
 		};
 	}
@@ -200,14 +218,6 @@ define([ "../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, p
         var input = request + " " + JSON.stringify(data);
         return input;
     }
-
-
-	function createGuid() {
-		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-			var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-			return v.toString(16);
-		});
-	}
 
 
     return Subscriber;
