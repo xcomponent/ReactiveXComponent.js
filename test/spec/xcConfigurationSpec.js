@@ -25,7 +25,11 @@ define(["configuration/xcConfiguration"], function (Configuration) {
         }
         var parser, configuration;
         beforeEach(function () {
+<<<<<<< HEAD
             parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic', 'getStateName']);
+=======
+            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic']);
+>>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
             parser.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
                 return {
                     eventCode: eventCode,

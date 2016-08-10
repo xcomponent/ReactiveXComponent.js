@@ -50,10 +50,13 @@ define(function () {
     }
 
 
+<<<<<<< HEAD
     Configuration.prototype.getStateName = function (componentCode, stateMachineCode, stateCode) {
         return this.parser.getStateName(componentCode, stateMachineCode, stateCode);
     }
 
 
+=======
+>>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
     return Configuration;
 });
