@@ -165,7 +165,6 @@ define(["parser"], function (Parser) {
         });
 
 
-<<<<<<< HEAD
         describe("Test getStateName method", function () {
             it("should get the right state name given existing componentCode StateMachineCode and stateCode", function () {
                 expect(parser.getStateName("-69981087", "-829536631", "0")).toEqual("EntryPoint");
@@ -193,8 +192,6 @@ define(["parser"], function (Parser) {
             });
         });
 
-=======
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
     });
 
 });

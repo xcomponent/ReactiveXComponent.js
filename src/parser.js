@@ -13,7 +13,6 @@ define(["./javascriptHelper"], function (javascriptHelper) {
         this.publishersDetails = getPublihersDetails(xmlDom, tags);
         this.subscribersTopics = getSubscribersTopics(xmlDom, tags);
         this.snapshotTopics = getSnapshotTopics(xmlDom, tags);
-<<<<<<< HEAD
         this.stateNames = getStateNames(xmlDom, tags);
     }
 
@@ -54,11 +53,6 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
-=======
-    }
-
-
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
     var getSnapshotTopics = function (xmlDom, tags) {
         var snapshots = xmlDom.getElementsByTagName(tags.snapshot);
         var snapshotTopics = {};
@@ -142,13 +136,8 @@ define(["./javascriptHelper"], function (javascriptHelper) {
         }
         return componentCode;
     }
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
     var getStateMachineCode = function (codes, componentName, stateMachineName) {
         var stateMachineCode;
         var stateMachineCodes = codes[componentName].stateMachineCodes;
@@ -195,7 +184,6 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
-<<<<<<< HEAD
     Parser.prototype.getStateName = function (componentCode, stateMachineCode, stateCode) {
         if (this.stateNames[componentCode] == undefined) {
             throw new Error("componentCode not found");
@@ -210,8 +198,6 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
-=======
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
     var getKey = function (array) {
         var key = "";
         for (var i = 0; i < array.length; i++)

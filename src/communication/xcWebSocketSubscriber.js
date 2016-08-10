@@ -162,23 +162,17 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 
 	Subscriber.prototype.getJsonDataFromEvent = function (e) {
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-<<<<<<< HEAD
 		var componentCode = jsonData.Header.ComponentCode.Fields[0];
 		var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
 		var stateCode = jsonData.Header.StateCode.Fields[0];
-=======
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
 		var thisObject = this;
 		var stateMachineRef = {
 			"StateMachineId": jsonData.Header.StateMachineId,
 			"AgentId": jsonData.Header.AgentId,
 			"StateMachineCode": jsonData.Header.StateMachineCode,
 			"ComponentCode": jsonData.Header.ComponentCode,
-<<<<<<< HEAD
 			"StateName": { "Case": "Some", "Fields": 
 			[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)] },
-=======
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
 			"send": function (messageType, jsonMessage) {
 				thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage);
 			}
@@ -190,14 +184,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	}
 
 
-<<<<<<< HEAD
 	var encodeBase64 = function (b64Data) {
-=======
-	Subscriber.prototype.getJsonDataFromSnapshot = function (e) {
-		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
-		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
 		var atob = javascriptHelper.getJavascriptHelper().atob;
 		var charData = atob(b64Data).split('').map(function (x) {
 			return x.charCodeAt(0);
@@ -207,7 +194,6 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 			return x != 0;
 		});
 		var strData = String.fromCharCode.apply(null, new Uint16Array(data));
-<<<<<<< HEAD
 		return strData;
 	}
 
@@ -217,9 +203,6 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
 		var items = JSON.parse(encodeBase64(b64Data));
-=======
-		var items = JSON.parse(strData);
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
 		var thisObject = this;
 		for (var i = 0; i < items.length; i++) {
 			(function (item) {
@@ -233,10 +216,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage);
 				};
 			})(items[i]);
-<<<<<<< HEAD
 			items[i].StateName = thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode);
-=======
->>>>>>> 79046ef5bf75fb1b74a5e7d8af45a9c00c03e594
 		}
 		return {
 			items: items,
