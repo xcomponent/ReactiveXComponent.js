@@ -13,6 +13,43 @@ define(["./javascriptHelper"], function (javascriptHelper) {
         this.publishersDetails = getPublihersDetails(xmlDom, tags);
         this.subscribersTopics = getSubscribersTopics(xmlDom, tags);
         this.snapshotTopics = getSnapshotTopics(xmlDom, tags);
+        this.stateNames = getStateNames(xmlDom, tags);
+    }
+
+
+    var getStateNames = function (xmlDom, tags) {
+        var stateNames = {};
+        var components = xmlDom.getElementsByTagName(tags.component);
+        for (var i = 0; i < components.length; i++) {
+            var componentId = components[i].getAttribute(tags.id);
+            var jsonStateMachines = getStateMachinesFromComponent(components[i], tags);
+            stateNames[componentId] = jsonStateMachines;
+        }
+        return stateNames;
+    }
+
+
+    var getStateMachinesFromComponent = function (component, tags) {
+        var stateMachines = component.getElementsByTagName(tags.stateMachine);
+        var jsonStateMachines = {};
+        for (var i = 0; i < stateMachines.length; i++) {
+            var stateMachineId = stateMachines[i].getAttribute(tags.id);
+            var jsonStates = getStatesFromStateMachine(stateMachines[i], tags);
+            jsonStateMachines[stateMachineId] = jsonStates;
+        }
+        return jsonStateMachines;
+    }
+
+
+    var getStatesFromStateMachine = function (stateMachine, tags) {
+        var states = stateMachine.getElementsByTagName(tags.state);
+        var jsonStates = {};
+        for (var i = 0; i < states.length; i++) {
+            var stateName = states[i].getAttribute(tags.name);
+            var stateId = states[i].getAttribute(tags.id);
+            jsonStates[stateId] = stateName;
+        }
+        return jsonStates;
     }
 
 
@@ -144,6 +181,20 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     Parser.prototype.getSnapshotTopic = function (componentName) {
         var componentCode = getComponentCode(this.codes, componentName);
         return this.snapshotTopics[componentCode];
+    }
+
+
+    Parser.prototype.getStateName = function (componentCode, stateMachineCode, stateCode) {
+        if (this.stateNames[componentCode] == undefined) {
+            throw new Error("componentCode not found");
+        }
+        if (this.stateNames[componentCode][stateMachineCode] == undefined) {
+            throw new Error("stateMachineCode not found");
+        }
+        if (this.stateNames[componentCode][stateMachineCode][stateCode] == undefined) {
+            throw new Error("stateCode not found");
+        }
+        return this.stateNames[componentCode][stateMachineCode][stateCode];
     }
 
 

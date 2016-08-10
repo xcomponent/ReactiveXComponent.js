@@ -44,7 +44,9 @@ var xml = (function () {
           </stateMachine>
           <stateMachine name="HelloWorldResponse" id="-343862282">
             <states>
-              <State name="Done" id="0" />
+              <State name="Start" id="0" />
+              <State name="Loop" id="1" />
+              <State name="Done" id="2" />
             </states>
           </stateMachine>
         </stateMachines>
@@ -60,6 +62,7 @@ var tags = (function () {
     tags.name = "name";
     tags.id = "id";
     tags.stateMachine = "stateMachine";
+    tags.state = "State";
     tags.publish = "publish";
     tags.componentCode = "componentCode";
     tags.stateMachineCode = "stateMachineCode";
@@ -161,6 +164,33 @@ define(["parser"], function (Parser) {
             });
         });
 
+
+        describe("Test getStateName method", function () {
+            it("should get the right state name given existing componentCode StateMachineCode and stateCode", function () {
+                expect(parser.getStateName("-69981087", "-829536631", "0")).toEqual("EntryPoint");
+                expect(parser.getStateName("-69981087", "-343862282", "0")).toEqual("Start");
+                expect(parser.getStateName("-69981087", "-343862282", "1")).toEqual("Loop");
+                expect(parser.getStateName("-69981087", "-343862282", "2")).toEqual("Done");
+            });
+
+            it("should throw an exeption when using an unknown componentCode", function () {
+                expect(function () {
+                    parser.getStateName("unknwon", "-343862282", "2");
+                }).toThrowError("componentCode not found");
+            });
+            
+            it("should throw an exeption when using an unknown stateMachineCode", function () {
+                expect(function () {
+                    parser.getStateName("-69981087", "unknwon", "2");
+                }).toThrowError("stateMachineCode not found");
+            }); 
+            
+            it("should throw an exeption when using an unknown stateCode", function () {
+                expect(function () {
+                    parser.getStateName("-69981087", "-343862282", "unknwon");
+                }).toThrowError("stateCode not found");
+            });
+        });
 
     });
 

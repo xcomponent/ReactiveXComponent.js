@@ -19,6 +19,8 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
                     var stateMachineUpdateListener = function (data) {
                         expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                         expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
+                        expect(data.stateMachineRef.AgentId).toEqual(Mock.correctReceivedData.stateMachineRef.AgentId);
+                        expect(data.stateMachineRef.StateName).toEqual(Mock.correctReceivedData.stateMachineRef.StateName);
                         expect(data.stateMachineRef.send).toEqual(jasmine.any(Function));
                         expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
                         done();

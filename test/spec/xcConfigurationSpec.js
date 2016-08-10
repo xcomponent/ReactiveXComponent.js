@@ -8,6 +8,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
         var stateMachineName = "stateMachine";
         var componentCode = "1";
         var stateMachineCode = "2";
+        var stateCode = "0";
         var eventCode = "9";
         var messageType = "XComponent.HelloWorld.UserObject.SayHello";
         var routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
@@ -24,7 +25,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
         }
         var parser, configuration;
         beforeEach(function () {
-            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic']);
+            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic', 'getStateName']);
             parser.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
                 return {
                     eventCode: eventCode,
@@ -41,7 +42,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
                 configuration.init();
                 expect(parser.parse).toHaveBeenCalledTimes(1);
             });
-       });
+        });
 
         describe("Test getCodes method", function () {
             it("should call getCodes method of parser with the right component and stateMachine", function () {
@@ -49,7 +50,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
                 expect(parser.getCodes).toHaveBeenCalledTimes(1);
                 expect(parser.getCodes).toHaveBeenCalledWith(componentName, stateMachineName);
             });
-         });
+        });
 
         describe("Test getPublisherDetails method", function () {
             it("should call getPublisherDetails method of parser with the right component and stateMachine", function () {
@@ -75,6 +76,14 @@ define(["configuration/xcConfiguration"], function (Configuration) {
             });
         });
 
+
+        describe("Test getStateName method", function () {
+            it("should call getStateName method of parser with the right componentCode, stateMachineCode and stateCode", function () {
+                configuration.getStateName(componentCode, stateMachineCode, stateCode);
+                expect(parser.getStateName).toHaveBeenCalledTimes(1);
+                expect(parser.getStateName).toHaveBeenCalledWith(componentCode, stateMachineCode, stateCode);
+            });
+        });
     });
 
 });
