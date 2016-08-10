@@ -2,7 +2,7 @@
 define(["./javascriptHelper"], function (javascriptHelper) {
     "use strict";
 
-    var Parser = function() {
+    var Parser = function () {
     }
 
 
@@ -12,7 +12,22 @@ define(["./javascriptHelper"], function (javascriptHelper) {
         this.codes = getCodes(xmlDom, tags);
         this.publishersDetails = getPublihersDetails(xmlDom, tags);
         this.subscribersTopics = getSubscribersTopics(xmlDom, tags);
+        this.snapshotTopics = getSnapshotTopics(xmlDom, tags);
     }
+
+
+    var getSnapshotTopics = function (xmlDom, tags) {
+        var snapshots = xmlDom.getElementsByTagName(tags.snapshot);
+        var snapshotTopics = {};
+        var componentCode, topic;
+        for (var i = 0; i < snapshots.length; i++) {
+            componentCode = snapshots[i].getAttribute(tags.componentCode);
+            topic = snapshots[i].getElementsByTagName(tags.topic)[0].textContent;
+            snapshotTopics[componentCode] = topic;
+        }
+        return snapshotTopics;
+    }
+
 
     var getSubscribersTopics = function (xmlDom, tags) {
         var subscribersTopics = {};
@@ -75,20 +90,32 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
-    Parser.prototype.getCodes = function (componentName, stateMachineName) {
-        var componentCode, stateMachineCode;
-        if (this.codes[componentName] == undefined) {
+    var getComponentCode = function (codes, componentName) {
+        var componentCode;
+        if (codes[componentName] == undefined) {
             throw new Error("Component '" + componentName + "' not found");
         } else {
-            componentCode = this.codes[componentName].componentCode;
+            componentCode = codes[componentName].componentCode;
         }
+        return componentCode;
+    }
 
-        var stateMachineCodes = this.codes[componentName].stateMachineCodes;
+
+    var getStateMachineCode = function (codes, componentName, stateMachineName) {
+        var stateMachineCode;
+        var stateMachineCodes = codes[componentName].stateMachineCodes;
         if (stateMachineCodes[stateMachineName] == undefined) {
             throw new Error("StateMachine '" + stateMachineName + "' not found");
         } else {
             stateMachineCode = stateMachineCodes[stateMachineName];
         }
+        return stateMachineCode;
+    }
+
+
+    Parser.prototype.getCodes = function (componentName, stateMachineName) {
+        var componentCode = getComponentCode(this.codes, componentName);
+        var stateMachineCode = getStateMachineCode(this.codes, componentName, stateMachineName);
         return {
             "componentCode": componentCode,
             "stateMachineCode": stateMachineCode
@@ -111,6 +138,12 @@ define(["./javascriptHelper"], function (javascriptHelper) {
         var key = getKey([codes.componentCode, codes.stateMachineCode]);
         var topic = this.subscribersTopics[key];
         return topic;
+    }
+
+
+    Parser.prototype.getSnapshotTopic = function (componentName) {
+        var componentCode = getComponentCode(this.codes, componentName);
+        return this.snapshotTopics[componentCode];
     }
 
 

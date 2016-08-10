@@ -9,9 +9,11 @@ define(function () {
             process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
             javascriptHelper.WebSocket = require('websocket').w3cwebsocket;
             javascriptHelper.DOMParser = require('xmldom').DOMParser;
+            javascriptHelper.atob = require('atob');
         } else {
             javascriptHelper.WebSocket = window.WebSocket;
             javascriptHelper.DOMParser = window.DOMParser;
+            javascriptHelper.atob = window.atob;
         }
         return javascriptHelper;
     }

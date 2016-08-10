@@ -16,6 +16,7 @@ define(function () {
     tags.topic = "topic";
     tags.eventCode = "eventCode";
     tags.subscribe = "subscribe";
+    tags.snapshot = "snapshot";
 
 
     var Configuration = function(parser) {
@@ -40,6 +41,11 @@ define(function () {
 
     Configuration.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
         return this.parser.getSubscriberTopic(componentName, stateMachineName);
+    }
+
+
+    Configuration.prototype.getSnapshotTopic = function (componentName) {
+        return this.parser.getSnapshotTopic(componentName);
     }
 
 
