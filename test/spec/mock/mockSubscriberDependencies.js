@@ -91,7 +91,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         "StateMachineCode": parseInt(stateMachineCode),
         "ComponentCode": parseInt(componentCode),
         "ReplyTopic": { "Case": "Some", "Fields": [guiExample] },
-        "PrivateTopic": { "Case": "Some", "Fields": [[guiExample]] }
+        "PrivateTopic": { "Case": "Some", "Fields": [[null]] }
     };
     var correctDataToSendSnapshot = {
         topic: snapshotTopic,

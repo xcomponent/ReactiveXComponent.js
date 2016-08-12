@@ -41,12 +41,11 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName, replyTopic) {
 		var topic = this.configuration.getSnapshotTopic(componentName);
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
-		var privateTopic = this.guid.create();
 		var jsonMessage = {
 			"StateMachineCode": parseInt(codes.stateMachineCode),
 			"ComponentCode": parseInt(codes.componentCode),
 			"ReplyTopic": { "Case": "Some", "Fields": [replyTopic] },
-			"PrivateTopic": { "Case": "Some", "Fields": [[privateTopic]] }
+			"PrivateTopic": { "Case": "Some", "Fields": [[null]] }
 		};
 		var dataToSendSnapshot = {
 			topic: topic,
