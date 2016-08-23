@@ -41,12 +41,11 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName, replyTopic) {
 		var topic = this.configuration.getSnapshotTopic(componentName);
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
-		var privateTopic = this.guid.create();
 		var jsonMessage = {
 			"StateMachineCode": parseInt(codes.stateMachineCode),
 			"ComponentCode": parseInt(codes.componentCode),
 			"ReplyTopic": { "Case": "Some", "Fields": [replyTopic] },
-			"PrivateTopic": { "Case": "Some", "Fields": [[privateTopic]] }
+			"PrivateTopic": { "Case": "Some", "Fields": [[null]] }
 		};
 		var dataToSendSnapshot = {
 			topic: topic,
@@ -162,12 +161,17 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 
 	Subscriber.prototype.getJsonDataFromEvent = function (e) {
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
+		var componentCode = jsonData.Header.ComponentCode.Fields[0];
+		var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
+		var stateCode = jsonData.Header.StateCode.Fields[0];
 		var thisObject = this;
 		var stateMachineRef = {
 			"StateMachineId": jsonData.Header.StateMachineId,
 			"AgentId": jsonData.Header.AgentId,
 			"StateMachineCode": jsonData.Header.StateMachineCode,
 			"ComponentCode": jsonData.Header.ComponentCode,
+			"StateName": { "Case": "Some", "Fields": 
+			[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)] },
 			"send": function (messageType, jsonMessage) {
 				thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage);
 			}
@@ -179,10 +183,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	}
 
 
-	Subscriber.prototype.getJsonDataFromSnapshot = function (e) {
-		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
-		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
+	var encodeBase64 = function (b64Data) {
 		var atob = javascriptHelper.getJavascriptHelper().atob;
 		var charData = atob(b64Data).split('').map(function (x) {
 			return x.charCodeAt(0);
@@ -192,7 +193,15 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 			return x != 0;
 		});
 		var strData = String.fromCharCode.apply(null, new Uint16Array(data));
-		var items = JSON.parse(strData);
+		return strData;
+	}
+
+
+	Subscriber.prototype.getJsonDataFromSnapshot = function (e) {
+		var replyTopic = e.data.substring(0, e.data.indexOf(" "));
+		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
+		var b64Data = JSON.parse(jsonData.JsonMessage).Items;
+		var items = JSON.parse(encodeBase64(b64Data));
 		var thisObject = this;
 		for (var i = 0; i < items.length; i++) {
 			(function (item) {
@@ -206,6 +215,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage);
 				};
 			})(items[i]);
+			items[i].StateName = thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode);
 		}
 		return {
 			items: items,

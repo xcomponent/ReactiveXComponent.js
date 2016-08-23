@@ -8,6 +8,7 @@ define(function () {
     tags.name = "name";
     tags.id = "id";
     tags.stateMachine = "stateMachine";
+    tags.state = "State";
     tags.publish = "publish";
     tags.componentCode = "componentCode";
     tags.stateMachineCode = "stateMachineCode";
@@ -19,7 +20,7 @@ define(function () {
     tags.snapshot = "snapshot";
 
 
-    var Configuration = function(parser) {
+    var Configuration = function (parser) {
         this.parser = parser;
     }
 
@@ -29,12 +30,12 @@ define(function () {
     }
 
 
-    Configuration.prototype.getCodes = function(componentName, stateMachineName) {
+    Configuration.prototype.getCodes = function (componentName, stateMachineName) {
         return this.parser.getCodes(componentName, stateMachineName);
     }
 
 
-    Configuration.prototype.getPublisherDetails = function(componentCode, stateMachineCode, messageType) {
+    Configuration.prototype.getPublisherDetails = function (componentCode, stateMachineCode, messageType) {
         return this.parser.getPublisherDetails(componentCode, stateMachineCode, messageType);
     }
 
@@ -48,6 +49,10 @@ define(function () {
         return this.parser.getSnapshotTopic(componentName);
     }
 
+
+    Configuration.prototype.getStateName = function (componentCode, stateMachineCode, stateCode) {
+        return this.parser.getStateName(componentCode, stateMachineCode, stateCode);
+    }
 
     return Configuration;
 });

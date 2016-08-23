@@ -5,12 +5,19 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
     // Mocking configuration
     var outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
     var snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
-    var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes', 'getHeaderConfig', 'convertToWebsocketInputFormat', 'getSnapshotTopic']);
+    var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes', 'getHeaderConfig', 'convertToWebsocketInputFormat', 'getSnapshotTopic', 'getStateName']);
+    
     configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
         return outputTopic;
     });
+    
     configuration.getSnapshotTopic.and.callFake(function (componentName) {
         return "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
+    });
+
+    var stateName = "stateName";
+    configuration.getStateName.and.callFake(function () {
+        return stateName;
     });
     var componentCode = "-69981087";
     var stateMachineCode = "-829536631";
@@ -40,10 +47,11 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
     var jsonMessage = { "key": "value" };
     var jsonData = {
         Header: {
-            StateMachineCode: { Fields: [parseInt(stateMachineCode)] },
-            ComponentCode: { Fields: [parseInt(componentCode)] },
-            StateMachineId: { Fields: [stateMachineId] },
-            AgentId: { Fields: [agentId] }
+            StateMachineCode: { "Case": "Some",Fields: [parseInt(stateMachineCode)] },
+            ComponentCode: { "Case": "Some", Fields: [parseInt(componentCode)] },
+            StateMachineId: { "Case": "Some", Fields: [stateMachineId] },
+            AgentId: { "Case": "Some", Fields: [agentId] },
+            StateCode: { "Case": "Some", Fields: [0] }
         },
         JsonMessage: jsonMessage
     };
@@ -52,6 +60,8 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         stateMachineRef: {
             "StateMachineCode": jsonData.Header.StateMachineCode,
             "ComponentCode": jsonData.Header.ComponentCode,
+            "AgentId": { "Case": "Some", Fields: [agentId] },
+            "StateName": { "Case": "Some", Fields: [stateName] },
             "send": function (jsonMessage) {
             }
         },
@@ -81,7 +91,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         "StateMachineCode": parseInt(stateMachineCode),
         "ComponentCode": parseInt(componentCode),
         "ReplyTopic": { "Case": "Some", "Fields": [guiExample] },
-        "PrivateTopic": { "Case": "Some", "Fields": [[guiExample]] }
+        "PrivateTopic": { "Case": "Some", "Fields": [[null]] }
     };
     var correctDataToSendSnapshot = {
         topic: snapshotTopic,
@@ -92,8 +102,8 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         }
     };
 
-    var correctSnapshotRequest = correctDataToSendSnapshot.topic + " " + correctDataToSendSnapshot.componentCode 
-    + " "  + JSON.stringify(correctDataToSendSnapshot.data);
+    var correctSnapshotRequest = correctDataToSendSnapshot.topic + " " + correctDataToSendSnapshot.componentCode
+        + " " + JSON.stringify(correctDataToSendSnapshot.data);
 
     var snapshotResponse = guiExample + " " + '{"Header":{"EventCode":0,"Probes":[],"IsContainsHashCode":false,"IncomingType":0,"MessageType":{"Case":"Some","Fields":["XComponent.Common.Processing.SnapshotResponse"]}},"JsonMessage":"{\\"Items\\":\\"H4sIAAAAAAAEAItmiGUAAKZ0XTIEAAAA\\"}"}';
 
