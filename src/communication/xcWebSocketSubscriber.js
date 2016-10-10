@@ -88,6 +88,8 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	}
 
 
+	
+
 	Subscriber.prototype.subscribe = function (componentName, stateMachineName, stateMachineUpdateListener) {
 		this.prepareStateMachineUpdates(componentName, stateMachineName)
             .subscribe(function (jsonData) {

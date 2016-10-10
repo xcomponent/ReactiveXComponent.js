@@ -21,6 +21,17 @@ define(function () {
     }
 
 
+	Publisher.prototype.canSend = function (componentName, stateMachineName, messageType) {
+	    var codes = this.configuration.getCodes(componentName, stateMachineName);
+	    try {
+	        this.configuration.getPublisherDetails(codes.componentCode, codes.stateMachineCode, messageType);
+	        return true;
+	    } catch (e) {
+	        return false;
+	    }
+	}
+
+
     Publisher.prototype.send = function (componentName, stateMachineName, messageType, jsonMessage) {
         var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage);
         this.webSocket.send(convertToWebsocketInputFormat(data));
