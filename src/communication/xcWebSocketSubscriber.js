@@ -212,7 +212,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 						StateMachineCode: { "Case": "Some", "Fields": [parseInt(item.StateMachineCode)] },
 						ComponentCode: { "Case": "Some", "Fields": [parseInt(item.ComponentCode)] },
 						AgentId : { "Case": "Some", "Fields": [parseInt(item.AgentId)] },
-						StateMachineid : { "Case": "Some", "Fields": [parseInt(item.StateMachineid)] }
+						StateMachineId : { "Case": "Some", "Fields": [parseInt(item.StateMachineId)] }
 					};
 					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage);
 				};

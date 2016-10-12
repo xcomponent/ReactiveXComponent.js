@@ -43,5 +43,17 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
             });
         });
 
+        describe("Test canPublish", function () {
+            var publisher;
+            beforeEach(function () {
+                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration);
+            });
+
+            it("should return true if there is a publisher details or false otherwise", function () {
+                expect(publisher.canPublish()).toBe(false);
+                expect(publisher.canPublish("componentCode", "stateMachineCode")).toBe(true);
+            });
+        });
+
     });
 });

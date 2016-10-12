@@ -53,13 +53,19 @@ define(function () {
 
     // Mocking configuration
     var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails']);
-    configuration.getCodes.and.callFake(function () {
+    configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
+        if (!componentName || !stateMachineName) {
+            throw new Error('');
+        }
         return {
             componentCode: componentCode,
             stateMachineCode: stateMachineCode
         };
     });
     configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
+        if (!componentCode || !stateMachineCode) {
+            throw new Error('');
+        }
         return {
             eventCode: eventCode,
             routingKey: routingKey

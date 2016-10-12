@@ -21,9 +21,9 @@ define(function () {
     }
 
 
-	Publisher.prototype.canSend = function (componentName, stateMachineName, messageType) {
-	    var codes = this.configuration.getCodes(componentName, stateMachineName);
+	Publisher.prototype.canPublish = function (componentName, stateMachineName, messageType) {
 	    try {
+	        var codes = this.configuration.getCodes(componentName, stateMachineName);
 	        this.configuration.getPublisherDetails(codes.componentCode, codes.stateMachineCode, messageType);
 	        return true;
 	    } catch (e) {
