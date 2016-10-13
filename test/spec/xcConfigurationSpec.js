@@ -25,7 +25,7 @@ define(["configuration/xcConfiguration"], function (Configuration) {
         }
         var parser, configuration;
         beforeEach(function () {
-            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic', 'getStateName']);
+            parser = jasmine.createSpyObj('parser', ['parse', 'getCodes', 'getPublisherDetails', 'getSubscriberTopic', 'getSnapshotTopic', 'getStateName', 'publisherExist', 'codesExist']);
             parser.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
                 return {
                     eventCode: eventCode,
@@ -84,6 +84,24 @@ define(["configuration/xcConfiguration"], function (Configuration) {
                 expect(parser.getStateName).toHaveBeenCalledWith(componentCode, stateMachineCode, stateCode);
             });
         });
+
+
+        describe("Test publisherExist method", function () {
+            it("should call publisherExist method of parser with the right componentCode, stateMachineCode and messageType", function () {
+                configuration.publisherExist(componentCode, stateMachineCode, messageType);
+                expect(parser.publisherExist).toHaveBeenCalledTimes(1);
+                expect(parser.publisherExist).toHaveBeenCalledWith(componentCode, stateMachineCode, messageType);
+            });
+        });
+
+        describe("Test codesExist method", function () {
+            it("should call codesExist method of parser with the right componentName and stateMachineName", function () {
+                configuration.codesExist(componentName, stateMachineName);
+                expect(parser.codesExist).toHaveBeenCalledTimes(1);
+                expect(parser.codesExist).toHaveBeenCalledWith(componentName, stateMachineName);
+            });
+        });
+
     });
 
 });

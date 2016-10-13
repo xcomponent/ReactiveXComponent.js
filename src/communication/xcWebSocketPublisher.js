@@ -1,13 +1,13 @@
 define(function () {
-	"use strict"
+    "use strict"
 
-	var Publisher = function (webSocket, configuration) {
-	    this.webSocket = webSocket;
-	    this.configuration = configuration;
-	}
+    var Publisher = function (webSocket, configuration) {
+        this.webSocket = webSocket;
+        this.configuration = configuration;
+    }
 
 
-	Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage) {
+    Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
         var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType);
         var event = {
@@ -21,12 +21,23 @@ define(function () {
     }
 
 
+    Publisher.prototype.canPublish = function (componentName, stateMachineName, messageType) {
+        if (this.configuration.codesExist(componentName, stateMachineName)) {
+            var codes = this.configuration.getCodes(componentName, stateMachineName);
+            if (this.configuration.publisherExist(codes.componentCode, codes.stateMachineCode, messageType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     Publisher.prototype.send = function (componentName, stateMachineName, messageType, jsonMessage) {
         var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
-    
-    
+
+
     Publisher.prototype.sendWithStateMachineRef = function (stateMachineRef, messageType, jsonMessage) {
         var componentCode = stateMachineRef.ComponentCode.Fields[0];
         var stateMachineCode = stateMachineRef.StateMachineCode.Fields[0];
@@ -66,7 +77,7 @@ define(function () {
 
     var convertToWebsocketInputFormat = function (data) {
         var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
-                    + " " + JSON.stringify(data.event);
+            + " " + JSON.stringify(data.event);
         return input;
     }
 

@@ -24,7 +24,7 @@ define(function () {
         routingKey: routingKey
     };
     var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
-     + " " + JSON.stringify(correctData.event);
+        + " " + JSON.stringify(correctData.event);
 
     var stateMachineRef = {
         "StateMachineId": { "Case": "Some", "Fields": [1] },
@@ -48,12 +48,12 @@ define(function () {
         routingKey: routingKey
     }
     var corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " " + correctDataForSMRef.event.Header.ComponentCode.Fields[0]
-     + " " + JSON.stringify(correctDataForSMRef.event);
+        + " " + JSON.stringify(correctDataForSMRef.event);
 
 
     // Mocking configuration
-    var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails']);
-    configuration.getCodes.and.callFake(function () {
+    var configuration = jasmine.createSpyObj('configuration', ['getCodes', 'getPublisherDetails', 'codesExist', 'publisherExist']);
+    configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
         return {
             componentCode: componentCode,
             stateMachineCode: stateMachineCode
@@ -65,7 +65,21 @@ define(function () {
             routingKey: routingKey
         };
     });
-    
+    configuration.codesExist.and.callFake(function (componentName, stateMachineName) {
+        if (!componentName || !stateMachineName) {
+            return false;
+        } else {
+            return true;
+        }
+    });
+
+    configuration.publisherExist.and.callFake(function (componentCode, stateMachineCode) {
+        if (!componentCode || !stateMachineCode) {
+            return false;
+        } else {
+            return true;
+        }
+    });
 
     // Mocking webSocket
     var createMockWebSocket = function () {
@@ -78,7 +92,7 @@ define(function () {
         configuration: configuration,
         createMockWebSocket: createMockWebSocket,
         jsonMessage: jsonMessage,
-        messageType:messageType,
+        messageType: messageType,
         correctData: correctData,
         corretWebsocketInputFormat: corretWebsocketInputFormat,
         stateMachineRef: stateMachineRef,

@@ -178,13 +178,13 @@ define(["parser"], function (Parser) {
                     parser.getStateName("unknwon", "-343862282", "2");
                 }).toThrowError("componentCode not found");
             });
-            
+
             it("should throw an exeption when using an unknown stateMachineCode", function () {
                 expect(function () {
                     parser.getStateName("-69981087", "unknwon", "2");
                 }).toThrowError("stateMachineCode not found");
-            }); 
-            
+            });
+
             it("should throw an exeption when using an unknown stateCode", function () {
                 expect(function () {
                     parser.getStateName("-69981087", "-343862282", "unknwon");
@@ -192,7 +192,23 @@ define(["parser"], function (Parser) {
             });
         });
 
+        describe("Test codesExist method method ", function () {
+            it("given a componentName and a stateMachineName, should return true if parser get their codes and false otherwise", function () {
+                expect(parser.codesExist("HelloWorld", "HelloWorldManager")).toBe(true);
+                expect(parser.codesExist("HelloWorld", "RandomStateMachine")).toBe(false);
+                expect(parser.codesExist("RandomComponent", "RandomStateMachine")).toBe(false);
+            });
+        });
+
+        describe("Test publisherExist method method ", function () {
+            it("given a componentCode, stateMachineCode and a messageType should return true if the publisher exists and false otherwise", function () {
+                expect(parser.publisherExist("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello")).toBe(true);
+                expect(parser.publisherExist("RandomCode", "RandomCode", "XComponent.HelloWorld.UserObject.SayHello")).toBe(false);
+            });
+        });
+
     });
+
 
 });
 
