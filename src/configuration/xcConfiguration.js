@@ -35,6 +35,14 @@ define(function () {
     }
 
 
+    Configuration.prototype.publisherExist = function (componentCode, stateMachineCode, messageType) {
+        return this.parser.publisherExist(componentCode, stateMachineCode, messageType);
+    }
+
+    Configuration.prototype.codesExist = function (componentName, stateMachineName) {
+        return this.parser.codesExist(componentName, stateMachineName);
+    }
+
     Configuration.prototype.getPublisherDetails = function (componentCode, stateMachineCode, messageType) {
         return this.parser.getPublisherDetails(componentCode, stateMachineCode, messageType);
     }

@@ -150,6 +150,19 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
+    Parser.prototype.codesExist = function(componentName, stateMachineName) {
+        var componentCode = this.codes[componentName];
+        if (componentCode == undefined) {
+            return false;
+        }
+        var stateMachineCodes = this.codes[componentName].stateMachineCodes;
+        if (stateMachineCodes[stateMachineName] == undefined) {
+            return false;
+        }
+        return true;
+    }
+
+
     Parser.prototype.getCodes = function (componentName, stateMachineName) {
         var componentCode = getComponentCode(this.codes, componentName);
         var stateMachineCode = getStateMachineCode(this.codes, componentName, stateMachineName);
@@ -157,6 +170,11 @@ define(["./javascriptHelper"], function (javascriptHelper) {
             "componentCode": componentCode,
             "stateMachineCode": stateMachineCode
         }
+    }
+
+
+    Parser.prototype.publisherExist = function (componentCode, stateMachineCode, messageType) {
+        return this.publishersDetails[getKey([componentCode, stateMachineCode, messageType])] != undefined;
     }
 
 
