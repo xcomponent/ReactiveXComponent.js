@@ -39,7 +39,7 @@ Example of XComponent API usage
             //create a subscriber to subscribe
             var subscriber = session.createSubscriber();
             
-            //check if subscriber is exposed by xcApi
+            //check if subscriber stateMachineResponse of is exposed by xcApi
             if (subscriber.canSubscribe(componentName, stateMachineResponse)) {
                 //stateMachineUpdateListener : callback executed when a message is received by the subscribed stateMachine
                 var stateMachineUpdateListener = function (jsonData) {
@@ -58,10 +58,12 @@ Example of XComponent API usage
                 console.log(items[0].PublicMember);
                 //each item contains a send method to send an event with a context
                 items[0].send(messageType, jsonMessage);
-                });
+            });
 
             //create a publisher to send an event
             var publisher = session.createPublisher(); 
+
+            //check if publisher of stateMachineName is exposed by xcApi
             if (publisher.canPublish(componentName, stateMachineName)) {
                 publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
             } 
