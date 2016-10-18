@@ -35,22 +35,28 @@ Example of XComponent API usage
             }
 
             var subscriber = session.createSubscriber();
-            var i = 0;
             var stateMachineUpdateListener = function (jsonData) {
+                //jsonMessage property is the public member
                 console.log(jsonData.jsonMessage);
-                 if (i == 0) {
-                    jsonData.stateMachineRef.send(messageType2, jsonMessage2);
-                    jsonData.stateMachineRef.send(messageType2, jsonMessage2);                        
-                    setTimeout(function () {
-                        jsonData.stateMachineRef.send(messageType3, jsonMessage3);
-                    }, 1000);
-                    i++;
-                }
+                //send context using directly stateMachineRef
+                jsonData.stateMachineRef.send(messageType3, jsonMessage3);                
             }
-            subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
+            if (subscriber.canSubscribe(componentName, stateMachineResponse)) {
+                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
+                
+                //Snapshot is used as follow
+                subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
+                    //items is an array of instances of stateMachineResponse
+                    console.log(items);
+                    //each item contains a send method to send an event with a context
+                    items[0].send(messageType, jsonMessage);
+                });
+            }
 
-            var publisher = session.createPublisher();                
-            publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
+            var publisher = session.createPublisher(); 
+            if (publisher.canPublish(componentName, stateMachineName)) {
+                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
+            }      
         }
 
         var xml = ...; //get your xcApi file configuration            
