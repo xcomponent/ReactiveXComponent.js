@@ -28,35 +28,44 @@ Example of XComponent API usage
         var stateMachineName = "HelloWorldManager";
         var stateMachineResponse = "HelloWorldResponse";
 
+        //sessionListener : callback executed when a session is open
         var sessionListener = function (error, session) {
+            //check if session is initialized
             if (error) {
                 console.log(error);
                 return;
             }
 
+            //create a subscriber to subscribe
             var subscriber = session.createSubscriber();
-            var stateMachineUpdateListener = function (jsonData) {
-                //jsonMessage property is the public member
-                console.log(jsonData.jsonMessage);
-                //send context using directly stateMachineRef
-                jsonData.stateMachineRef.send(messageType3, jsonMessage3);                
-            }
+            
+            //check if subscriber is exposed by xcApi
             if (subscriber.canSubscribe(componentName, stateMachineResponse)) {
-                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);
-                
-                //Snapshot is used as follow
-                subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
-                    //items is an array of instances of stateMachineResponse
-                    console.log(items);
-                    //each item contains a send method to send an event with a context
-                    items[0].send(messageType, jsonMessage);
-                });
+                //stateMachineUpdateListener : callback executed when a message is received by the subscribed stateMachine
+                var stateMachineUpdateListener = function (jsonData) {
+                    //jsonMessage property is the public member
+                    console.log(jsonData.jsonMessage);
+                    //send context using directly stateMachineRef
+                    jsonData.stateMachineRef.send(messageType3, jsonMessage3);
+                }       
+                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);         
             }
 
+                
+            //Snapshot is used as follow
+            subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
+                //items is an array of instances of stateMachineResponse
+                console.log(items[0].PublicMember);
+                //each item contains a send method to send an event with a context
+                items[0].send(messageType, jsonMessage);
+                });
+
+            //create a publisher to send an event
             var publisher = session.createPublisher(); 
             if (publisher.canPublish(componentName, stateMachineName)) {
                 publisher.send(componentName, stateMachineName, messageType1, jsonMessage1);
-            }      
+            } 
+
         }
 
         var xml = ...; //get your xcApi file configuration            
