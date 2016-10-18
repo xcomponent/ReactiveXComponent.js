@@ -150,7 +150,7 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
-    Parser.prototype.codesExist = function(componentName, stateMachineName) {
+    Parser.prototype.codesExist = function (componentName, stateMachineName) {
         var componentCode = this.codes[componentName];
         if (componentCode == undefined) {
             return false;
@@ -188,7 +188,21 @@ define(["./javascriptHelper"], function (javascriptHelper) {
     }
 
 
+    Parser.prototype.subscriberExist = function (componentName, stateMachineName) {
+        if (this.codesExist(componentName, stateMachineName)) {
+            var codes = this.getCodes(componentName, stateMachineName);
+            var key = getKey([codes.componentCode, codes.stateMachineCode]);
+            var topic = this.subscribersTopics[key];
+            return topic != undefined;
+        }
+        return false;
+    }
+
+
     Parser.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
+        if (!this.subscriberExist(componentName, stateMachineName)) {
+            throw new Error("SubscriberTopic not found");
+        }
         var codes = this.getCodes(componentName, stateMachineName);
         var key = getKey([codes.componentCode, codes.stateMachineCode]);
         var topic = this.subscribersTopics[key];

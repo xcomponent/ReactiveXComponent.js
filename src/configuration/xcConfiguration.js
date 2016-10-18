@@ -39,9 +39,11 @@ define(function () {
         return this.parser.publisherExist(componentCode, stateMachineCode, messageType);
     }
 
+
     Configuration.prototype.codesExist = function (componentName, stateMachineName) {
         return this.parser.codesExist(componentName, stateMachineName);
     }
+
 
     Configuration.prototype.getPublisherDetails = function (componentCode, stateMachineCode, messageType) {
         return this.parser.getPublisherDetails(componentCode, stateMachineCode, messageType);
@@ -50,6 +52,11 @@ define(function () {
 
     Configuration.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
         return this.parser.getSubscriberTopic(componentName, stateMachineName);
+    }
+
+
+    Configuration.prototype.subscriberExist = function (componentName, stateMachineName) {
+        return this.parser.subscriberExist(componentName, stateMachineName);
     }
 
 
