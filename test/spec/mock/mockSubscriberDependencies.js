@@ -5,7 +5,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
     // Mocking configuration
     var outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
     var snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
-    var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes', 'getHeaderConfig', 'convertToWebsocketInputFormat', 'getSnapshotTopic', 'getStateName']);
+    var configuration = jasmine.createSpyObj('configuration', ['getSubscriberTopic', 'getCodes', 'getHeaderConfig', 'convertToWebsocketInputFormat', 'getSnapshotTopic', 'getStateName', 'subscriberExist']);
     
     configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
         return outputTopic;

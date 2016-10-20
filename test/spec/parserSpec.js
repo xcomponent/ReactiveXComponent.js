@@ -145,6 +145,13 @@ define(["parser"], function (Parser) {
                 var topic = parser.getSubscriberTopic("HelloWorld", "HelloWorldResponse");
                 expect(topic).toEqual(correctTopic);
             });
+
+            it("given a wrong component or/and a stateMachine should throw an exception", function () {
+                var messageError = "SubscriberTopic not found";
+                expect(function () {
+                    parser.getSubscriberTopic("RandomComponent", "RandomStateMachine");
+                }).toThrowError(messageError);
+            });
         });
 
 
@@ -204,6 +211,14 @@ define(["parser"], function (Parser) {
             it("given a componentCode, stateMachineCode and a messageType should return true if the publisher exists and false otherwise", function () {
                 expect(parser.publisherExist("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello")).toBe(true);
                 expect(parser.publisherExist("RandomCode", "RandomCode", "XComponent.HelloWorld.UserObject.SayHello")).toBe(false);
+            });
+        });
+
+        describe("Test subscriberExist method method ", function () {
+            it("given a componentName and a stateMachineName should return true if the susbscriber exists and false otherwise", function () {
+                expect(parser.subscriberExist("RandomComponent", "RandomStateMachine")).toBe(false);
+                expect(parser.subscriberExist("HelloWorld", "HelloWorldManager")).toBe(false);
+                expect(parser.subscriberExist("HelloWorld", "HelloWorldResponse")).toBe(true);
             });
         });
 

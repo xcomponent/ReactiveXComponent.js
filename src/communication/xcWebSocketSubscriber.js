@@ -88,6 +88,9 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	}
 
 
+	Subscriber.prototype.canSubscribe = function (componentName, stateMachineName) {
+		return this.configuration.subscriberExist(componentName, stateMachineName);
+	}
 	
 
 	Subscriber.prototype.subscribe = function (componentName, stateMachineName, stateMachineUpdateListener) {
@@ -172,8 +175,10 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 			"AgentId": jsonData.Header.AgentId,
 			"StateMachineCode": jsonData.Header.StateMachineCode,
 			"ComponentCode": jsonData.Header.ComponentCode,
-			"StateName": { "Case": "Some", "Fields": 
-			[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)] },
+			"StateName": {
+				"Case": "Some", "Fields":
+					[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)]
+			},
 			"send": function (messageType, jsonMessage) {
 				thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage);
 			}
@@ -211,8 +216,8 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 					var stateMachineRef = {
 						StateMachineCode: { "Case": "Some", "Fields": [parseInt(item.StateMachineCode)] },
 						ComponentCode: { "Case": "Some", "Fields": [parseInt(item.ComponentCode)] },
-						AgentId : { "Case": "Some", "Fields": [parseInt(item.AgentId)] },
-						StateMachineId : { "Case": "Some", "Fields": [parseInt(item.StateMachineId)] }
+						AgentId: { "Case": "Some", "Fields": [parseInt(item.AgentId)] },
+						StateMachineId: { "Case": "Some", "Fields": [parseInt(item.StateMachineId)] }
 					};
 					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage);
 				};

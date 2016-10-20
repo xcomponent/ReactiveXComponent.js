@@ -40,6 +40,10 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
 
             });
 
+            it("can subscribe method : return true if subscriber exists and false otherwise", function () {
+                subscriber.canSubscribe("RandomComponent", "RandomStateMachine");
+                expect(Mock.configuration.subscriberExist).toHaveBeenCalledWith("RandomComponent", "RandomStateMachine");
+            });
         });
 
 
