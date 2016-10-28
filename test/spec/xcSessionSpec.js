@@ -4,7 +4,7 @@ define(["communication/xcSession", "communication/xcWebSocketPublisher", "commun
     describe("Test xcSession module", function () {
 
 
-        describe("Test createPublisher method", function() {
+        describe("Test createPublisher method", function () {
             var session;
             beforeEach(function () {
                 session = new xcSession.Session();
@@ -14,7 +14,7 @@ define(["communication/xcSession", "communication/xcWebSocketPublisher", "commun
                 var publisher = session.createPublisher();
                 expect(publisher instanceof Publisher).toBe(true);
             });
-        
+
         });
 
         describe("Test createSubscriber method", function () {
@@ -29,6 +29,22 @@ define(["communication/xcSession", "communication/xcWebSocketPublisher", "commun
                 expect(subscriber instanceof Subscriber).toBe(true);
             });
         });
+
+        describe("Test close method", function () {
+            var session;
+            beforeEach(function () {
+                var serverUrl = "wss:\\serverUrl";
+                var mockWebSocket = new MockWebSocket(serverUrl);
+                session = new xcSession.Session(serverUrl, mockWebSocket, null);
+            });
+            it("should call onclose method when session is closed", function (done) {
+                session.webSocket.onclose = function(e) {
+                    done();
+                }
+                session.close();
+            });
+        });
+
     });
 
 });

@@ -49,6 +49,9 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
         return subscriber;
     }
 
+    Session.prototype.close = function() {
+        this.webSocket.close();
+    }
 
     return {
         create: SessionFactory,
