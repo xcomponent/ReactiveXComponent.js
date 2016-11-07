@@ -6,9 +6,9 @@ Use npm to install the latest version of the API:
 ``` npm i reactivexcomponent.js ```
 
 ## Usage
-Import *xcomponentapi.js* in your main html file:
+Import *xcomponentapi.js* module:
 ```html
-<script src="xcomponentapi.js" type="text/javascript"></script>
+import xcomponentapi from 'reactivexcomponent.js/dist/xcomponentapi';
 ```
 
 Example of XComponent API usage

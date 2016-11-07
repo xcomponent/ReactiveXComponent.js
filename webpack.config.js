@@ -9,7 +9,7 @@ var config = {
   output: {
     path: BUILD_DIR,
     filename: 'xcomponentapi.js',
-    libraryTarget: 'var',
+    libraryTarget: 'umd',
     library: 'xcomponentapi',    
     publicPath: './'
   },
