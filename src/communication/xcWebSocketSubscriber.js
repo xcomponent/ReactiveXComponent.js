@@ -1,4 +1,4 @@
-define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pako) {
+define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration", "rx", "pako",], function (javascriptHelper, xcWebSocketBridgeConfiguration, Rx, pako) {
 	"use strict"
 
 	var Subscriber = function (webSocket, configuration, replyPublisher, guid) {
@@ -70,20 +70,20 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 		var codes = this.configuration.getCodes(componentName, stateMachineName);
 		var thisObject = this;
 		var filteredObservable = this.observableMsg
-            .map(function (e) {
+			.map(function (e) {
 				try {
 					return thisObject.getJsonDataFromEvent(e);
 				} catch (e) {
 					return null;
 				}
-            })
-            .filter(function (jsonData) {
+			})
+			.filter(function (jsonData) {
 				try {
 					return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
 				} catch (e) {
 					return false;
 				}
-            });
+			});
 		return filteredObservable;
 	}
 
@@ -91,39 +91,55 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	Subscriber.prototype.canSubscribe = function (componentName, stateMachineName) {
 		return this.configuration.subscriberExist(componentName, stateMachineName);
 	}
-	
+
 
 	Subscriber.prototype.subscribe = function (componentName, stateMachineName, stateMachineUpdateListener) {
 		this.prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe(function (jsonData) {
-                stateMachineUpdateListener(jsonData);
-            });
+			.subscribe(function (jsonData) {
+				stateMachineUpdateListener(jsonData);
+			});
 		this.sendSubscribeRequest(componentName, stateMachineName);
-    }
+	}
 
 
 	Subscriber.prototype.sendSubscribeRequest = function (componentName, stateMachineName) {
 		if (!isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-			var data = this.getDataToSend(componentName, stateMachineName);
+			var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
+			var kind = xcWebSocketBridgeConfiguration.kinds.Public;
+			var data = this.getDataToSend(topic, kind);
 			this.webSocket.send(convertToWebsocketInputFormat("subscribe", data));
 			this.addSubscribedStateMachines(componentName, stateMachineName);
 		}
 	}
 
 
-	Subscriber.prototype.getDataToSend = function (componentName, stateMachineName) {
-		var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
-		var data = {
+	Subscriber.prototype.sendSubscribeRequestToPrivateTopic = function (topic, kind) {
+		//var kind = xcWebSocketBridgeConfiguration.kinds.Private;
+		var data = this.getDataToSend(topic, kind);
+		this.webSocket.send(convertToWebsocketInputFormat("subscribe", data));
+	}
+
+
+	Subscriber.prototype.sendUnSubscribeRequestToPrivateTopic = function (topic, kind) {
+		//var kind = xcWebSocketBridgeConfiguration.kinds.Private;
+		var data = this.getDataToSend(topic, kind);
+		this.webSocket.send(convertToWebsocketInputFormat("unsubscribe", data));
+	}
+
+
+	Subscriber.prototype.getDataToSend = function (topic, kind) {
+		return {
 			"Header": { "IncomingType": 0 },
-			"JsonMessage": JSON.stringify({ "Topic": { "Key": topic } })
+			"JsonMessage": JSON.stringify({ "Topic": { "Key": topic, "kind": kind } })
 		};
-		return data;
 	}
 
 
 	Subscriber.prototype.unsubscribe = function (componentName, stateMachineName) {
 		if (isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-			var data = this.getDataToSend(componentName, stateMachineName);
+			var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
+			var kind = xcWebSocketBridgeConfiguration.kinds.Public;
+			var data = this.getDataToSend(topic, kind);
 			this.webSocket.send(convertToWebsocketInputFormat("unsubscribe", data));
 			this.removeSubscribedStateMachines(componentName, stateMachineName);
 		}
@@ -165,6 +181,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 
 
 	Subscriber.prototype.getJsonDataFromEvent = function (e) {
+		console.log(e.data);
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var componentCode = jsonData.Header.ComponentCode.Fields[0];
 		var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
@@ -177,7 +194,7 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 			"ComponentCode": jsonData.Header.ComponentCode,
 			"StateName": {
 				"Case": "Some", "Fields":
-					[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)]
+				[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)]
 			},
 			"send": function (messageType, jsonMessage) {
 				thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage);
@@ -231,11 +248,11 @@ define(["../javascriptHelper", "rx", "pako"], function (javascriptHelper, Rx, pa
 	}
 
 
-    function convertToWebsocketInputFormat(request, data) {
-        var input = request + " " + JSON.stringify(data);
-        return input;
-    }
+	function convertToWebsocketInputFormat(request, data) {
+		var input = request + " " + JSON.stringify(data);
+		return input;
+	}
 
 
-    return Subscriber;
+	return Subscriber;
 });

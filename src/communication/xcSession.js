@@ -14,7 +14,8 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
-        this.replyPublisher = new Publisher(this.webSocket, this.configuration);
+        this.replyPublisher = new Publisher(this.webSocket, this.configuration, new Guid());
+        this.privateSubscriber = new Subscriber(this.webSocket, this.configuration);
     }
 
 
@@ -39,7 +40,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
 
 
     Session.prototype.createPublisher = function() {
-        var publisher = new Publisher(this.webSocket, this.configuration);
+        var publisher = new Publisher(this.webSocket, this.configuration, new Guid(), this.privateSubscriber);
         return publisher;
     }
 

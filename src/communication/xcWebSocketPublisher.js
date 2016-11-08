@@ -1,15 +1,18 @@
-define(function () {
+define(["../configuration/xcWebSocketBridgeConfiguration"], function (xcWebSocketBridgeConfiguration) {
     "use strict"
 
-    var Publisher = function (webSocket, configuration) {
+    var Publisher = function (webSocket, configuration, guid, privateSubscriber) {
         this.webSocket = webSocket;
         this.configuration = configuration;
+        this.guid = guid;
+        this.privateSubscriber = privateSubscriber;
+        this.privateTopic = guid.create();
     }
 
 
-    Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage) {
+    Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
-        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType);
+        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate);
         var event = {
             "Header": headerConfig.header,
             "JsonMessage": JSON.stringify(jsonMessage)
@@ -32,8 +35,13 @@ define(function () {
     }
 
 
-    Publisher.prototype.send = function (componentName, stateMachineName, messageType, jsonMessage) {
-        var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage);
+    Publisher.prototype.send = function (componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
+        if (visibilityPrivate) {
+            var topic = this.privateTopic;
+            var kind = xcWebSocketBridgeConfiguration.kinds.Private;
+            this.privateSubscriber.sendSubscribeRequestToPrivateTopic(topic, kind);
+        }
+        var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
@@ -59,14 +67,16 @@ define(function () {
     }
 
 
-    Publisher.prototype.getHeaderConfig = function (componentCode, stateMachineCode, messageType) {
+    Publisher.prototype.getHeaderConfig = function (componentCode, stateMachineCode, messageType, visibilityPrivate) {
         var publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
+        var thisObject = this;
         var header = {
             "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
             "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
             "EventCode": parseInt(publisher.eventCode),
             "IncomingType": 0,
-            "MessageType": { "Case": "Some", "Fields": [messageType] }
+            "MessageType": { "Case": "Some", "Fields": [messageType] },
+            "PublishTopic": (!visibilityPrivate) ? undefined : { "Case": "Some", "Fields": [thisObject.privateTopic] }
         };
         return {
             header: header,
