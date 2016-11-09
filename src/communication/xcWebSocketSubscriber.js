@@ -1,4 +1,4 @@
-define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration", "rx", "pako",], function (javascriptHelper, xcWebSocketBridgeConfiguration, Rx, pako) {
+define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration", "rx", "pako"], function (javascriptHelper, xcWebSocketBridgeConfiguration, Rx, pako) {
 	"use strict"
 
 	var Subscriber = function (webSocket, configuration, replyPublisher, guid) {
@@ -31,8 +31,10 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 				}
 			})
 			.subscribe(function (data) {
+				thisObject.sendUnsubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);				
 				snapshotListener(data.items);
 			});
+		this.sendSubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
 		var dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
 		this.webSocket.send(convertToWebsocketInputFormat(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode, dataToSendSnapshot.data));
 	}
@@ -106,24 +108,23 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 		if (!isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
 			var topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
 			var kind = xcWebSocketBridgeConfiguration.kinds.Public;
-			var data = this.getDataToSend(topic, kind);
-			this.webSocket.send(convertToWebsocketInputFormat("subscribe", data));
+			this.sendSubscribeRequestToTopic(topic, kind);
 			this.addSubscribedStateMachines(componentName, stateMachineName);
 		}
 	}
 
 
-	Subscriber.prototype.sendSubscribeRequestToPrivateTopic = function (topic, kind) {
-		//var kind = xcWebSocketBridgeConfiguration.kinds.Private;
+	Subscriber.prototype.sendSubscribeRequestToTopic = function (topic, kind) {
 		var data = this.getDataToSend(topic, kind);
-		this.webSocket.send(convertToWebsocketInputFormat("subscribe", data));
+		var command = xcWebSocketBridgeConfiguration.commands.subscribe;
+		this.webSocket.send(convertToWebsocketInputFormat(command, data));
 	}
 
 
-	Subscriber.prototype.sendUnSubscribeRequestToPrivateTopic = function (topic, kind) {
-		//var kind = xcWebSocketBridgeConfiguration.kinds.Private;
+	Subscriber.prototype.sendUnsubscribeRequestToTopic = function (topic, kind) {
 		var data = this.getDataToSend(topic, kind);
-		this.webSocket.send(convertToWebsocketInputFormat("unsubscribe", data));
+		var command = xcWebSocketBridgeConfiguration.commands.unsubscribe;
+		this.webSocket.send(convertToWebsocketInputFormat(command, data));
 	}
 
 
@@ -181,7 +182,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
 
 	Subscriber.prototype.getJsonDataFromEvent = function (e) {
-		console.log(e.data);
+		//console.log(e.data);
 		var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
 		var componentCode = jsonData.Header.ComponentCode.Fields[0];
 		var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
@@ -196,8 +197,8 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 				"Case": "Some", "Fields":
 				[thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)]
 			},
-			"send": function (messageType, jsonMessage) {
-				thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage);
+			"send": function (messageType, jsonMessage, visibilityPrivate) {
+				thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
 			}
 		};
 		return {
@@ -229,14 +230,14 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 		var thisObject = this;
 		for (var i = 0; i < items.length; i++) {
 			(function (item) {
-				item.send = function (messageType, jsonMessage) {
+				item.send = function (messageType, jsonMessage, visibilityPrivate) {
 					var stateMachineRef = {
 						StateMachineCode: { "Case": "Some", "Fields": [parseInt(item.StateMachineCode)] },
 						ComponentCode: { "Case": "Some", "Fields": [parseInt(item.ComponentCode)] },
 						AgentId: { "Case": "Some", "Fields": [parseInt(item.AgentId)] },
 						StateMachineId: { "Case": "Some", "Fields": [parseInt(item.StateMachineId)] }
 					};
-					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage);
+					thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate);
 				};
 			})(items[i]);
 			items[i].StateName = thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode);

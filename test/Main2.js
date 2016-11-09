@@ -83,16 +83,19 @@ requirejs.config({
         var subscriber = session.createSubscriber();
         var publisher = session.createPublisher();
 
-        /*subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
-          console.log("Snapshot1");
-          console.log(items);
-          //items[0].send(messageType, jsonMessage);
-        });*/
-
         subscriber.subscribe(componentName, stateMachineResponse, function (jsonData) {
-          console.log("subscribeeeeeeeeeeeee");          
+          console.log("subscribeeeeeeeeeeeee");
           console.log(jsonData);
         });
+
+        /*subscriber.getSnapshot(componentName, stateMachineName, function (items) {
+          //console.log("Snapshot1");
+          //items[0].send();//todo
+          items[0].send(messageType, jsonMessage, true);
+        });*/
+
+
+
         publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
 
         /*console.log(subscriber.canSubscribe(componentName, stateMachineName));
@@ -106,11 +109,11 @@ requirejs.config({
           console.log(jsonData);
         });*/
 
-        subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
+        /*subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
           console.log("Snapshot2");          
           console.log(items);
           //items[0].send(messageType, jsonMessage);
-        });
+        });*/
 
         /*subscriber.getSnapshot(componentName, stateMachineName, function (items) {
           console.log(items);

@@ -1,16 +1,14 @@
-define(["../configuration/xcWebSocketBridgeConfiguration"], function (xcWebSocketBridgeConfiguration) {
+define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocketBridgeConfiguration) {
     "use strict"
 
-    var Publisher = function (webSocket, configuration, guid, privateSubscriber) {
+    var Publisher = function(webSocket, configuration, privateTopic) {
         this.webSocket = webSocket;
         this.configuration = configuration;
-        this.guid = guid;
-        this.privateSubscriber = privateSubscriber;
-        this.privateTopic = guid.create();
+        this.privateTopic = privateTopic;
     }
 
 
-    Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
+    Publisher.prototype.getEventToSend = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
         var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate);
         var event = {
@@ -24,7 +22,7 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function (xcWebSocke
     }
 
 
-    Publisher.prototype.canPublish = function (componentName, stateMachineName, messageType) {
+    Publisher.prototype.canPublish = function(componentName, stateMachineName, messageType) {
         if (this.configuration.codesExist(componentName, stateMachineName)) {
             var codes = this.configuration.getCodes(componentName, stateMachineName);
             if (this.configuration.publisherExist(codes.componentCode, codes.stateMachineCode, messageType)) {
@@ -35,21 +33,26 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function (xcWebSocke
     }
 
 
-    Publisher.prototype.send = function (componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
-        if (visibilityPrivate) {
+    Publisher.prototype.send = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
+        /*if (visibilityPrivate) {
             var topic = this.privateTopic;
             var kind = xcWebSocketBridgeConfiguration.kinds.Private;
-            this.privateSubscriber.sendSubscribeRequestToPrivateTopic(topic, kind);
-        }
+            this.privateSubscriber.sendSubscribeRequestToTopic(topic, kind);
+        }*/
         var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
 
-    Publisher.prototype.sendWithStateMachineRef = function (stateMachineRef, messageType, jsonMessage) {
+    Publisher.prototype.sendWithStateMachineRef = function(stateMachineRef, messageType, jsonMessage, visibilityPrivate) {
+        /*if (visibilityPrivate) {
+            var topic = this.privateTopic;
+            var kind = xcWebSocketBridgeConfiguration.kinds.Private;
+            this.privateSubscriber.sendSubscribeRequestToTopic(topic, kind);
+        }*/
         var componentCode = stateMachineRef.ComponentCode.Fields[0];
         var stateMachineCode = stateMachineRef.StateMachineCode.Fields[0];
-        var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType);
+        var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate);
         var headerStateMachineRef = {
             "StateMachineId": stateMachineRef.StateMachineId,
             "AgentId": stateMachineRef.AgentId
@@ -67,7 +70,7 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function (xcWebSocke
     }
 
 
-    Publisher.prototype.getHeaderConfig = function (componentCode, stateMachineCode, messageType, visibilityPrivate) {
+    Publisher.prototype.getHeaderConfig = function(componentCode, stateMachineCode, messageType, visibilityPrivate) {
         var publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
         var thisObject = this;
         var header = {
@@ -85,14 +88,14 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function (xcWebSocke
     }
 
 
-    var convertToWebsocketInputFormat = function (data) {
+    var convertToWebsocketInputFormat = function(data) {
         var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
             + " " + JSON.stringify(data.event);
         return input;
     }
 
 
-    var mergeJsonObjects = function (obj1, obj2) {
+    var mergeJsonObjects = function(obj1, obj2) {
         var merged = {};
         for (var key in obj1)
             merged[key] = obj1[key];

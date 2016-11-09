@@ -8,8 +8,13 @@ define(function () {
         "Public": 3
     };
 
+    var commands = {
+        subscribe: "subscribe",
+        unsubscribe: "unsubscribe"
+    }
 
     return {
-        kinds: kinds
+        kinds: kinds,
+        commands: commands
     };
 });

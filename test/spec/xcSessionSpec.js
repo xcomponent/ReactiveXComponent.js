@@ -7,7 +7,9 @@ define(["communication/xcSession", "communication/xcWebSocketPublisher", "commun
         describe("Test createPublisher method", function () {
             var session;
             beforeEach(function () {
-                session = new xcSession.Session();
+                var serverUrl = "wss:\\serverUrl";
+                var mockWebSocket = new MockWebSocket(serverUrl);
+                session = new xcSession.Session(serverUrl, mockWebSocket, null);
             });
 
             it("should return a new instance of Publisher", function () {
@@ -38,7 +40,7 @@ define(["communication/xcSession", "communication/xcWebSocketPublisher", "commun
                 session = new xcSession.Session(serverUrl, mockWebSocket, null);
             });
             it("should call onclose method when session is closed", function (done) {
-                session.webSocket.onclose = function(e) {
+                session.webSocket.onclose = function (e) {
                     done();
                 }
                 session.close();
