@@ -27,10 +27,6 @@ define(function () {
         return header;
     }
 
-    var subscriber = jasmine.createSpyObj('subscriber', ['sendSubscribeRequestToTopic']);
-    subscriber.sendSubscribeRequestToTopic.and.callFake(function () {
-    });
-
 
     var jsonMessage = { "Name": "MY NAME" };
 
@@ -116,11 +112,6 @@ define(function () {
 
     var guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 
-    var guid = jasmine.createSpyObj('guid', ['create']);
-    guid.create.and.callFake(function () {
-        return guiExample;
-    });
-
     return {
         configuration: configuration,
         createMockWebSocket: createMockWebSocket,
@@ -130,7 +121,6 @@ define(function () {
         getCorretWebsocketInputFormat: getCorretWebsocketInputFormat,
         stateMachineRef: stateMachineRef,
         corretWebsocketInputFormatForSendSMRef: corretWebsocketInputFormatForSendSMRef,
-        guiExample: guiExample,
-        privateteSubscriber: subscriber
+        guiExample: guiExample
     }
 });

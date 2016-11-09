@@ -44,7 +44,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket", "configuration/xcW
 
     var agentId = 1;
     var stateMachineId = 2;
-    var jsonMessage = { "key": "value" };
+    var jsonMessage = { key: 'value' };
     var jsonData = {
         Header: {
             StateMachineCode: { "Case": "Some",Fields: [parseInt(stateMachineCode)] },
@@ -53,7 +53,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket", "configuration/xcW
             AgentId: { "Case": "Some", Fields: [agentId] },
             StateCode: { "Case": "Some", Fields: [0] }
         },
-        JsonMessage: jsonMessage
+        JsonMessage: JSON.stringify(jsonMessage)
     };
 
     var correctReceivedData = {
@@ -65,7 +65,7 @@ define(["communication/xcWebSocketSubscriber", "mock-socket", "configuration/xcW
             "send": function (jsonMessage) {
             }
         },
-        jsonMessage: jsonData.JsonMessage
+        jsonMessage: jsonMessage
     };
 
     var correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);
