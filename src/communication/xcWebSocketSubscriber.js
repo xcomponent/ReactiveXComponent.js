@@ -170,34 +170,30 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
 
     function isSameComponent(jsonData, codes) {
-        var sameComponent = jsonData.stateMachineRef.ComponentCode.Fields[0] == parseInt(codes.componentCode);
+        var sameComponent = jsonData.stateMachineRef.ComponentCode == parseInt(codes.componentCode);
         return sameComponent;
     }
 
 
     function isSameStateMachine(jsonData, codes) {
-        var sameStateMachine = jsonData.stateMachineRef.StateMachineCode.Fields[0] == parseInt(codes.stateMachineCode);
+        var sameStateMachine = jsonData.stateMachineRef.StateMachineCode == parseInt(codes.stateMachineCode);
         return sameStateMachine;
     }
 
 
     Subscriber.prototype.getJsonDataFromEvent = function(e) {
-        //console.log(e.data);
         var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
         var componentCode = jsonData.Header.ComponentCode.Fields[0];
         var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
         var stateCode = jsonData.Header.StateCode.Fields[0];
         var thisObject = this;
         var stateMachineRef = {
-            "StateMachineId": jsonData.Header.StateMachineId,
-            "AgentId": jsonData.Header.AgentId,
-            "StateMachineCode": jsonData.Header.StateMachineCode,
-            "ComponentCode": jsonData.Header.ComponentCode,
-            "StateName": {
-                "Case": "Some", "Fields":
-                [thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode)]
-            },
-            "send": function(messageType, jsonMessage, visibilityPrivate) {
+            "StateMachineId": jsonData.Header.StateMachineId.Fields[0],
+            "AgentId": jsonData.Header.AgentId.Fields[0],
+            "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
+            "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
+            "StateName": thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode),
+            "send": function (messageType, jsonMessage, visibilityPrivate) {
                 thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
             }
         };
@@ -232,10 +228,10 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
             (function(item) {
                 item.send = function(messageType, jsonMessage, visibilityPrivate) {
                     var stateMachineRef = {
-                        StateMachineCode: { "Case": "Some", "Fields": [parseInt(item.StateMachineCode)] },
-                        ComponentCode: { "Case": "Some", "Fields": [parseInt(item.ComponentCode)] },
-                        AgentId: { "Case": "Some", "Fields": [parseInt(item.AgentId)] },
-                        StateMachineId: { "Case": "Some", "Fields": [parseInt(item.StateMachineId)] }
+                        StateMachineCode: parseInt(item.StateMachineCode),
+                        ComponentCode: parseInt(item.ComponentCode),
+                        AgentId: parseInt(item.AgentId),
+                        StateMachineId: parseInt(item.StateMachineId)
                     };
                     thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate);
                 };

@@ -88,11 +88,11 @@ requirejs.config({
           console.log(jsonData);
         });
 
-        /*subscriber.getSnapshot(componentName, stateMachineName, function (items) {
-          //console.log("Snapshot1");
+        subscriber.getSnapshot(componentName, stateMachineName, function (items) {
+          console.log(items);
           //items[0].send();//todo
-          items[0].send(messageType, jsonMessage, true);
-        });*/
+          //items[0].send(messageType, jsonMessage, true);
+        });
 
 
 

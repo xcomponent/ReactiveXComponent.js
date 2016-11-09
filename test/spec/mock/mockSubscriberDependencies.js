@@ -58,10 +58,10 @@ define(["communication/xcWebSocketSubscriber", "mock-socket", "configuration/xcW
 
     var correctReceivedData = {
         stateMachineRef: {
-            "StateMachineCode": jsonData.Header.StateMachineCode,
-            "ComponentCode": jsonData.Header.ComponentCode,
-            "AgentId": { "Case": "Some", Fields: [agentId] },
-            "StateName": { "Case": "Some", Fields: [stateName] },
+            "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
+            "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
+            "AgentId": agentId,
+            "StateName": stateName,
             "send": function (jsonMessage) {
             }
         },

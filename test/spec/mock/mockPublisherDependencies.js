@@ -50,18 +50,18 @@ define(function () {
     }
 
     var stateMachineRef = {
-        "StateMachineId": { "Case": "Some", "Fields": [1] },
-        "AgentId": { "Case": "Some", "Fields": [2] },
-        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
-        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+        "StateMachineId": 1,
+        "AgentId": 2,
+        "StateMachineCode": parseInt(stateMachineCode),
+        "ComponentCode": parseInt(componentCode),
     };
     var correctDataForSMRef = {
         event: {
             "Header": {
-                "StateMachineId": stateMachineRef.StateMachineId,
-                "AgentId": stateMachineRef.AgentId,
-                "StateMachineCode": stateMachineRef.StateMachineCode,
-                "ComponentCode": stateMachineRef.ComponentCode,
+                "StateMachineId": { "Case": "Some", "Fields": [stateMachineRef.StateMachineId] },
+                "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] },
+                "StateMachineCode": { "Case": "Some", "Fields": [stateMachineRef.StateMachineCode] },
+                "ComponentCode": { "Case": "Some", "Fields": [stateMachineRef.ComponentCode] },
                 "EventCode": parseInt(eventCode),
                 "IncomingType": 0,
                 "MessageType": { "Case": "Some", "Fields": [messageType] }

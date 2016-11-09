@@ -34,28 +34,18 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
 
 
     Publisher.prototype.send = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
-        /*if (visibilityPrivate) {
-            var topic = this.privateTopic;
-            var kind = xcWebSocketBridgeConfiguration.kinds.Private;
-            this.privateSubscriber.sendSubscribeRequestToTopic(topic, kind);
-        }*/
         var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
 
     Publisher.prototype.sendWithStateMachineRef = function(stateMachineRef, messageType, jsonMessage, visibilityPrivate) {
-        /*if (visibilityPrivate) {
-            var topic = this.privateTopic;
-            var kind = xcWebSocketBridgeConfiguration.kinds.Private;
-            this.privateSubscriber.sendSubscribeRequestToTopic(topic, kind);
-        }*/
-        var componentCode = stateMachineRef.ComponentCode.Fields[0];
-        var stateMachineCode = stateMachineRef.StateMachineCode.Fields[0];
+        var componentCode = stateMachineRef.ComponentCode;
+        var stateMachineCode = stateMachineRef.StateMachineCode;
         var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate);
         var headerStateMachineRef = {
-            "StateMachineId": stateMachineRef.StateMachineId,
-            "AgentId": stateMachineRef.AgentId
+            "StateMachineId": { "Case": "Some", "Fields": [stateMachineRef.StateMachineId] },
+            "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] }
         };
         var event = {
             "Header": mergeJsonObjects(headerStateMachineRef, headerConfig.header),
