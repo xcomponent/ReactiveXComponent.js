@@ -8,37 +8,60 @@ define(function () {
     var eventCode = "9";
     var messageType = "XComponent.HelloWorld.UserObject.SayHello";
     var routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
-    var header = {
-        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
-        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
-        "EventCode": parseInt(eventCode),
-        "IncomingType": 0,
-        "MessageType": { "Case": "Some", "Fields": [messageType] }
-    };
+    var guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+
+    var guid = jasmine.createSpyObj('guid', ['create']);
+    guid.create.and.callFake(function () {
+        return guiExample;
+    });
+
+    function getHeader(visibility) {
+        var header = {
+            "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
+            "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+            "EventCode": parseInt(eventCode),
+            "IncomingType": 0,
+            "MessageType": { "Case": "Some", "Fields": [messageType] },
+            "PublishTopic": (!visibility) ? undefined : { "Case": "Some", "Fields": [guid.create()] }
+        };
+        return header;
+    }
+
+
     var jsonMessage = { "Name": "MY NAME" };
-    var correctData = {
-        event: {
-            "Header": header,
-            "JsonMessage": JSON.stringify(jsonMessage)
-        },
-        routingKey: routingKey
-    };
-    var corretWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
-        + " " + JSON.stringify(correctData.event);
+
+    function getCorrectData(visibility) {
+        return {
+            event: {
+                "Header": getHeader(visibility),
+                "JsonMessage": JSON.stringify(jsonMessage)
+            },
+            routingKey: routingKey
+        };
+    }
+
+    var correctData = getCorrectData();
+
+    function getCorretWebsocketInputFormat(visibility) {
+        var correctData = getCorrectData(visibility);
+        var correctWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
+            + " " + JSON.stringify(correctData.event);
+        return correctWebsocketInputFormat;
+    }
 
     var stateMachineRef = {
-        "StateMachineId": { "Case": "Some", "Fields": [1] },
-        "AgentId": { "Case": "Some", "Fields": [2] },
-        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
-        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
+        "StateMachineId": 1,
+        "AgentId": 2,
+        "StateMachineCode": parseInt(stateMachineCode),
+        "ComponentCode": parseInt(componentCode),
     };
     var correctDataForSMRef = {
         event: {
             "Header": {
-                "StateMachineId": stateMachineRef.StateMachineId,
-                "AgentId": stateMachineRef.AgentId,
-                "StateMachineCode": stateMachineRef.StateMachineCode,
-                "ComponentCode": stateMachineRef.ComponentCode,
+                "StateMachineId": { "Case": "Some", "Fields": [stateMachineRef.StateMachineId] },
+                "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] },
+                "StateMachineCode": { "Case": "Some", "Fields": [stateMachineRef.StateMachineCode] },
+                "ComponentCode": { "Case": "Some", "Fields": [stateMachineRef.ComponentCode] },
                 "EventCode": parseInt(eventCode),
                 "IncomingType": 0,
                 "MessageType": { "Case": "Some", "Fields": [messageType] }
@@ -87,6 +110,7 @@ define(function () {
         return webSocket;
     }
 
+    var guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 
     return {
         configuration: configuration,
@@ -94,8 +118,9 @@ define(function () {
         jsonMessage: jsonMessage,
         messageType: messageType,
         correctData: correctData,
-        corretWebsocketInputFormat: corretWebsocketInputFormat,
+        getCorretWebsocketInputFormat: getCorretWebsocketInputFormat,
         stateMachineRef: stateMachineRef,
-        corretWebsocketInputFormatForSendSMRef: corretWebsocketInputFormatForSendSMRef
+        corretWebsocketInputFormatForSendSMRef: corretWebsocketInputFormatForSendSMRef,
+        guiExample: guiExample
     }
 });

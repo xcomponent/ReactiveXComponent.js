@@ -91,20 +91,32 @@ define(["communication/xcWebSocketSubscriber", "../spec/mock/mockSubscriberDepen
             });
 
             it("send snapshot request, snapshotListener callback should be executed when a response is received", function (done) {
+                mockServer.on('connection', function (server) {
+                    var n = 0;
+                    server.on('message', function (message) {
+                        switch (n) {
+                            case 0:
+                                expect(message).toEqual(Mock.snapshotSubscribeRequest);
+                                n++;
+                                break;
+                            case 1:
+                                n++;
+                                expect(message).toEqual(Mock.correctSnapshotRequest);
+                                server.send(Mock.snapshotResponse);
+                                break;
+                            case 2:
+                                expect(message).toEqual(Mock.snapshotUnsubscribeRequest);
+                                n++;
+                                break;
+                        }
+                    });
+                });
                 mockWebSocket.onopen = function (e) {
                     var snapshotListener = function (items) {
                         done();
                     }
                     subscriber.getSnapshot("component", "stateMachine", snapshotListener);
-                }
-
-                mockServer.on('connection', function (server) {
-                    server.on('message', function (snapshotRequest) {
-                        expect(snapshotRequest).toEqual(Mock.correctSnapshotRequest);
-                        server.send();
-                        server.send(Mock.snapshotResponse);
-                    });
-                });
+                };
             });
 
         });

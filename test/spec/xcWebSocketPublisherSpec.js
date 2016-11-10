@@ -7,7 +7,7 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
         describe("Test getEventToSend method", function () {
             var publisher;
             beforeEach(function () {
-                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration);
+                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample);
             });
 
             it("should return event with routing details (how to route the message to the right stateMachine)", function () {
@@ -20,20 +20,27 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
         describe("Test send method", function () {
             var publisher;
             beforeEach(function () {
-                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration);
+                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample);
             });
 
             it("sould send a message to the given stateMachine and component", function () {
                 publisher.send("componentName", "stateMachineName", Mock.messageType, Mock.jsonMessage);
                 expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
-                expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.corretWebsocketInputFormat);
+                expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.getCorretWebsocketInputFormat(false));
             });
+
+            it("sould send a message in a priavte topic to the given stateMachine and component", function () {
+                publisher.send("componentName", "stateMachineName", Mock.messageType, Mock.jsonMessage, true);
+                expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
+                expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.getCorretWebsocketInputFormat(true));
+            });
+
         });
 
         describe("Test sendWithStateMachineRef", function () {
             var publisher;
             beforeEach(function () {
-                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration);
+                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample);
             });
 
             it("sould send a message to the given instance of stateMachine", function () {
@@ -46,7 +53,7 @@ define(["communication/xcWebSocketPublisher", "../spec/mock/mockPublisherDepende
         describe("Test canPublish", function () {
             var publisher;
             beforeEach(function () {
-                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration);
+                publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample);
             });
 
             it("should return true if there is a publisher details and false otherwise", function () {

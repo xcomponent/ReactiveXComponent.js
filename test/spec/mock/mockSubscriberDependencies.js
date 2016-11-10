@@ -1,5 +1,5 @@
 
-define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcriber, MockSocket) {
+define(["communication/xcWebSocketSubscriber", "mock-socket", "configuration/xcWebSocketBridgeConfiguration"], function (Susbcriber, MockSocket, webSocketConf) {
     "use strict";
 
     // Mocking configuration
@@ -38,13 +38,13 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
     //Initilisation of expected data
     var correctData = {
         "Header": { "IncomingType": 0 },
-        "JsonMessage": JSON.stringify({ "Topic": { "Key": outputTopic } })
+        "JsonMessage": JSON.stringify({ "Topic": { "Key": outputTopic, kind: webSocketConf.kinds.Public } })
     };
 
 
     var agentId = 1;
     var stateMachineId = 2;
-    var jsonMessage = { "key": "value" };
+    var jsonMessage = { key: 'value' };
     var jsonData = {
         Header: {
             StateMachineCode: { "Case": "Some",Fields: [parseInt(stateMachineCode)] },
@@ -53,19 +53,19 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
             AgentId: { "Case": "Some", Fields: [agentId] },
             StateCode: { "Case": "Some", Fields: [0] }
         },
-        JsonMessage: jsonMessage
+        JsonMessage: JSON.stringify(jsonMessage)
     };
 
     var correctReceivedData = {
         stateMachineRef: {
-            "StateMachineCode": jsonData.Header.StateMachineCode,
-            "ComponentCode": jsonData.Header.ComponentCode,
-            "AgentId": { "Case": "Some", Fields: [agentId] },
-            "StateName": { "Case": "Some", Fields: [stateName] },
+            "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
+            "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
+            "AgentId": agentId,
+            "StateName": stateName,
             "send": function (jsonMessage) {
             }
         },
-        jsonMessage: jsonData.JsonMessage
+        jsonMessage: jsonMessage
     };
 
     var correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);
@@ -107,6 +107,9 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
 
     var snapshotResponse = guiExample + " " + '{"Header":{"EventCode":0,"Probes":[],"IsContainsHashCode":false,"IncomingType":0,"MessageType":{"Case":"Some","Fields":["XComponent.Common.Processing.SnapshotResponse"]}},"JsonMessage":"{\\"Items\\":\\"H4sIAAAAAAAEAItmiGUAAKZ0XTIEAAAA\\"}"}';
 
+    var snapshotSubscribeRequest = "subscribe " + JSON.stringify({"Header":{"IncomingType":0},"JsonMessage":JSON.stringify({"Topic":{"Key":guiExample,"kind":1}})});
+    var snapshotUnsubscribeRequest = "unsubscribe " + JSON.stringify({"Header":{"IncomingType":0},"JsonMessage":JSON.stringify({"Topic":{"Key":guiExample,"kind":1}})});
+
     return {
         configuration: configuration,
         createWebSocket: createWebSocket,
@@ -121,6 +124,8 @@ define(["communication/xcWebSocketSubscriber", "mock-socket"], function (Susbcri
         guid: guid,
         correctDataToSendSnapshot: correctDataToSendSnapshot,
         correctSnapshotRequest: correctSnapshotRequest,
-        snapshotResponse: snapshotResponse
+        snapshotResponse: snapshotResponse,
+        snapshotSubscribeRequest: snapshotSubscribeRequest,
+        snapshotUnsubscribeRequest: snapshotUnsubscribeRequest
     }
 });
