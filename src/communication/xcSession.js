@@ -20,6 +20,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic);
             this.privateSubscriber = new Subscriber(this.webSocket, this.configuration, null, null);
             this.publishers = [this.replyPublisher];
+            this.subscribers = [];
         }
 
 
@@ -30,6 +31,9 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             for (var i = 0; i < this.publishers.length; i++) {
                 this.publishers[i].privateTopic = privateTopic;
+            }
+            for (var j = 0; i < this.subscribers.length; j++) {
+                this.subscribers[j].replyPublisher = this.replyPublisher;
             }
         }
 
@@ -64,6 +68,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
 
         Session.prototype.createSubscriber = function () {
             var subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid);
+            this.subscribers.push(subscriber);
             return subscriber;
         }
 
