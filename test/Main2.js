@@ -87,24 +87,19 @@ requirejs.config({
           console.log(jsonData);
         });*/
 
-        /*subscriber.getSnapshot(componentName, stateMachineName, function (items) {
+        subscriber.getSnapshot(componentName, stateMachineName, function (items) {
           console.log(items);
           //items[0].send();//todo
           //items[0].send(messageType, jsonMessage, true);
-        });*/
-        session.setPrivateTopic("NEW_PRIVATE0000");
-
+        });
         subscriber.subscribe(componentName, stateMachineResponse, function (jsonData) {
           console.log(jsonData.jsonMessage);
-          session.close();
           //items[0].send();//todo
           //items[0].send(messageType, jsonMessage, true);
         });
 
 
-
         publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
-        //publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
 
         /*console.log(subscriber.canSubscribe(componentName, stateMachineName));
         console.log(subscriber.canSubscribe(componentName, stateMachineResponse));
