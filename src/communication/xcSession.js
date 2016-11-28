@@ -72,8 +72,27 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             return subscriber;
         }
 
+
+        Session.prototype.clearPublishers = function () {
+            this.publishers = [this.replyPublisher];
+        }
+
+
+        Session.prototype.clearSubscribers = function () {
+            this.subscribers = [];
+        }
+
+
+        Session.prototype.dispose = function () {
+            this.clearPublishers();
+            this.clearSubscribers();
+        }
+
+
         Session.prototype.close = function () {
             this.privateSubscriber.sendUnsubscribeRequestToTopic(this.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+            this.publishers = null;
+            this.subscribers = null;
             this.webSocket.close();
         }
 
