@@ -96,6 +96,7 @@ requirejs.config({
 
         subscriber.subscribe(componentName, stateMachineResponse, function (jsonData) {
           console.log(jsonData.jsonMessage);
+          session.close();
           //items[0].send();//todo
           //items[0].send(messageType, jsonMessage, true);
         });

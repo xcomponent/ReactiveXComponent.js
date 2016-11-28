@@ -73,28 +73,42 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
         }
 
 
-        Session.prototype.clearPublishers = function () {
-            this.publishers = [this.replyPublisher];
+        Array.prototype.removeElement = function (e, msg) {
+            var index = this.indexOf(e);
+            if (index > -1) {
+                this.splice(index, 1);
+            } else {
+                throw new Error(msg);
+            }
         }
 
 
-        Session.prototype.clearSubscribers = function () {
-            this.subscribers = [];
+        Session.prototype.disposePublisher = function (publisher) {
+            this.publishers.removeElement(publisher, 'Publisher not found');
+        }
+
+
+        Session.prototype.disposeSubscriber = function (subscriber) {
+            this.subscribers.removeElement(subscriber, 'Subscriber not found');
         }
 
 
         Session.prototype.dispose = function () {
-            this.clearPublishers();
-            this.clearSubscribers();
+            for (var i = 0; i < this.publishers.length; i++) {
+                this.disposePublisher(this.publishers[i]);
+            }
+            for (var j = 0; i < this.subscribers.length; j++) {
+                this.disposeSubscriber(this.subscribers[j]);
+            }
         }
 
 
         Session.prototype.close = function () {
             this.privateSubscriber.sendUnsubscribeRequestToTopic(this.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
-            this.publishers = null;
-            this.subscribers = null;
+            this.dispose();
             this.webSocket.close();
         }
+
 
         return {
             create: SessionFactory,
