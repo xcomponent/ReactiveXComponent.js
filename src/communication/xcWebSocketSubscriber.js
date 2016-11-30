@@ -213,7 +213,11 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
         var data = pako.inflate(binData).filter(function (x) {
             return x != 0;
         });
-        var strData = String.fromCharCode.apply(null, new Uint16Array(data));
+        var finalData = new Uint16Array(data);
+        var strData = "";
+        for (var i = 0; i < finalData.length; i++) {
+            strData += String.fromCharCode(finalData[i]);
+        }
         return strData;
     }
 
