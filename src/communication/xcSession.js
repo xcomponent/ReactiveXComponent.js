@@ -50,11 +50,13 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.webSocket.onerror = function (e) {
                 var messageError = "Error on " + thisObject.serverUrl + ".";
                 console.error(messageError);
+                console.error(e);
                 sessionListener(messageError, null);
             }
 
             this.webSocket.onclose = function (e) {
                 console.log("connection on " + thisObject.serverUrl + " closed.");
+                console.log(e);
             }
         }
 
