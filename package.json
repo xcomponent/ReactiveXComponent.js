@@ -1,13 +1,13 @@
 {
   "name": "reactivexcomponent.js",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Javascript reactive client API for XComponent",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "dev": "webpack -d --watch",
-    "build": "webpack -p",
+    "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
     "test": "karma start test/karma.conf.js"
   },
   "repository": {
@@ -25,7 +25,8 @@
   "files": [
     "LICENSE",
     "Readme.md",
-    "dist/xcomponentapi.js"
+    "dist/xcomponentapi.js",
+    "dist/xcomponentapi.map"
   ],
   "bugs": {
     "url": "https://github.com/xcomponent/ReactiveXComponent.js/issues"

@@ -249,24 +249,28 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
             items = JSON.parse(encodeBase64(b64Data));
         } catch (e) {
             items = b64Data;
-        }
+        }        
+        var snapshotItems = [];
         var thisObject = this;
         for (var i = 0; i < items.length; i++) {
-            (function(item) {
-                item.send = function(messageType, jsonMessage, visibilityPrivate) {
-                    var stateMachineRef = {
-                        StateMachineCode: parseInt(item.StateMachineCode),
-                        ComponentCode: parseInt(item.ComponentCode),
-                        AgentId: parseInt(item.AgentId),
-                        StateMachineId: parseInt(item.StateMachineId)
-                    };
-                    thisObject.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate);
-                };
-            })(items[i]);
-            items[i].StateName = thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode);
+            var stateMachineRef = {
+                "StateMachineId": parseInt(items[i].StateMachineId),
+                "AgentId": parseInt(items[i].AgentId),
+                "StateMachineCode": parseInt(items[i].AgentId),
+                "ComponentCode": parseInt(items[i].ComponentCode),
+                "StateName": thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
+                "send": function (messageType, jsonMessage, visibilityPrivate) {
+                    thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
+                }
+            };            
+            snapshotItems.push({
+                stateMachineRef: stateMachineRef,
+                jsonMessage: items[i].PublicMember
+            });            
         }
+        
         return {
-            items: items,
+            items: snapshotItems,
             replyTopic: replyTopic
         };
     }

@@ -124,6 +124,7 @@ requirejs.config({
             var api = new XComponentAPI();
             api.createSession(xml, serverUrl, sessionListener);
 
+
         });
 
     }
