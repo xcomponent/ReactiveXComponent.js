@@ -1,17 +1,17 @@
 requirejs.config({
-  urlArgs: 'bustCache=' + (new Date()).getTime(),
-  baseUrl: '../src',
+    urlArgs: 'bustCache=' + (new Date()).getTime(),
+    baseUrl: '../src',
 
-  paths: {
-    'rx': '../node_modules/rx/dist/rx.all',
-    'pako': '../node_modules/pako/dist/pako'
-  },
+    paths: {
+        'rx': '../node_modules/rx/dist/rx.all',
+        'pako': '../node_modules/pako/dist/pako'
+    },
 
-  callback: function () {
-    "use strict";
+    callback: function() {
+        "use strict";
 
-    require(["xcomponentAPI"], function (XComponentAPI) {
-      var xml = `<?xml version="1.0" encoding="utf-8"?>
+        require(["xcomponentAPI"], function(XComponentAPI) {
+            var xml = `<?xml version="1.0" encoding="utf-8"?>
 <deployment environment="Dev" xcProjectName="MyPricer" deploymentTargetCode="-1984047567" deploymentTargetName="MyPricerApi" version="1.0" frameworkType="Framework45" xmlns="http://xcomponent.com/DeploymentConfig.xsd">
   <threading />
   <serialization>Json</serialization>
@@ -65,74 +65,66 @@ requirejs.config({
   </codesConverter>
 </deployment>`;
 
-      var serverUrl = "wss://localhost:443";
+            var serverUrl = "wss://localhost:443";
 
-      var componentName = "Pricer";
-      var stateMachineName = "Pricer";
-      var stateMachineResponse = "PricerResult";
-      var messageType = "XComponent.Pricer.UserObject.Pricer";
-      var jsonMessage = { "Price": 100, "Discount": 5 };
+            var componentName = "Pricer";
+            var stateMachineName = "Pricer";
+            var stateMachineResponse = "PricerResult";
+            var messageType = "XComponent.Pricer.UserObject.Pricer";
+            var jsonMessage = { "Price": 100, "Discount": 5 };
 
-      var sessionListener = function (error, session) {
-        if (error) {
-          console.log(error);
-          return;
-        }
+            var sessionListener = function(error, session) {
+                if (error) {
+                    console.log("Connection lost !!!!!!!");
+                    console.log(error);
+                    return;
+                }
 
-        var subscriber = session.createSubscriber();
-        var publisher = session.createPublisher();
+                var subscriber1 = session.createSubscriber();
+                var subscriber2 = session.createSubscriber();
+                var publisher = session.createPublisher();
 
-        /*subscriber.subscribe(componentName, stateMachineResponse, function (jsonData) {
-          console.log("subscribeeeeeeeeeeeee");
-          console.log(jsonData);
-        });*/
+                /*subscriber.subscribe(componentName, stateMachineResponse, function (jsonData) {
+                  console.log("subscribeeeeeeeeeeeee");
+                  console.log(jsonData);
+                });*/
 
-        subscriber.getSnapshot(componentName, stateMachineName, function (items) {
-          console.log(items);
-          //items[0].send();//todo
-          //items[0].send(messageType, jsonMessage, true);
+                subscriber1.subscribe(componentName, stateMachineResponse, function(jsonData) {
+                    console.log("subscribe 1");
+                    console.log(jsonData.jsonMessage);
+                    //items[0].send();//todo
+                    //items[0].send(messageType, jsonMessage, true);
+                    //subscriber.dispose();
+                });
+                subscriber2.subscribe(componentName, stateMachineResponse, function(jsonData) {
+                    console.log("subscribe 2");
+                    console.log(jsonData.jsonMessage);
+                    //items[0].send();//todo
+                    //items[0].send(messageType, jsonMessage, true);
+                    subscriber2.dispose();
+                    subscriber2.getSnapshot(componentName, stateMachineName, function(items) {
+                        console.log(items);
+                        //items[0].send();//todo
+                        //items[0].send(messageType, jsonMessage, true);
+                    });
+
+                });
+
+
+
+                publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
+
+                setTimeout(function() {
+
+                    publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
+
+                }, 40000);
+            }
+
+            var api = new XComponentAPI();
+            api.createSession(xml, serverUrl, sessionListener);
+
         });
-        subscriber.subscribe(componentName, stateMachineResponse, function (jsonData) {
-          console.log(jsonData.jsonMessage);
-          //items[0].send();//todo
-          //items[0].send(messageType, jsonMessage, true);
-        });
 
-
-        publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
-
-        /*console.log(subscriber.canSubscribe(componentName, stateMachineName));
-        console.log(subscriber.canSubscribe(componentName, stateMachineResponse));
-
-        subscriber.subscribe(componentName, stateMachineName, function(jsonData) {
-          console.log(jsonData);
-        });*/
-
-        /*subscriber.subscribe(componentName, stateMachineResponse, function(jsonData) {
-          console.log(jsonData);
-        });*/
-
-        /*subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
-          console.log("Snapshot2");          
-          console.log(items);
-          //items[0].send(messageType, jsonMessage);
-        });*/
-
-        /*subscriber.getSnapshot(componentName, stateMachineName, function (items) {
-          console.log(items);
-          //items[0].send(messageType, jsonMessage);
-        });*/
-
-        /*setTimeout(function() {
-          session.close();
-        },1000);*/
-      }
-
-      var api = new XComponentAPI();
-      api.createSession(xml, serverUrl, sessionListener);
-
-    });
-
-  }
+    }
 });
-
