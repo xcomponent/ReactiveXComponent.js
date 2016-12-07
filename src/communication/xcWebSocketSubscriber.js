@@ -1,7 +1,7 @@
 define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration", "rx", "pako"], function(javascriptHelper, xcWebSocketBridgeConfiguration, Rx, pako) {
     "use strict"
 
-    var Subscriber = function(webSocket, configuration, replyPublisher, guid) {
+    var Subscriber = function(webSocket, configuration, replyPublisher, guid, privateTopics) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.replyPublisher = replyPublisher;
@@ -9,6 +9,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
         this.observableMsg = Rx.Observable.fromEvent(this.webSocket, 'message');
         this.observableSubscribers = [];
         this.guid = guid;
+        this.privateTopics = privateTopics;
     }
 
 
@@ -44,6 +45,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
     Subscriber.prototype.getDataToSendSnapshot = function(componentName, stateMachineName, replyTopic) {
         var topic = this.configuration.getSnapshotTopic(componentName);
         var codes = this.configuration.getCodes(componentName, stateMachineName);
+        var thisObject = this;
         var jsonMessage = {
             "StateMachineCode": parseInt(codes.stateMachineCode),
             "ComponentCode": parseInt(codes.componentCode),
@@ -51,7 +53,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
             "PrivateTopic": {
                 "Case": "Some",
                 "Fields": [
-                    [null]
+                    thisObject.privateTopics
                 ]
             }
         };
