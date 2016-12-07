@@ -96,29 +96,29 @@ requirejs.config({
                     //items[0].send(messageType, jsonMessage, true);
                     //subscriber.dispose();
                 });
-                subscriber2.subscribe(componentName, stateMachineResponse, function(jsonData) {
+                /*subscriber2.subscribe(componentName, stateMachineResponse, function(jsonData) {
                     console.log("subscribe 2");
                     console.log(jsonData.jsonMessage);
                     //items[0].send();//todo
                     //items[0].send(messageType, jsonMessage, true);
-                    subscriber2.dispose();
-                    subscriber2.getSnapshot(componentName, stateMachineName, function(items) {
-                        console.log(items);
-                        //items[0].send();//todo
-                        //items[0].send(messageType, jsonMessage, true);
-                    });
-
+                    //subscriber2.dispose();
+                    //session.dispose(subscriber2);*/
+                subscriber2.getSnapshot(componentName, stateMachineName, function(items) {
+                    console.log(items);
+                    //items[0].send();//todo
+                    //items[0].send(messageType, jsonMessage, true);
                 });
 
+                /*});*/
 
+                session.setPrivateTopic("TEST0");
+                session.addPrivateTopic("TEST1");
+                session.addPrivateTopic("TEST2");
 
                 publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
+                publisher.send(componentName, stateMachineName, messageType, jsonMessage, true, "TEST1");
+                publisher.send(componentName, stateMachineName, messageType, jsonMessage, true, "TEST2");
 
-                setTimeout(function() {
-
-                    publisher.send(componentName, stateMachineName, messageType, jsonMessage, true);
-
-                }, 40000);
             }
 
             var api = new XComponentAPI();
