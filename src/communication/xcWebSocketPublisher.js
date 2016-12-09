@@ -8,9 +8,9 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
     }
 
 
-    Publisher.prototype.getEventToSend = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
+    Publisher.prototype.getEventToSend = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
-        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate);
+        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
         var event = {
             "Header": headerConfig.header,
             "JsonMessage": JSON.stringify(jsonMessage)
@@ -33,16 +33,16 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
     }
 
 
-    Publisher.prototype.send = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate) {
-        var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate);
+    Publisher.prototype.send = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
+        var data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         this.webSocket.send(convertToWebsocketInputFormat(data));
     }
 
 
-    Publisher.prototype.sendWithStateMachineRef = function(stateMachineRef, messageType, jsonMessage, visibilityPrivate) {
+    Publisher.prototype.sendWithStateMachineRef = function(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
         var componentCode = stateMachineRef.ComponentCode;
         var stateMachineCode = stateMachineRef.StateMachineCode;
-        var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate);
+        var headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
         var headerStateMachineRef = {
             "StateMachineId": { "Case": "Some", "Fields": [stateMachineRef.StateMachineId] },
             "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] }
@@ -60,16 +60,17 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
     }
 
 
-    Publisher.prototype.getHeaderConfig = function(componentCode, stateMachineCode, messageType, visibilityPrivate) {
+    Publisher.prototype.getHeaderConfig = function(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic) {
         var publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
         var thisObject = this;
+        var publishTopic = undefined;
         var header = {
             "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
             "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
             "EventCode": parseInt(publisher.eventCode),
             "IncomingType": 0,
             "MessageType": { "Case": "Some", "Fields": [messageType] },
-            "PublishTopic": (!visibilityPrivate) ? undefined : { "Case": "Some", "Fields": [thisObject.privateTopic] }
+            "PublishTopic": (!visibilityPrivate) ? undefined : { "Case": "Some", "Fields": [(specifiedPrivateTopic) ? specifiedPrivateTopic : thisObject.privateTopic] }
         };
         return {
             header: header,
@@ -79,8 +80,8 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
 
 
     var convertToWebsocketInputFormat = function(data) {
-        var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0]
-            + " " + JSON.stringify(data.event);
+        var input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0] +
+            " " + JSON.stringify(data.event);
         return input;
     }
 

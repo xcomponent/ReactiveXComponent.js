@@ -16,23 +16,43 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.configuration = configuration;
             this.guid = new Guid();
             this.privateTopic = this.guid.create();
-            this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic);
             this.privateSubscriber = new Subscriber(this.webSocket, this.configuration, null, null);
+            this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic);
             this.publishers = [this.replyPublisher];
             this.subscribers = [];
+            this.privateTopics = [this.privateTopic];
         }
 
 
         Session.prototype.setPrivateTopic = function(privateTopic) {
-            var kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
-            this.privateSubscriber.sendUnsubscribeRequestToTopic(this.privateTopic, kindPrivate);
+            this.addPrivateTopic(privateTopic);
+            this.removePrivateTopic(this.privateTopic);
             this.privateTopic = privateTopic;
-            this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             for (var i = 0; i < this.publishers.length; i++) {
                 this.publishers[i].privateTopic = privateTopic;
             }
             for (var j = 0; i < this.subscribers.length; j++) {
                 this.subscribers[j].replyPublisher = this.replyPublisher;
+            }
+        }
+
+
+        Session.prototype.addPrivateTopic = function(privateTopic) {
+            var kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
+            this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
+            this.privateTopics.push(privateTopic);
+            for (var i = 0; i < this.subscribers.length; i++) {
+                this.subscribers[i].privateTopics = privateTopics;
+            }
+        }
+
+
+        Session.prototype.removePrivateTopic = function(privateTopic) {
+            var kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
+            this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
+            this.privateTopics.removeElement(privateTopic, 'private topic not found');
+            for (var i = 0; i < this.subscribers.length; i++) {
+                this.subscribers[i].privateTopics = privateTopics;
             }
         }
 
