@@ -254,7 +254,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
             var stateMachineRef = {
                 "StateMachineId": parseInt(items[i].StateMachineId),
                 "AgentId": parseInt(items[i].AgentId),
-                "StateMachineCode": parseInt(items[i].AgentId),
+                "StateMachineCode": parseInt(items[i].StateMachineCode),
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
                 "send": function (messageType, jsonMessage, visibilityPrivate) {
