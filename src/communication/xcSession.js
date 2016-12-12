@@ -43,7 +43,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             this.privateTopics.push(privateTopic);
             for (var i = 0; i < this.subscribers.length; i++) {
-                this.subscribers[i].privateTopics = privateTopics;
+                this.subscribers[i].privateTopics = this.privateTopics;
             }
         }        
 
@@ -52,7 +52,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
             this.privateTopics.removeElement(privateTopic, 'private topic not found');
             for (var i = 0; i < this.subscribers.length; i++) {
-                this.subscribers[i].privateTopics = privateTopics;
+                this.subscribers[i].privateTopics = this.privateTopics;
             }
         }
 
