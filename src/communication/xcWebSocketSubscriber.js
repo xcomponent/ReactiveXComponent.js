@@ -37,7 +37,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
                 snapshotListener(data.items);
             });
         this.sendSubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
-        var dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
+        var dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);        
         this.webSocket.send(convertToWebsocketInputFormat(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode, dataToSendSnapshot.data));
     }
 

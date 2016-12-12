@@ -91,7 +91,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
 
 
         Session.prototype.createSubscriber = function() {
-            var subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid);
+            var subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
             this.subscribers.push(subscriber);
             return subscriber;
         }
