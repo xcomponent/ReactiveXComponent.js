@@ -1,16 +1,17 @@
 define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocketBridgeConfiguration) {
     "use strict"
 
-    var Publisher = function(webSocket, configuration, privateTopic) {
+    var Publisher = function(webSocket, configuration, privateTopic, sessionData) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.privateTopic = privateTopic;
+        this.sessionData = sessionData;        
     }
 
 
     Publisher.prototype.getEventToSend = function(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
-        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
+        var headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);        
         var event = {
             "Header": headerConfig.header,
             "JsonMessage": JSON.stringify(jsonMessage)
@@ -55,7 +56,9 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
             event: event,
             routingKey: headerConfig.routingKey
         };
-        var webSocketInputFormat = convertToWebsocketInputFormat(dataToSend);
+        console.error(this.sessionData);
+        console.error(headerConfig.header);
+        var webSocketInputFormat = convertToWebsocketInputFormat(dataToSend);        
         this.webSocket.send(webSocketInputFormat);
     }
 
@@ -70,7 +73,8 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
             "EventCode": parseInt(publisher.eventCode),
             "IncomingType": 0,
             "MessageType": { "Case": "Some", "Fields": [messageType] },
-            "PublishTopic": (!visibilityPrivate) ? undefined : { "Case": "Some", "Fields": [(specifiedPrivateTopic) ? specifiedPrivateTopic : thisObject.privateTopic] }
+            "PublishTopic": (!visibilityPrivate) ? undefined : { "Case": "Some", "Fields": [(specifiedPrivateTopic) ? specifiedPrivateTopic : thisObject.privateTopic] },
+            "SessionData": (!this.sessionData) ? undefined : { "Case": "Some", "Fields": [this.sessionData] }
         };
         return {
             header: header,

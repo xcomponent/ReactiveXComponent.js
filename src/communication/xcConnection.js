@@ -12,6 +12,11 @@ define(["./xcSession"], function (SessionFactory) {
         session.init(sessionListener);
     }
 
+    Connection.prototype.createAuthenticatedSession = function (serverUrl, sessionData, sessionListener) {
+        var session = SessionFactory.create(serverUrl, this.configuration, sessionData);
+        session.init(sessionListener);
+    }
+
 
     return Connection;
 });

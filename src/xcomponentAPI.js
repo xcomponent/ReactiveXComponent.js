@@ -14,6 +14,13 @@ define(["./communication/xcConnection", "./parser", "./configuration/xcConfigura
         connection.createSession(serverUrl, sessionListener);
     }
 
+    XComponentAPI.prototype.createAuthenticatedSession = function (xml, serverUrl, sessionData, sessionListener) {
+        var parser = new Parser();
+        var configuration = new Configuration(parser);
+        configuration.init(xml);
+        var connection = new Connection(configuration);
+        connection.createAuthenticatedSession(serverUrl, sessionData, sessionListener);
+    }
 
     return XComponentAPI;
 });

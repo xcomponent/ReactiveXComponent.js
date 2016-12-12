@@ -2,22 +2,23 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
     function(javascriptHelper, Guid, Publisher, Subscriber, xcWebSocketBridgeConfiguration) {
         "use strict";
 
-        var SessionFactory = function(serverUrl, configuration) {
+        var SessionFactory = function(serverUrl, configuration, sessionData) {
             var WebSocket = javascriptHelper.getJavascriptHelper().WebSocket;
             var webSocket = new WebSocket(serverUrl);
-            var session = new Session(serverUrl, webSocket, configuration);
+            var session = new Session(serverUrl, webSocket, configuration, sessionData);
             return session;
         }
 
 
-        var Session = function(serverUrl, webSocket, configuration) {
+        var Session = function(serverUrl, webSocket, configuration, sessionData) {
             this.serverUrl = serverUrl;
             this.webSocket = webSocket;
             this.configuration = configuration;
             this.guid = new Guid();
             this.privateTopic = this.guid.create();
+            this.sessionData = sessionData;
             this.privateSubscriber = new Subscriber(this.webSocket, this.configuration, null, null);
-            this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic);
+            this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
             this.publishers = [this.replyPublisher];
             this.subscribers = [];
             this.privateTopics = [this.privateTopic];
@@ -44,8 +45,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             for (var i = 0; i < this.subscribers.length; i++) {
                 this.subscribers[i].privateTopics = privateTopics;
             }
-        }
-
+        }        
 
         Session.prototype.removePrivateTopic = function(privateTopic) {
             var kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
@@ -84,7 +84,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
 
 
         Session.prototype.createPublisher = function() {
-            var publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic);
+            var publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
             this.publishers.push(publisher);
             return publisher;
         }

@@ -9,6 +9,7 @@ define(function () {
     var messageType = "XComponent.HelloWorld.UserObject.SayHello";
     var routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
     var guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+    var sessionData = "sessiondata";
 
     var guid = jasmine.createSpyObj('guid', ['create']);
     guid.create.and.callFake(function () {
@@ -22,7 +23,8 @@ define(function () {
             "EventCode": parseInt(eventCode),
             "IncomingType": 0,
             "MessageType": { "Case": "Some", "Fields": [messageType] },
-            "PublishTopic": (!visibility) ? undefined : { "Case": "Some", "Fields": [guid.create()] }
+            "PublishTopic": (!visibility) ? undefined : { "Case": "Some", "Fields": [guid.create()] },
+            "SessionData": { "Case": "Some", "Fields": [sessionData] }
         };
         return header;
     }
@@ -64,7 +66,8 @@ define(function () {
                 "ComponentCode": { "Case": "Some", "Fields": [stateMachineRef.ComponentCode] },
                 "EventCode": parseInt(eventCode),
                 "IncomingType": 0,
-                "MessageType": { "Case": "Some", "Fields": [messageType] }
+                "MessageType": { "Case": "Some", "Fields": [messageType] },
+                "SessionData": { "Case": "Some", "Fields": [sessionData] }
             },
             "JsonMessage": JSON.stringify(jsonMessage)
         },
@@ -121,6 +124,7 @@ define(function () {
         getCorretWebsocketInputFormat: getCorretWebsocketInputFormat,
         stateMachineRef: stateMachineRef,
         corretWebsocketInputFormatForSendSMRef: corretWebsocketInputFormatForSendSMRef,
-        guiExample: guiExample
+        guiExample: guiExample,
+        sessionData: sessionData
     }
 });
