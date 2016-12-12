@@ -55,9 +55,7 @@ define(["../configuration/xcWebSocketBridgeConfiguration"], function(xcWebSocket
         var dataToSend = {
             event: event,
             routingKey: headerConfig.routingKey
-        };
-        console.error(this.sessionData);
-        console.error(headerConfig.header);
+        };        
         var webSocketInputFormat = convertToWebsocketInputFormat(dataToSend);        
         this.webSocket.send(webSocketInputFormat);
     }
