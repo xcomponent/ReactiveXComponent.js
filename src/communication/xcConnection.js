@@ -11,7 +11,7 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
         this.session.privateSubscriber.getXcApi(xcApiFileName, (function (xcApi) {
             var parser = new Parser();
             this.configuration = new Configuration(parser);
-            configuration.init(xcApi);
+            this.configuration.init(xcApi);
             this.session.configuration = this.configuration;
             this.session.replyPublisher.configuration = this.configuration;
         }).bind(this));
