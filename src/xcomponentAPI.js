@@ -8,13 +8,13 @@ define(["./communication/xcConnection"], function (Connection) {
 
 
     XComponentAPI.prototype.createSession = function (xcApiFileName, serverUrl, sessionListener) {
-        this.connection.init(xcApiFileName, serverUrl);
-        this.connection.createSession(sessionListener);
+        this.connection.init(xcApiFileName, serverUrl, null, sessionListener);
+        this.connection.createSession();
     }
 
     XComponentAPI.prototype.createAuthenticatedSession = function (xcApiFileName, serverUrl, sessionData, sessionListener) {
-        this.connection.init(xcApiFileName, serverUrl, sessionData);        
-        this.connection.createSession(sessionListener);
+        this.connection.init(xcApiFileName, serverUrl, sessionData, sessionListener);        
+        this.connection.createSession();
     }
 
     return XComponentAPI;

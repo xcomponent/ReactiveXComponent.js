@@ -57,20 +57,20 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
         }
 
 
-        Session.prototype.init = function(sessionListener) {
+        Session.prototype.init = function() {
             var thisObject = this;
 
             this.webSocket.onopen = function(e) {
                 thisObject.privateSubscriber.sendSubscribeRequestToTopic(thisObject.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
                 console.log("connection started on " + thisObject.serverUrl + ".");
-                sessionListener(null, thisObject);
+                //sessionListener(null, thisObject);
             }
 
             this.webSocket.onerror = function(e) {
                 var messageError = "Error on " + thisObject.serverUrl + ".";
                 console.error(messageError);
                 console.error(e);
-                sessionListener(messageError, null);
+                //sessionListener(messageError, null);
             }
 
             this.webSocket.onclose = function(e) {
@@ -79,6 +79,15 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
                 if (!e.wasClean) {
                     throw new Error("unexpected connection close with code " + e.code);
                 }
+            }
+        }
+
+
+        Session.prototype.execListener = function(sessionListener) {
+            if (this.webSocket.readyState == WebSocket.OPEN) {
+                sessionListener(null, this);
+            } else {
+                sessionListener("WebSocket state: " + this.webSocket.readyState, null);                
             }
         }
 
