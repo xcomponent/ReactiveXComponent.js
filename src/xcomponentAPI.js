@@ -1,25 +1,20 @@
 
-define(["./communication/xcConnection", "./parser", "./configuration/xcConfiguration"], function (Connection, Parser, Configuration) {
+define(["./communication/xcConnection"], function (Connection) {
     "use strict";
 
     var XComponentAPI = function () {
+        this.connection = new Connection();
     }
 
 
-    XComponentAPI.prototype.createSession = function (xml, serverUrl, sessionListener) {
-        var parser = new Parser();
-        var configuration = new Configuration(parser);
-        configuration.init(xml);
-        var connection = new Connection(configuration);
-        connection.createSession(serverUrl, sessionListener);
+    XComponentAPI.prototype.createSession = function (xcApiFileName, serverUrl, sessionListener) {
+        this.connection.init(xcApiFileName, serverUrl);
+        this.connection.createSession(sessionListener);
     }
 
-    XComponentAPI.prototype.createAuthenticatedSession = function (xml, serverUrl, sessionData, sessionListener) {
-        var parser = new Parser();
-        var configuration = new Configuration(parser);
-        configuration.init(xml);
-        var connection = new Connection(configuration);
-        connection.createAuthenticatedSession(serverUrl, sessionData, sessionListener);
+    XComponentAPI.prototype.createAuthenticatedSession = function (xcApiFileName, serverUrl, sessionData, sessionListener) {
+        this.connection.init(xcApiFileName, serverUrl, sessionData);        
+        this.connection.createSession(sessionListener);
     }
 
     return XComponentAPI;

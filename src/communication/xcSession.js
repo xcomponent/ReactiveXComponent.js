@@ -17,7 +17,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.guid = new Guid();
             this.privateTopic = this.guid.create();
             this.sessionData = sessionData;
-            this.privateSubscriber = new Subscriber(this.webSocket, this.configuration, null, null);
+            this.privateSubscriber = new Subscriber(this.webSocket, null, null, null);
             this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
             this.publishers = [this.replyPublisher];
             this.subscribers = [];

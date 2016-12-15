@@ -1,20 +1,24 @@
 
-define(["./xcSession"], function (SessionFactory) {
+define(["./xcSession", "../parser", "../configuration/xcConfiguration"], function (SessionFactory, Parser, Configuration) {
     "use strict";
 
-    var Connection = function (configuration) {
-        this.configuration = configuration;
+    var Connection = function () {
+    }
+
+    Connection.prototype.init = function(xcApiFileName, serverUrl, sessionData) {
+        this.session = SessionFactory.create(serverUrl, null, sessionData);
+        this.session.privateSubscriber.getXcApi(xcApiFileName, (function (xcApi) {
+            var parser = new Parser();
+            this.configuration = new Configuration(parser);
+            configuration.init(xcApi);
+        }).bind(this));
     }
 
 
-    Connection.prototype.createSession = function (serverUrl, sessionListener) {
-        var session = SessionFactory.create(serverUrl, this.configuration);
-        session.init(sessionListener);
-    }
-
-    Connection.prototype.createAuthenticatedSession = function (serverUrl, sessionData, sessionListener) {
-        var session = SessionFactory.create(serverUrl, this.configuration, sessionData);
-        session.init(sessionListener);
+    Connection.prototype.createSession = function (sessionListener) {
+        this.session.configuration = this.configuration;
+        this.session.replyPublisher.configuration = this.configuration;
+        this.session.init(sessionListener);        
     }
 
 

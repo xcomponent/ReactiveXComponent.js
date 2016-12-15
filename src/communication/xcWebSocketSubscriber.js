@@ -12,6 +12,25 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
         this.privateTopics = privateTopics;
     }
 
+    Subscriber.prototype.getXcApi = function (xcApiFileName, getXcApiListener) {
+        var thisObject = this;
+        this.observableMsg
+            .map(function (e) {
+                try {
+                    return thisObject.getJsonDataFromXcApiRequest(e, xcApiFileName);
+                } catch (e) {
+                    return null;
+                }
+            })
+            .filter(function (xcApi) {
+                return xcAPi != null;
+            })
+            .subscribe(function (xcApi) {
+                getXcApiListener(xcApi);
+            });
+        var command = xcWebSocketBridgeConfiguration.commands.getXcapi;
+        this.webSocket.send(convertToWebsocketInputFormat(command + " " + xcApiFileName));
+    }
 
     Subscriber.prototype.getSnapshot = function(componentName, stateMachineName, snapshotListener) {
         var codes = this.configuration.getCodes(componentName, stateMachineName);
@@ -273,6 +292,15 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
             items: snapshotItems,
             replyTopic: replyTopic
         };
+    }
+
+
+    Subscriber.prototype.getJsonDataFromXcApiRequest = function(e, xcApiFileName) {
+        var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
+        if (!jsonData[xcApiFileName])
+            return null;
+        var xcApi = encodeBase64(jsonData[xcApiFileName]);
+        return xcApi;
     }
 
 

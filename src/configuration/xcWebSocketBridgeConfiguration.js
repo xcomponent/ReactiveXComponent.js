@@ -10,7 +10,9 @@ define(function () {
 
     var commands = {
         subscribe: "subscribe",
-        unsubscribe: "unsubscribe"
+        unsubscribe: "unsubscribe",
+        getXcapi: "getXcapi",
+        getXcapiList: "getXcapiList"
     }
 
     return {
