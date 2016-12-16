@@ -21,7 +21,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                     expect(session).toBe(null);
                     done();
                 };
-                connection.createSession("xcApiFileName", serverUrl, null, sessionListener)
+                connection.createSession("xcApiFileName", serverUrl, sessionListener)
             });
 
             it("should call the sessionListener with the created session as argument", function (done) {
@@ -33,7 +33,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                     expect(session).not.toBe(null);
                     done();
                 };
-                connection.createSession(xcApiFileName, serverUrl, null, sessionListener);
+                connection.createSession(xcApiFileName, serverUrl, sessionListener);
                 mockServer.on('connection', function(server) {
                     var xcApi = 'H4sIAAAAAAAAAwXB2w0AEBAEwFbWl2Y0IW4jQmziPNo3k6TuGK0Tj/ESVRs6yzkuHRnGIqPB92qzhg8yp62UMAAAAA==';
                     var data = {};
