@@ -23,9 +23,10 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
                 }
             })
             .filter(function (xcApi) {
-                return xcAPi != null;
+                return xcApi != null;
             })
             .subscribe(function (xcApi) {
+                console.log(xcApiFileName + " received successfully");
                 getXcApiListener(xcApi);
             });
         var command = xcWebSocketBridgeConfiguration.commands.getXcapi;
@@ -297,8 +298,9 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
     Subscriber.prototype.getJsonDataFromXcApiRequest = function(e, xcApiFileName) {
         var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-        if (!jsonData[xcApiFileName])
+        if (jsonData[xcApiFileName] === undefined) {
             return null;
+        }
         var xcApi = encodeBase64(jsonData[xcApiFileName]);
         return xcApi;
     }
