@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
-    "test": "karma start test/karma.conf.js"
+    "test": "karma start test/karma.conf.js",
+    "test:watch": "karma start test/karma.conf.js --auto-watch --no-single-run"
   },
-  "autoWatch": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xcomponent/ReactiveXComponent.js.git"
