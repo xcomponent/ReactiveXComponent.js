@@ -12,6 +12,26 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
         this.privateTopics = privateTopics;
     }
 
+
+    Subscriber.prototype.getXcApiList = function (getXcApiListListener) {
+        var thisObject = this;
+        this.observableMsg
+            .map(function (e) {
+                return thisObject.getJsonDataFromGetXcApiListRequest(e);
+            })
+            .filter(function (apis) {
+                return apis != null;
+            })
+            .subscribe(function (apis) {
+                console.log("ApiList received successfully");
+                getXcApiListListener(apis);
+            });
+        var command = xcWebSocketBridgeConfiguration.commands.getXcApiList;
+        var data = {};
+        this.webSocket.send(convertToWebsocketInputFormat(command, data));
+    }
+
+
     Subscriber.prototype.getXcApi = function (xcApiFileName, getXcApiListener) {
         var thisObject = this;
         this.observableMsg
@@ -221,7 +241,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
 
     Subscriber.prototype.getJsonDataFromEvent = function(e) {
-        var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
+        var jsonData = getJsonData(e.data);
         var componentCode = jsonData.Header.ComponentCode.Fields[0];
         var stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
         var stateCode = jsonData.Header.StateCode.Fields[0];
@@ -262,8 +282,8 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
 
     Subscriber.prototype.getJsonDataFromSnapshot = function(e) {
-        var replyTopic = e.data.substring(0, e.data.indexOf(" "));
-        var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
+        var replyTopic = getCommand(e.data);
+        var jsonData = getJsonData(e.data);
         var b64Data = JSON.parse(jsonData.JsonMessage).Items;
         var items;
         try {
@@ -298,12 +318,33 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
 
     Subscriber.prototype.getJsonDataFromXcApiRequest = function(e, xcApiFileName) {
-        var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-        if (!jsonData.ApiFound || jsonData.ApiName != xcApiFileName) {
+        var jsonData = getJsonData(e.data);
+        if (xcWebSocketBridgeConfiguration.commands.getXcApi != getCommand(e.data)) {
             return null;
+        } else {
+            return encodeBase64(jsonData.Content);
         }
-        var xcApi = encodeBase64(jsonData.Content);
-        return xcApi;
+    }
+
+
+    Subscriber.prototype.getJsonDataFromGetXcApiListRequest = function(e) {
+        var jsonData = getJsonData(e.data);
+        console.error(xcWebSocketBridgeConfiguration.commands.getXcApiList == getCommand(e.data));
+        if (xcWebSocketBridgeConfiguration.commands.getXcApiList != getCommand(e.data)) {
+            return null;
+        } else {
+            return jsonData.Apis;
+        }
+    }
+
+
+    function getJsonData(data) {
+        return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
+    }
+
+
+    function getCommand(data) {
+        return data.substring(0, data.indexOf(" "));
     }
 
 

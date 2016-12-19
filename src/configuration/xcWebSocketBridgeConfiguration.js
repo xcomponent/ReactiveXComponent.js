@@ -12,7 +12,7 @@ define(function () {
         subscribe: "subscribe",
         unsubscribe: "unsubscribe",
         getXcApi: "getXcApi",
-        getXcapiList: "getXcapiList"
+        getXcApiList: "getXcApiList"
     }
 
     return {

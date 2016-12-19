@@ -38,7 +38,7 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                     server.on('message', function(message) {
                         var content = 'H4sIAAAAAAAAAwXB2w0AEBAEwFbWl2Y0IW4jQmziPNo3k6TuGK0Tj/ESVRs6yzkuHRnGIqPB92qzhg8yp62UMAAAAA==';
                         var data = {ApiFound: true, ApiName: xcApiFileName, Content: content};
-                        server.send(JSON.stringify(data));
+                        server.send("getXcApi " + JSON.stringify(data));
                     });
                 });
             });

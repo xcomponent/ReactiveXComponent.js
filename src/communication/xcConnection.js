@@ -6,6 +6,10 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
     }
 
 
+    Connection.prototype.createSessionWithAllApis = function (serverUrl, sessionListener) {
+    }
+
+
     Connection.prototype.createSession = function (xcApiFileName, serverUrl, sessionListener) {
         this.init(xcApiFileName, serverUrl, null, sessionListener);
     }
