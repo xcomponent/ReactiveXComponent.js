@@ -57,11 +57,12 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
         }
 
 
-        Session.prototype.init = function(sessionListener) {
+        Session.prototype.init = function(sessionListener, getXcApiRequest, xcApiFileName) {
             var thisObject = this;
 
             this.webSocket.onopen = function(e) {
                 thisObject.privateSubscriber.sendSubscribeRequestToTopic(thisObject.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+                getXcApiRequest(xcApiFileName, sessionListener);
                 console.log("connection started on " + thisObject.serverUrl + ".");
             }
 

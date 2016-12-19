@@ -26,11 +26,12 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
                 return xcApi != null;
             })
             .subscribe(function (xcApi) {
-                console.log(xcApiFileName + " received successfully");
+                console.log(xcApiFileName + " " + "received successfully");
                 getXcApiListener(xcApi);
             });
-        var command = xcWebSocketBridgeConfiguration.commands.getXcapi;
-        this.webSocket.send(convertToWebsocketInputFormat(command + " " + xcApiFileName));
+        var command = xcWebSocketBridgeConfiguration.commands.getXcApi;
+        var data = {Name: xcApiFileName};
+        this.webSocket.send(convertToWebsocketInputFormat(command, data));
     }
 
     Subscriber.prototype.getSnapshot = function(componentName, stateMachineName, snapshotListener) {
@@ -298,10 +299,10 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
     Subscriber.prototype.getJsonDataFromXcApiRequest = function(e, xcApiFileName) {
         var jsonData = JSON.parse(e.data.substring(e.data.indexOf("{"), e.data.lastIndexOf("}") + 1));
-        if (jsonData[xcApiFileName] === undefined) {
+        if (!jsonData.ApiFound || jsonData.ApiName != xcApiFileName) {
             return null;
         }
-        var xcApi = encodeBase64(jsonData[xcApiFileName]);
+        var xcApi = encodeBase64(jsonData.Content);
         return xcApi;
     }
 

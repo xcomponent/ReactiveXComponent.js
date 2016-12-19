@@ -11,7 +11,7 @@ define(function () {
     var commands = {
         subscribe: "subscribe",
         unsubscribe: "unsubscribe",
-        getXcapi: "getXcapi",
+        getXcApi: "getXcApi",
         getXcapiList: "getXcapiList"
     }
 

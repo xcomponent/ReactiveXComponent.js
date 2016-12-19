@@ -35,10 +35,11 @@ define(["mock-socket", "communication/xcConnection"], function (MockSocket, Conn
                 };
                 connection.createSession(xcApiFileName, serverUrl, sessionListener);
                 mockServer.on('connection', function(server) {
-                    var xcApi = 'H4sIAAAAAAAAAwXB2w0AEBAEwFbWl2Y0IW4jQmziPNo3k6TuGK0Tj/ESVRs6yzkuHRnGIqPB92qzhg8yp62UMAAAAA==';
-                    var data = {};
-                    data[xcApiFileName] = xcApi;
-                    server.send(JSON.stringify(data));
+                    server.on('message', function(message) {
+                        var content = 'H4sIAAAAAAAAAwXB2w0AEBAEwFbWl2Y0IW4jQmziPNo3k6TuGK0Tj/ESVRs6yzkuHRnGIqPB92qzhg8yp62UMAAAAA==';
+                        var data = {ApiFound: true, ApiName: xcApiFileName, Content: content};
+                        server.send(JSON.stringify(data));
+                    });
                 });
             });
         });
