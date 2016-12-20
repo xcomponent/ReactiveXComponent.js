@@ -329,7 +329,6 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
 
     Subscriber.prototype.getJsonDataFromGetXcApiListRequest = function(e) {
         var jsonData = getJsonData(e.data);
-        console.error(xcWebSocketBridgeConfiguration.commands.getXcApiList == getCommand(e.data));
         if (xcWebSocketBridgeConfiguration.commands.getXcApiList != getCommand(e.data)) {
             return null;
         } else {

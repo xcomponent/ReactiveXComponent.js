@@ -6,9 +6,11 @@ define(["./communication/xcConnection"], function (Connection) {
         this.connection = new Connection();
     }
 
-    
-    XComponentAPI.prototype.createSessionWithAllApis = function (serverUrl, sessionListener) {
-        this.connection.createSessionWithAllApis(serverUrl, sessionListener);
+    //connectionListener=>(connection, apis)
+    XComponentAPI.prototype.getXcApiList = function (serverUrl, connectionListener) {
+        this.connection.getXcApiList(serverUrl, (function(apis) {
+            connectionListener(this.connection, apis);
+        }).bind(this));
     }
 
     XComponentAPI.prototype.createSession = function (xcApiFileName, serverUrl, sessionListener) {

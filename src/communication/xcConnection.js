@@ -6,7 +6,11 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
     }
 
 
-    Connection.prototype.createSessionWithAllApis = function (serverUrl, sessionListener) {
+    Connection.prototype.getXcApiList = function (serverUrl, getXcApiListListener) {
+        this.session = SessionFactory.create(serverUrl, null, null);
+        this.session.webSocket.addEventListener('open', (function(e) {
+            this.session.privateSubscriber.getXcApiList(getXcApiListListener);
+        }).bind(this));
     }
 
 
@@ -21,7 +25,6 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
 
 
     Connection.prototype.init = function (xcApiFileName, serverUrl, sessionData, sessionListener) {
-        this.session = SessionFactory.create(serverUrl, null, sessionData);
         var thisObject = this;
         var getXcApiRequest = function (xcApiFileName, sessionListener) {
             thisObject.session.privateSubscriber.getXcApi(xcApiFileName, function (xcApi) {
@@ -33,7 +36,14 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
                 sessionListener(null, thisObject.session);
             });
         }
-        this.session.init(sessionListener, getXcApiRequest, xcApiFileName);
+        if (!this.session) {
+            this.session = SessionFactory.create(serverUrl, null, sessionData);
+            this.session.init(sessionListener, getXcApiRequest, xcApiFileName);
+        } else {
+            this.session.sessionData = sessionData;
+            this.session.replyPublisher.sessionData = sessionData;
+            getXcApiRequest(xcApiFileName, sessionListener);
+        }
     }
 
 
