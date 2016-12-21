@@ -17,6 +17,7 @@ define(["../javascriptHelper", "../configuration/xcWebSocketBridgeConfiguration"
         var thisObject = this;
         this.observableMsg
             .map(function (e) {
+                console.log(e.data);
                 return thisObject.getJsonDataFromGetXcApiListRequest(e);
             })
             .filter(function (apis) {
