@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
-    "test": "karma start test/karma.conf.js"
+    "test": "karma start test/karma.conf.js",
+    "test:watch": "karma start test/karma.conf.js --auto-watch --no-single-run"
   },
   "repository": {
     "type": "git",
@@ -36,7 +37,8 @@
     "atob": "^2.0.3",
     "pako": "^1.0.3",
     "websocket": "^1.0.23",
-    "xmldom": "^0.1.22"
+    "xmldom": "^0.1.22",
+    "rx": "^4.1.0"
   },
   "devDependencies": {
     "babel-core": "^6.11.4",
@@ -51,7 +53,6 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
     "mock-socket": "^2.0.0",
-    "rx": "^4.1.0",
     "webpack": "^1.13.1"
   }
 }

@@ -17,7 +17,7 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
             this.guid = new Guid();
             this.privateTopic = this.guid.create();
             this.sessionData = sessionData;
-            this.privateSubscriber = new Subscriber(this.webSocket, this.configuration, null, null);
+            this.privateSubscriber = new Subscriber(this.webSocket, null, null, null);
             this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
             this.publishers = [this.replyPublisher];
             this.subscribers = [];
@@ -57,13 +57,13 @@ define(["../javascriptHelper", "../guid", "./xcWebSocketPublisher", "./xcWebSock
         }
 
 
-        Session.prototype.init = function(sessionListener) {
+        Session.prototype.init = function(sessionListener, getXcApiRequest, xcApiFileName) {
             var thisObject = this;
 
             this.webSocket.onopen = function(e) {
                 thisObject.privateSubscriber.sendSubscribeRequestToTopic(thisObject.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+                getXcApiRequest(xcApiFileName, sessionListener);
                 console.log("connection started on " + thisObject.serverUrl + ".");
-                sessionListener(null, thisObject);
             }
 
             this.webSocket.onerror = function(e) {

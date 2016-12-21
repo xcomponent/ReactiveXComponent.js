@@ -73,8 +73,8 @@ Example of XComponent API usage
 
         }
 
-        var xml = ...; //get your xcApi file configuration            
-        xcomponentapi.createSession(xml, serverUrl, sessionListener);
+        var xcApiName = "HelloWorldApi.xcApi"            
+        xcomponentapi.createSession(xcApiName, serverUrl, sessionListener);
 
 ```
 
