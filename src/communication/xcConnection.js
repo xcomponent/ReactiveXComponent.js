@@ -3,7 +3,6 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
     "use strict";
 
     var Connection = function () {
-        this.allSessions = [];
     }
 
 
