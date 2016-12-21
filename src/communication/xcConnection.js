@@ -7,10 +7,13 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
 
 
     Connection.prototype.getXcApiList = function (serverUrl, getXcApiListListener) {
-        this.session = SessionFactory.create(serverUrl, null, null);
-        this.session.webSocket.addEventListener('open', (function(e) {
-            this.session.privateSubscriber.getXcApiList(getXcApiListListener);
-        }).bind(this));
+        var session = SessionFactory.create(serverUrl, null, null);
+        session.webSocket.addEventListener('open', function(e) {
+            session.privateSubscriber.getXcApiList(function(apis) {
+                getXcApiListListener(apis);
+                session.close();
+            });
+        });
     }
 
 
@@ -25,25 +28,18 @@ define(["./xcSession", "../parser", "../configuration/xcConfiguration"], functio
 
 
     Connection.prototype.init = function (xcApiFileName, serverUrl, sessionData, sessionListener) {
-        var thisObject = this;
+        var session = SessionFactory.create(serverUrl, null, sessionData);
         var getXcApiRequest = function (xcApiFileName, sessionListener) {
-            thisObject.session.privateSubscriber.getXcApi(xcApiFileName, function (xcApi) {
+            session.privateSubscriber.getXcApi(xcApiFileName, function (xcApi) {
                 var parser = new Parser();
-                thisObject.configuration = new Configuration(parser);
-                thisObject.configuration.init(xcApi);
-                thisObject.session.configuration = thisObject.configuration;
-                thisObject.session.replyPublisher.configuration = thisObject.configuration;
-                sessionListener(null, thisObject.session);
+                var configuration = new Configuration(parser);
+                configuration.init(xcApi);
+                session.configuration = configuration;
+                session.replyPublisher.configuration = configuration;
+                sessionListener(null, session);
             });
         }
-        if (!this.session) {
-            this.session = SessionFactory.create(serverUrl, null, sessionData);
-            this.session.init(sessionListener, getXcApiRequest, xcApiFileName);
-        } else {
-            this.session.sessionData = sessionData;
-            this.session.replyPublisher.sessionData = sessionData;
-            getXcApiRequest(xcApiFileName, sessionListener);
-        }
+        session.init(sessionListener, getXcApiRequest, xcApiFileName);
     }
 
 

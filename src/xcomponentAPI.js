@@ -6,7 +6,6 @@ define(["./communication/xcConnection"], function (Connection) {
         this.connection = new Connection();
     }
 
-    //connectionListener=>(connection, apis)
     XComponentAPI.prototype.getXcApiList = function (serverUrl, connectionListener) {
         this.connection.getXcApiList(serverUrl, (function(apis) {
             connectionListener(this.connection, apis);
