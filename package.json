@@ -1,6 +1,6 @@
 {
   "name": "reactivexcomponent.js",
-  "version": "1.1.12",
+  "version": "2.0.0",
   "description": "Javascript reactive client API for XComponent",
   "directories": {
     "test": "test"
@@ -8,8 +8,29 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
-    "test": "karma start test/karma.conf.js",
-    "test:watch": "karma start test/karma.conf.js --auto-watch --no-single-run"
+    "test": "jest --coverage ",
+    "lint": "tslint src/**/*.ts*"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "\\.(ts)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/test/.*(Test|Spec))\\.tsx?$",
+    "modulePaths": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/src/"
+    ],
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "**/src/**/*.ts",
+      "!**/src/**/*.d.ts"
+    ],
+    "testResultsProcessor": "./node_modules/jest-junit",
+    "testEnvironment": "jsdom"
   },
   "repository": {
     "type": "git",
@@ -34,17 +55,30 @@
   },
   "homepage": "https://github.com/xcomponent/ReactiveXComponent.js#readme",
   "dependencies": {
+    "@types/es6-shim": "^0.31.32",
+    "@types/jest": "^16.0.1",
+    "@types/pako": "^0.2.31",
+    "@types/rx": "^2.5.34",
+    "@types/websocket": "0.0.32",
+    "@types/xmldom": "^0.1.28",
     "atob": "^2.0.3",
+    "es6-shim": "^0.35.2",
     "pako": "^1.0.3",
+    "rx": "^4.1.0",
     "websocket": "^1.0.23",
-    "xmldom": "^0.1.22",
-    "rx": "^4.1.0"
+    "xmldom": "^0.1.22"
   },
   "devDependencies": {
+    "awesome-typescript-loader": "^3.0.0-beta.17",
     "babel-core": "^6.11.4",
     "babel-loader": "^6.2.4",
+    "clean-webpack-plugin": "^0.1.14",
+    "compression": "^1.6.2",
     "istanbul-instrumenter-loader": "^0.2.0",
     "jasmine-core": "^2.4.1",
+    "jest": "^17.0.3",
+    "jest-cli": "^17.0.3",
+    "jest-junit": "https://github.com/palmerj3/jest-junit.git",
     "karma": "^0.13.22",
     "karma-chrome-launcher": "^1.0.1",
     "karma-coverage": "^1.0.0",
@@ -53,6 +87,12 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
     "mock-socket": "^2.0.0",
-    "webpack": "^1.13.1"
+    "source-map-loader": "^0.1.5",
+    "ts-jest": "^17.0.3",
+    "tslint": "^4.1.0",
+    "tslint-loader": "^3.3.0",
+    "typescript": "^2.1.4",
+    "webpack": "^1.13.1",
+    "window-or-global": "^1.0.1"
   }
 }

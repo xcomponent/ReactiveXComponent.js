@@ -1,25 +1,38 @@
-var webpack = require('webpack');
-var path = require('path');
+var webpack = require("webpack");
+var path = require("path");
+var CleanWebpackPlugin = require("clean-webpack-plugin");
 
-var BUILD_DIR = path.resolve(__dirname, 'dist/');
-var APP_DIR = path.resolve(__dirname, 'src');
+var BUILD_DIR = path.resolve(__dirname, "dist");
+var APP_DIR = path.resolve(__dirname, "src");
 
 var config = {
-  entry: APP_DIR + '/index.js',
-  devtool: 'cheap-module-source-map',
+  entry: ["es6-shim", APP_DIR + "/index.ts"],
+  devtool: "cheap-module-source-map",
   output: {
     path: BUILD_DIR,
-    filename: 'xcomponentapi.js',
-    libraryTarget: 'umd',
-    library: 'xcomponentapi',
-    publicPath: './'
+    filename: "xcomponentapi.js",
+    publicPath: "/",
+    libraryTarget: "umd",
+    library: "xcomponentapi",
   },
-  plugins: process.env.NODE_ENV === 'production' ? [    
+  resolve: {
+    extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+    modulesDirectories: [
+      "node_modules",
+      "src"]
+  },
+  plugins: process.env.NODE_ENV === "production" ? [
+    new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
+      root: __dirname,
+      verbose: true,
+      dry: false,
+      exclude: []
+    }),
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify('production')
+      "process.env": {
+        "NODE_ENV": JSON.stringify("production")
       }
     }),
     new webpack.optimize.UglifyJsPlugin({
@@ -27,13 +40,33 @@ var config = {
         warnings: false
       }
     })
-  ] : [],
+  ] : [
+      new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
+        root: __dirname,
+        verbose: true,
+        dry: false,
+        exclude: []
+      }),
+    ],
   module: {
-    loaders: []
+    loaders: [
+      { test: /\.ts$/, loader: "awesome-typescript-loader" },
+    ],
+    preLoaders: [
+      {
+        test: /\.ts$/,
+        loader: "tslint-loader"
+      }
+    ]
+  },
+  tslint: {
+    typeCheck: false,
+    configFile: false,
+    failOnHint: true
   },
   externals: {
-    'websocket': 'websocket',
-    'xmldoc': 'xmldoc'
+    "websocket": "websocket",
+    "xmldoc": "xmldoc"
   }
 };
 
