@@ -5,3 +5,4 @@ test_out/
 .DS_Store
 *.tgz
 dist/
+junit.xml

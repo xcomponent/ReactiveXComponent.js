@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
-    "test": "export JEST_JUNIT_OUTPUT=\"./test_output/report.xml\"|| set JEST_JUNIT_OUTPUT=\"./test_output/report.xml\"&& jest --coverage $1",
+    "test": "jest --coverage ",
     "lint": "tslint src/**/*.ts*"
   },
   "jest": {
@@ -19,7 +19,7 @@
     "transform": {
       "\\.(ts)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "/test/spec/.*(Test|Spec).ts?$",
+    "testRegex": "(/test/.*(Test|Spec))\\.tsx?$",
     "modulePaths": [
       "<rootDir>/node_modules/",
       "<rootDir>/src/"
