@@ -1,0 +1,98 @@
+<testsuites name="XComponentApi tests">
+  <testsuite name="undefined" tests="1" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="4.887">
+    <testcase classname="test It should create a random guid with the right format" name="test It should create a random guid with the right format" time="8">
+    </testcase>
+  </testsuite>
+  <testsuite name="Test xcConfiguration module" tests="9" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="4.914">
+    <testcase classname="Test xcConfiguration module Test init method should instanciate the parser and store xcApi file data" name="Test xcConfiguration module Test init method should instanciate the parser and store xcApi file data" time="7">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test getCodes method should call getCodes method of parser with the right component and stateMachine" name="Test xcConfiguration module Test getCodes method should call getCodes method of parser with the right component and stateMachine" time="2">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test getPublisherDetails method should call getPublisherDetails method of parser with the right component and stateMachine" name="Test xcConfiguration module Test getPublisherDetails method should call getPublisherDetails method of parser with the right component and stateMachine" time="1">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test getSubscriberTopic method should call getSubscriberTopic method of parser with the right component and stateMachine" name="Test xcConfiguration module Test getSubscriberTopic method should call getSubscriberTopic method of parser with the right component and stateMachine" time="1">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test getSnapshotTopic method should call getSnapshotTopic method of parser with the right component" name="Test xcConfiguration module Test getSnapshotTopic method should call getSnapshotTopic method of parser with the right component" time="1">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test getStateName method should call getStateName method of parser with the right componentCode, stateMachineCode and stateCode" name="Test xcConfiguration module Test getStateName method should call getStateName method of parser with the right componentCode, stateMachineCode and stateCode" time="1">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test publisherExist method should call publisherExist method of parser with the right componentCode, stateMachineCode and messageType" name="Test xcConfiguration module Test publisherExist method should call publisherExist method of parser with the right componentCode, stateMachineCode and messageType" time="1">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test codesExist method should call codesExist method of parser with the right componentName and stateMachineName" name="Test xcConfiguration module Test codesExist method should call codesExist method of parser with the right componentName and stateMachineName" time="1">
+    </testcase>
+    <testcase classname="Test xcConfiguration module Test subscriberExist method should call subscriberExist method of parser with the right componentName and stateMachineName" name="Test xcConfiguration module Test subscriberExist method should call subscriberExist method of parser with the right componentName and stateMachineName" time="1">
+    </testcase>
+  </testsuite>
+  <testsuite name="Test xcWebSocketPublisher module" tests="5" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="5.065">
+    <testcase classname="Test xcWebSocketPublisher module Test getEventToSend method should return event with routing details (how to route the message to the right stateMachine)" name="Test xcWebSocketPublisher module Test getEventToSend method should return event with routing details (how to route the message to the right stateMachine)" time="6">
+    </testcase>
+    <testcase classname="Test xcWebSocketPublisher module Test send method sould send a message to the given stateMachine and component" name="Test xcWebSocketPublisher module Test send method sould send a message to the given stateMachine and component" time="3">
+    </testcase>
+    <testcase classname="Test xcWebSocketPublisher module Test send method sould send a message in a priavte topic to the given stateMachine and component" name="Test xcWebSocketPublisher module Test send method sould send a message in a priavte topic to the given stateMachine and component" time="1">
+    </testcase>
+    <testcase classname="Test xcWebSocketPublisher module Test sendWithStateMachineRef sould send a message to the given instance of stateMachine" name="Test xcWebSocketPublisher module Test sendWithStateMachineRef sould send a message to the given instance of stateMachine" time="1">
+    </testcase>
+    <testcase classname="Test xcWebSocketPublisher module Test canPublish should return true if there is a publisher details and false otherwise" name="Test xcWebSocketPublisher module Test canPublish should return true if there is a publisher details and false otherwise" time="2">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" tests="16" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="5.323">
+    <testcase classname="test Test getCodes: it should get the right codes given existing component and statemachine names" name="test Test getCodes: it should get the right codes given existing component and statemachine names" time="67">
+    </testcase>
+    <testcase classname="test Test getCodes: it should throw an error when using an unkonwn component name" name="test Test getCodes: it should throw an error when using an unkonwn component name" time="44">
+    </testcase>
+    <testcase classname="test Test getCodes: it should throw an error when using an unknown stateMachine name" name="test Test getCodes: it should throw an error when using an unknown stateMachine name" time="52">
+    </testcase>
+    <testcase classname="test Test getPublisherDetails method: it should get the right publisher details given existing component and stateMachine codes" name="test Test getPublisherDetails method: it should get the right publisher details given existing component and stateMachine codes" time="40">
+    </testcase>
+    <testcase classname="test Test getPublisherDetails method: it should throw an error when using an unknown stateMachine name" name="test Test getPublisherDetails method: it should throw an error when using an unknown stateMachine name" time="31">
+    </testcase>
+    <testcase classname="test Test getSubscriberTopic method: it should get the right topic given existing component and stateMachine" name="test Test getSubscriberTopic method: it should get the right topic given existing component and stateMachine" time="34">
+    </testcase>
+    <testcase classname="test Test getSubscriberTopic method: given a wrong component or/and a stateMachine should throw an exception" name="test Test getSubscriberTopic method: given a wrong component or/and a stateMachine should throw an exception" time="25">
+    </testcase>
+    <testcase classname="test Test getSnapshotTopic method: it should get the right snapshot topic given existing component" name="test Test getSnapshotTopic method: it should get the right snapshot topic given existing component" time="30">
+    </testcase>
+    <testcase classname="test Test getSnapshotTopic method: it should throw an exeption when using an unknown component name" name="test Test getSnapshotTopic method: it should throw an exeption when using an unknown component name" time="26">
+    </testcase>
+    <testcase classname="test Test getStateName method: it should get the right state name given existing componentCode StateMachineCode and stateCode" name="test Test getStateName method: it should get the right state name given existing componentCode StateMachineCode and stateCode" time="23">
+    </testcase>
+    <testcase classname="test Test getStateName method: it should throw an exeption when using an unknown componentCode" name="test Test getStateName method: it should throw an exeption when using an unknown componentCode" time="8">
+    </testcase>
+    <testcase classname="test Test getStateName method: it should throw an exeption when using an unknown stateMachineCode" name="test Test getStateName method: it should throw an exeption when using an unknown stateMachineCode" time="7">
+    </testcase>
+    <testcase classname="test Test getStateName method: it should throw an exeption when using an unknown stateCode" name="test Test getStateName method: it should throw an exeption when using an unknown stateCode" time="7">
+    </testcase>
+    <testcase classname="test Test codesExist method method: given a componentName and a stateMachineName, should return true if parser get their codes and false otherwise" name="test Test codesExist method method: given a componentName and a stateMachineName, should return true if parser get their codes and false otherwise" time="8">
+    </testcase>
+    <testcase classname="test Test publisherExist method method: given a componentCode, stateMachineCode and a messageType should return true if the publisher exists and false otherwise" name="test Test publisherExist method method: given a componentCode, stateMachineCode and a messageType should return true if the publisher exists and false otherwise" time="4">
+    </testcase>
+    <testcase classname="test Test subscriberExist method method: given a componentName and a stateMachineName should return true if the susbscriber exists and false otherwise" name="test Test subscriberExist method method: given a componentName and a stateMachineName should return true if the susbscriber exists and false otherwise" time="7">
+    </testcase>
+  </testsuite>
+  <testsuite name="Test xcSession module" tests="3" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="5.807">
+    <testcase classname="Test xcSession module Test createPublisher method should return a new instance of Publisher" name="Test xcSession module Test createPublisher method should return a new instance of Publisher" time="6">
+    </testcase>
+    <testcase classname="Test xcSession module Test createSubscriber method should return a new instance of Subscriber" name="Test xcSession module Test createSubscriber method should return a new instance of Subscriber" time="1">
+    </testcase>
+    <testcase classname="Test xcSession module Test close method should call onclose method when session is closed" name="Test xcSession module Test close method should call onclose method when session is closed" time="4">
+    </testcase>
+  </testsuite>
+  <testsuite name="Test xcWebSocketSubscriber module" tests="5" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="5.897">
+    <testcase classname="Test xcWebSocketSubscriber module Test subscribe method subscribe to a state machine, subscriberListener callback should be executed when a message is received" name="Test xcWebSocketSubscriber module Test subscribe method subscribe to a state machine, subscriberListener callback should be executed when a message is received" time="18">
+    </testcase>
+    <testcase classname="Test xcWebSocketSubscriber module Test subscribe method can subscribe method : return true if subscriber exists and false otherwise" name="Test xcWebSocketSubscriber module Test subscribe method can subscribe method : return true if subscriber exists and false otherwise" time="2">
+    </testcase>
+    <testcase classname="Test xcWebSocketSubscriber module Test unsubscribe method unsubscribe to a subscribed state machine" name="Test xcWebSocketSubscriber module Test unsubscribe method unsubscribe to a subscribed state machine" time="1">
+    </testcase>
+    <testcase classname="Test xcWebSocketSubscriber module Test getStateMachineUpdates method get an observable collection from a subscribed state machine" name="Test xcWebSocketSubscriber module Test getStateMachineUpdates method get an observable collection from a subscribed state machine" time="1">
+    </testcase>
+    <testcase classname="Test xcWebSocketSubscriber module Test getSnapshot method send snapshot request, snapshotListener callback should be executed when a response is received" name="Test xcWebSocketSubscriber module Test getSnapshot method send snapshot request, snapshotListener callback should be executed when a response is received" time="15">
+    </testcase>
+  </testsuite>
+  <testsuite name="Test xcConnection module" tests="2" errors="0" failures="0" skipped="0" timestamp="2016-12-30T14:19:09" time="6.048">
+    <testcase classname="Test xcConnection module Test createSession method given an unknown server url, should call the session listener with an error argument" name="Test xcConnection module Test createSession method given an unknown server url, should call the session listener with an error argument" time="13">
+    </testcase>
+    <testcase classname="Test xcConnection module Test createSession method should call the sessionListener with the created session as argument" name="Test xcConnection module Test createSession method should call the sessionListener with the created session as argument" time="25">
+    </testcase>
+  </testsuite>
+</testsuites>
