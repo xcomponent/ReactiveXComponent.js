@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
-    "test": "JEST_SUITE_NAME=\"XComponentApi tests\" JEST_JUNIT_OUTPUT=\"./test_output/report.xml\" jest --coverage $1",
+    "test": "export JEST_JUNIT_OUTPUT=\"./test_output/report.xml\"|| set JEST_JUNIT_OUTPUT=\"./test_output/report.xml\"&& jest --coverage $1",
     "lint": "tslint src/**/*.ts*"
   },
   "jest": {
