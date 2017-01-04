@@ -1,23 +1,22 @@
-let tags : any = {};
-
-tags.component = "component";
-tags.name = "name";
-tags.id = "id";
-tags.stateMachine = "stateMachine";
-tags.state = "State";
-tags.publish = "publish";
-tags.componentCode = "componentCode";
-tags.stateMachineCode = "stateMachineCode";
-tags.eventCode = "eventCode";
-tags.event = "event";
-tags.topic = "topic";
-tags.eventCode = "eventCode";
-tags.subscribe = "subscribe";
-tags.snapshot = "snapshot";
 
 class Configuration {
 
     private parser : any;
+    private tags = {
+        component: "component",
+        name: "name",
+        id: "id",
+        stateMachine: "stateMachine",
+        state: "State",
+        publish: "publish",
+        componentCode: "componentCode",
+        stateMachineCode: "stateMachineCode",
+        eventCode: "eventCode",
+        event: "event",
+        topic: "topic",
+        subscribe: "subscribe",
+        snapshot: "snapshot"
+    };
 
     constructor(parser) {
         this.parser = parser;
@@ -26,7 +25,7 @@ class Configuration {
     init(xml) {
         this
             .parser
-            .parse(xml, tags);
+            .parse(xml, this.tags);
     };
 
     getCodes(componentName, stateMachineName) {
