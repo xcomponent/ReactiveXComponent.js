@@ -1,4 +1,4 @@
-let tags: any = {};
+let tags : any = {};
 
 tags.component = "component";
 tags.name = "name";
@@ -15,54 +15,68 @@ tags.eventCode = "eventCode";
 tags.subscribe = "subscribe";
 tags.snapshot = "snapshot";
 
+class Configuration {
 
-let Configuration = function (parser) {
-    this.parser = parser;
-};
+    private parser : any;
 
+    constructor(parser) {
+        this.parser = parser;
+    }
 
-Configuration.prototype.init = function (xml) {
-    this.parser.parse(xml, tags);
-};
+    init(xml) {
+        this
+            .parser
+            .parse(xml, tags);
+    };
 
+    getCodes(componentName, stateMachineName) {
+        return this
+            .parser
+            .getCodes(componentName, stateMachineName);
+    };
 
-Configuration.prototype.getCodes = function (componentName, stateMachineName) {
-    return this.parser.getCodes(componentName, stateMachineName);
-};
+    publisherExist(componentCode, stateMachineCode, messageType) {
+        return this
+            .parser
+            .publisherExist(componentCode, stateMachineCode, messageType);
+    };
 
+    codesExist(componentName, stateMachineName) {
+        return this
+            .parser
+            .codesExist(componentName, stateMachineName);
+    };
 
-Configuration.prototype.publisherExist = function (componentCode, stateMachineCode, messageType) {
-    return this.parser.publisherExist(componentCode, stateMachineCode, messageType);
-};
+    getPublisherDetails(componentCode, stateMachineCode, messageType) {
+        return this
+            .parser
+            .getPublisherDetails(componentCode, stateMachineCode, messageType);
+    };
 
+    getSubscriberTopic(componentName, stateMachineName) {
+        return this
+            .parser
+            .getSubscriberTopic(componentName, stateMachineName);
+    };
 
-Configuration.prototype.codesExist = function (componentName, stateMachineName) {
-    return this.parser.codesExist(componentName, stateMachineName);
-};
+    subscriberExist(componentName, stateMachineName) {
+        return this
+            .parser
+            .subscriberExist(componentName, stateMachineName);
+    };
 
+    getSnapshotTopic(componentName) {
+        return this
+            .parser
+            .getSnapshotTopic(componentName);
+    };
 
-Configuration.prototype.getPublisherDetails = function (componentCode, stateMachineCode, messageType) {
-    return this.parser.getPublisherDetails(componentCode, stateMachineCode, messageType);
-};
+    getStateName(componentCode, stateMachineCode, stateCode) {
+        return this
+            .parser
+            .getStateName(componentCode, stateMachineCode, stateCode);
+    };
 
-
-Configuration.prototype.getSubscriberTopic = function (componentName, stateMachineName) {
-    return this.parser.getSubscriberTopic(componentName, stateMachineName);
-};
-
-
-Configuration.prototype.subscriberExist = function (componentName, stateMachineName) {
-    return this.parser.subscriberExist(componentName, stateMachineName);
-};
-
-
-Configuration.prototype.getSnapshotTopic = function (componentName) {
-    return this.parser.getSnapshotTopic(componentName);
-};
-
-
-Configuration.prototype.getStateName = function (componentCode, stateMachineCode, stateCode) {
-    return this.parser.getStateName(componentCode, stateMachineCode, stateCode);
-};
+}
 
 export default Configuration;
