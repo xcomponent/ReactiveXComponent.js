@@ -1,6 +1,6 @@
 import SessionFactory from "communication/xcSession";
-import Parser from "Parser";
-import Configuration from "configuration/xcConfiguration";
+import { ApiConfiguration } from "configuration/ApiConfiguration";
+import { DefaultApiConfigurationParser } from "configuration/ApiConfigurationParser";
 
 let Connection = function () {
 };
@@ -31,12 +31,13 @@ Connection.prototype.init = function (xcApiFileName, serverUrl, sessionData, ses
     let session = SessionFactory.create(serverUrl, null, sessionData);
     let getXcApiRequest = function (xcApiFileName, sessionListener) {
         session.privateSubscriber.getXcApi(xcApiFileName, function (xcApi) {
-            let parser = new Parser();
-            let configuration = new Configuration(parser);
-            configuration.init(xcApi);
-            session.configuration = configuration;
-            session.replyPublisher.configuration = configuration;
-            sessionListener(null, session);
+            const parser = new DefaultApiConfigurationParser();
+            const configurationPromise = parser.parse(xcApi);
+            configurationPromise.then(configuration => {
+                session.configuration = configuration;
+                session.replyPublisher.configuration = configuration;
+                sessionListener(null, session);
+            });
         });
     };
     session.init(sessionListener, getXcApiRequest, xcApiFileName);

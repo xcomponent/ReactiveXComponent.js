@@ -1,9 +1,10 @@
 import { javascriptHelper } from "javascriptHelper";
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import { ApiConfiguration, SubscriberEventType } from "configuration/ApiConfiguration";
 let Rx = require("rx");
 import pako = require("pako");
 
-let Subscriber = function (webSocket, configuration, replyPublisher, guid, privateTopics) {
+let Subscriber = function (webSocket, configuration: ApiConfiguration, replyPublisher, guid, privateTopics) {
     this.webSocket = webSocket;
     this.configuration = configuration;
     this.replyPublisher = replyPublisher;
@@ -41,6 +42,7 @@ Subscriber.prototype.getXcApi = function (xcApiFileName, getXcApiListener) {
             try {
                 return thisObject.getJsonDataFromXcApiRequest(e, xcApiFileName);
             } catch (e) {
+                console.error(e);
                 return null;
             }
         })
@@ -86,8 +88,8 @@ Subscriber.prototype.getSnapshot = function (componentName, stateMachineName, sn
 
 
 Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName, replyTopic) {
-    let topic = this.configuration.getSnapshotTopic(componentName);
     let codes = this.configuration.getCodes(componentName, stateMachineName);
+    let topic = this.configuration.getSnapshotTopic(codes.componentCode);
     let thisObject = this;
     let jsonMessage = {
         "StateMachineCode": parseInt(codes.stateMachineCode),
@@ -142,7 +144,8 @@ Subscriber.prototype.prepareStateMachineUpdates = function (componentName, state
 
 
 Subscriber.prototype.canSubscribe = function (componentName, stateMachineName) {
-    return this.configuration.subscriberExist(componentName, stateMachineName);
+    let codes = this.configuration.getCodes(componentName, stateMachineName);
+    return this.configuration.subscriberExist(codes.componentCode, codes.stateMachineCode);
 };
 
 
@@ -158,7 +161,8 @@ Subscriber.prototype.subscribe = function (componentName, stateMachineName, stat
 
 Subscriber.prototype.sendSubscribeRequest = function (componentName, stateMachineName) {
     if (!isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-        let topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
+        let codes = this.configuration.getCodes(componentName, stateMachineName);
+        let topic = this.configuration.getSubscriberTopic(codes.componentCode, codes.stateMachineCode, SubscriberEventType.Update);
         let kind = xcWebSocketBridgeConfiguration.kinds.Public;
         this.sendSubscribeRequestToTopic(topic, kind);
         this.addSubscribedStateMachines(componentName, stateMachineName);
@@ -190,7 +194,8 @@ Subscriber.prototype.getDataToSend = function (topic, kind) {
 
 Subscriber.prototype.unsubscribe = function (componentName, stateMachineName) {
     if (isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-        let topic = this.configuration.getSubscriberTopic(componentName, stateMachineName);
+        let codes = this.configuration.getCodes(componentName, stateMachineName);
+        let topic = this.configuration.getSubscriberTopic(codes.componentCode, codes.stateMachineCode, SubscriberEventType.Update);
         let kind = xcWebSocketBridgeConfiguration.kinds.Public;
         let data = this.getDataToSend(topic, kind);
         let command = xcWebSocketBridgeConfiguration.commands.unsubscribe;
@@ -265,11 +270,12 @@ Subscriber.prototype.getJsonDataFromEvent = function (e) {
 };
 
 
-let encodeBase64 = function (b64Data) {
+let decodeServerMessage = function (b64Data) {
     let atob = javascriptHelper().atob;
     let charData = atob(b64Data).split("").map(function (x) {
         return x.charCodeAt(0);
     });
+
     let binData = new Uint8Array(charData);
     let data = pako.inflate(binData).filter(function (x) {
         return x !== 0;
@@ -289,7 +295,7 @@ Subscriber.prototype.getJsonDataFromSnapshot = function (e) {
     let b64Data = JSON.parse(jsonData.JsonMessage).Items;
     let items;
     try {
-        items = JSON.parse(encodeBase64(b64Data));
+        items = JSON.parse(decodeServerMessage(b64Data));
     } catch (e) {
         items = b64Data;
     }
@@ -324,7 +330,7 @@ Subscriber.prototype.getJsonDataFromXcApiRequest = function (e, xcApiFileName) {
     if (xcWebSocketBridgeConfiguration.commands.getXcApi !== getCommand(e.data)) {
         return null;
     } else {
-        return encodeBase64(jsonData.Content);
+        return decodeServerMessage(jsonData.Content);
     }
 };
 

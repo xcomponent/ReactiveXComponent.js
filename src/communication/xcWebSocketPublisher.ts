@@ -1,6 +1,7 @@
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import { ApiConfiguration } from "configuration/ApiConfiguration";
 
-let Publisher = function (webSocket, configuration, privateTopic, sessionData) {
+let Publisher = function (webSocket, configuration: ApiConfiguration, privateTopic, sessionData) {
     this.webSocket = webSocket;
     this.configuration = configuration;
     this.privateTopic = privateTopic;
