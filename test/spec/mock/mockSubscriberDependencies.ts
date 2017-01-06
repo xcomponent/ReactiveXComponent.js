@@ -7,11 +7,11 @@ let outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldRespon
 let snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
 let configuration = jasmine.createSpyObj("configuration", ["getSubscriberTopic", "getCodes", "getHeaderConfig", "convertToWebsocketInputFormat", "getSnapshotTopic", "getStateName", "subscriberExist"]);
 
-configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
+configuration.getSubscriberTopic.and.callFake(function (componentCode, stateMachineCode, type) {
     return outputTopic;
 });
 
-configuration.getSnapshotTopic.and.callFake(function (componentName) {
+configuration.getSnapshotTopic.and.callFake(function (componentCode) {
     return "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
 });
 
