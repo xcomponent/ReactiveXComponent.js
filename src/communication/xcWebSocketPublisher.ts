@@ -1,5 +1,5 @@
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
-import { ApiConfiguration } from "configuration/ApiConfiguration";
+import { ApiConfiguration } from "configuration/apiConfiguration";
 
 let Publisher = function (webSocket, configuration: ApiConfiguration, privateTopic, sessionData) {
     this.webSocket = webSocket;
@@ -24,13 +24,13 @@ Publisher.prototype.getEventToSend = function (componentName, stateMachineName, 
 
 
 Publisher.prototype.canPublish = function (componentName, stateMachineName, messageType) {
-    if (this.configuration.codesExist(componentName, stateMachineName)) {
+    try {
         let codes = this.configuration.getCodes(componentName, stateMachineName);
-        if (this.configuration.publisherExist(codes.componentCode, codes.stateMachineCode, messageType)) {
-            return true;
-        }
+        return this.configuration.containsPublisher(codes.componentCode, codes.stateMachineCode, messageType);
     }
-    return false;
+    catch (_) {
+        return false;
+    }
 };
 
 

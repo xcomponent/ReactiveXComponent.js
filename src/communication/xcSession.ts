@@ -4,7 +4,7 @@ import Publisher from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
-import { ApiConfiguration } from "configuration/ApiConfiguration";
+import { ApiConfiguration } from "configuration/apiConfiguration";
 
 let SessionFactory = function (serverUrl, configuration: ApiConfiguration, sessionData) {
     let WebSocket = javascriptHelper().WebSocket;

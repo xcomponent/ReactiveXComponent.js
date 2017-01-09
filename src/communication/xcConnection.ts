@@ -1,6 +1,6 @@
 import SessionFactory from "communication/xcSession";
-import { ApiConfiguration } from "configuration/ApiConfiguration";
-import { DefaultApiConfigurationParser } from "configuration/ApiConfigurationParser";
+import { ApiConfiguration } from "configuration/apiConfiguration";
+import { DefaultApiConfigurationParser } from "configuration/apiConfigurationParser";
 
 let Connection = function () {
 };
@@ -37,7 +37,8 @@ Connection.prototype.init = function (xcApiFileName, serverUrl, sessionData, ses
                 session.configuration = configuration;
                 session.replyPublisher.configuration = configuration;
                 sessionListener(null, session);
-            });
+            })
+            .catch(e => sessionListener(e, null));
         });
     };
     session.init(sessionListener, getXcApiRequest, xcApiFileName);

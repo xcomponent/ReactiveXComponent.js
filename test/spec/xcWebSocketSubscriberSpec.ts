@@ -43,7 +43,7 @@ describe("Test xcWebSocketSubscriber module", function () {
 
         it("can subscribe method : return true if subscriber exists and false otherwise", function () {
             subscriber.canSubscribe("RandomComponent", "RandomStateMachine");
-            expect(Mock.configuration.subscriberExist).toHaveBeenCalledWith("-69981087", "-829536631");
+            expect(Mock.configuration.containsSubscriber).toHaveBeenCalledWith("-69981087", "-829536631");
         });
     });
 
