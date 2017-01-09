@@ -5,21 +5,23 @@ import Subscriber from "communication/xcWebSocketSubscriber";
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 
+import Configuration from "configuration/xcConfiguration";
+
 class Session {
 
-    public serverUrl : any;
+    public serverUrl : string;
     public webSocket : any;
-    public configuration : any;
-    public sessionData : any;
+    public configuration : Configuration;
+    public sessionData : string;
     public guid : any;
-    public privateTopic : any;
-    public privateSubscriber : any;
-    public replyPublisher : any;
-    public publishers : any;
-    public subscribers : any;
-    public privateTopics : any;
+    public privateTopic : string;
+    public privateSubscriber : Subscriber;
+    public replyPublisher : Publisher;
+    public publishers : Array<Publisher>;
+    public subscribers : Array<Subscriber>;
+    public privateTopics : Array<String>;
 
-    constructor(serverUrl, webSocket, configuration, sessionData) {
+    constructor(serverUrl : string, webSocket : any, configuration : Configuration, sessionData: string) {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
@@ -35,7 +37,7 @@ class Session {
         this.privateTopics = [this.privateTopic];
     }
 
-    setPrivateTopic(privateTopic) {
+    setPrivateTopic(privateTopic : string) {
         this.addPrivateTopic(privateTopic);
         this.removePrivateTopic(this.privateTopic);
         this.privateTopic = privateTopic;
@@ -47,7 +49,7 @@ class Session {
         }
     };
 
-    addPrivateTopic(privateTopic) {
+    addPrivateTopic(privateTopic : string) {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
         this
             .privateSubscriber
@@ -60,12 +62,12 @@ class Session {
         }
     };
 
-    removePrivateTopic(privateTopic) {
+    removePrivateTopic(privateTopic : string) {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
         this
             .privateSubscriber
             .sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
-        this.privateTopics = this.removeElement(this.privateTopics, privateTopic, "private topic not found");
+        this.removeElement(this.privateTopics, privateTopic, "private topic not found");
         for (let i = 0; i < this.subscribers.length; i++) {
             this.subscribers[i].privateTopics = this.privateTopics;
         }
@@ -114,21 +116,21 @@ class Session {
         return subscriber;
     };
 
-    private removeElement(array, e, msg) {
+    private removeElement(array : Array<Object>, e : Object, msg : string) {
         let index = array.indexOf(e);
         if (index > -1) {
-            return array.splice(index, 1);
+            array.splice(index, 1);
         } else {
             throw new Error(msg);
         }
     };
 
-    disposePublisher(publisher) {
-        this.publishers = this.removeElement(this.publishers, publisher, "Publisher not found");
+    disposePublisher(publisher : Publisher) {
+        this.removeElement(this.publishers, publisher, "Publisher not found");
     };
 
-    disposeSubscriber(subscriber) {
-        this.subscribers = this.removeElement(this.subscribers, subscriber, "Subscriber not found");
+    disposeSubscriber(subscriber : Subscriber) {
+        this.removeElement(this.subscribers, subscriber, "Subscriber not found");
     };
 
     dispose() {
@@ -152,7 +154,7 @@ class Session {
 
 }
 
-let SessionFactory = function (serverUrl, configuration, sessionData) {
+let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) {
     let WebSocket = javascriptHelper().WebSocket;
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
