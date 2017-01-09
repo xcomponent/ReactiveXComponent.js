@@ -4,7 +4,11 @@ import Configuration from "configuration/xcConfiguration";
 
 class Connection {
 
-    constructor() {}
+    private apis : any;
+
+    constructor() {
+        this.apis = {};
+    }
 
     getXcApiList(serverUrl, getXcApiListListener) {
         let session = SessionFactory.create(serverUrl, null, null);
@@ -30,17 +34,26 @@ class Connection {
 
     private init(xcApiFileName, serverUrl, sessionData, sessionListener) {
         let session = SessionFactory.create(serverUrl, null, sessionData);
+        let thisObject = this;
         let getXcApiRequest = function (xcApiFileName, sessionListener) {
-            session
-                .privateSubscriber
-                .getXcApi(xcApiFileName, function (xcApi) {
-                    let parser = new Parser();
-                    let configuration = new Configuration(parser);
-                    configuration.init(xcApi);
-                    session.configuration = configuration;
-                    session.replyPublisher.configuration = configuration;
-                    sessionListener(null, session);
-                });
+            if (thisObject.apis[xcApiFileName] === undefined) {
+                session
+                    .privateSubscriber
+                    .getXcApi(xcApiFileName, function (xcApi) {
+                        let parser = new Parser();
+                        let configuration = new Configuration(parser);
+                        configuration.init(xcApi);
+                        thisObject.apis[xcApiFileName] = configuration;
+                        session.configuration = configuration;
+                        session.replyPublisher.configuration = configuration;
+                        sessionListener(null, session);
+                    });
+            } else {
+                let configuration = thisObject.apis[xcApiFileName];
+                session.configuration = configuration;
+                session.replyPublisher.configuration = configuration;
+                sessionListener(null, session);
+            }
         };
         session.init(sessionListener, getXcApiRequest, xcApiFileName);
     };
