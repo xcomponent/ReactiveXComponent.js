@@ -1,6 +1,6 @@
 import { javascriptHelper } from "javascriptHelper";
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
-import { ApiConfiguration, SubscriberEventType } from "configuration/ApiConfiguration";
+import { ApiConfiguration, SubscriberEventType } from "configuration/apiConfiguration";
 let Rx = require("rx");
 import pako = require("pako");
 
@@ -129,6 +129,7 @@ Subscriber.prototype.prepareStateMachineUpdates = function (componentName, state
             try {
                 return thisObject.getJsonDataFromEvent(e);
             } catch (e) {
+                console.error(e);
                 return null;
             }
         })
@@ -145,7 +146,7 @@ Subscriber.prototype.prepareStateMachineUpdates = function (componentName, state
 
 Subscriber.prototype.canSubscribe = function (componentName, stateMachineName) {
     let codes = this.configuration.getCodes(componentName, stateMachineName);
-    return this.configuration.subscriberExist(codes.componentCode, codes.stateMachineCode);
+    return this.configuration.containsSubscriber(codes.componentCode, codes.stateMachineCode);
 };
 
 

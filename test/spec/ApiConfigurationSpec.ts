@@ -1,5 +1,5 @@
-import { DefaultApiConfigurationParser } from "configuration/ApiConfigurationParser";
-import { SubscriberEventType } from "configuration/ApiConfiguration";
+import { DefaultApiConfigurationParser } from "configuration/apiConfigurationParser";
+import { SubscriberEventType } from "configuration/apiConfiguration";
 
 const xml = `<?xml version="1.0" encoding="utf-8"?>
 <deployment environment="Dev" xcProjectName="HelloWorld" deploymentTargetCode="-487384339" deploymentTargetName="HelloWorldApi" version="1.0" frameworkType="Framework4" xmlns="http://xcomponent.com/DeploymentConfig.xsd">
@@ -24,6 +24,34 @@ const xml = `<?xml version="1.0" encoding="utf-8"?>
   </clientAPICommunication>
   <codesConverter>
     <components>
+      <component name="HelloWorld2" id="-69981080">
+        <events>
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
+          <event name="XComponent.Common.Event.ApiProxy.ApiInitSuccessful" id="1" />
+          <event name="XComponent.Common.Event.ApiProxy.CancelApiInit" id="2" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedSubscription" id="3" />
+          <event name="XComponent.Common.Event.ApiProxy.InstanceUpdatedUnsubscription" id="4" />
+          <event name="XComponent.Common.Event.ApiProxy.SnapshotOptions" id="5" />
+          <event name="XComponent.Common.Event.DefaultEvent" id="6" />
+          <event name="XComponent.Common.Event.ExceptionEvent" id="7" />
+          <event name="XComponent.HelloWorld.UserObject.HelloWorldResponse" id="8" />
+          <event name="XComponent.HelloWorld.UserObject.SayHello" id="9" />
+        </events>
+        <stateMachines>
+          <stateMachine name="HelloWorldManager2" id="-829536630">
+            <states>
+              <State name="EntryPoint" id="0" />
+            </states>
+          </stateMachine>
+          <stateMachine name="HelloWorldResponse2" id="-343862281">
+            <states>
+              <State name="Start" id="0" />
+              <State name="Loop" id="1" />
+              <State name="Done" id="2" />
+            </states>
+          </stateMachine>
+        </stateMachines>
+      </component>
       <component name="HelloWorld" id="-69981087">
         <events>
           <event name="XComponent.Common.Event.ApiProxy.ApiInitError" id="0" />
@@ -68,11 +96,19 @@ test("Test basic config parsing", () => {
     .then(config => expect(config).toBeDefined());
 });
 
+test("Test parsing non xml format", () => {
+  return testParseWithWrongInput("wrong text input");
+});
+
 test("Test parsing wrong xml format", () => {
-  return parse("wrong format")
+  return testParseWithWrongInput("<deployment />");
+});
+
+const testParseWithWrongInput = (input: string) => {
+  return parse(input)
     .then(_ => fail())
     .catch(e => { });
-});
+}
 
 test("Test getCodes: it should get the right codes given existing component and statemachine names", () => {
   return parse(xml)
@@ -80,11 +116,11 @@ test("Test getCodes: it should get the right codes given existing component and 
       let codes, correctCodes;
 
       codes = config.getCodes("HelloWorld", "HelloWorldManager");
-      correctCodes = { componentCode: "-69981087", stateMachineCode: "-829536631" };
+      correctCodes = { componentCode: -69981087, stateMachineCode: -829536631 };
       expect(codes).toEqual(correctCodes);
 
       codes = config.getCodes("HelloWorld", "HelloWorldResponse");
-      correctCodes = { componentCode: "-69981087", stateMachineCode: "-343862282" };
+      correctCodes = { componentCode: -69981087, stateMachineCode: -343862282 };
       expect(codes).toEqual(correctCodes);
     });
 });
@@ -115,17 +151,17 @@ test("Test getPublisherDetails method: it should get the right publisher details
   return parse(xml)
     .then(config => {
       let correctPublish = {
-        eventCode: "9",
+        eventCode: 9,
         routingKey: "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
       };
-      let publish = config.getPublisherDetails("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello");
+      let publish = config.getPublisherDetails(-69981087, -829536631, "XComponent.HelloWorld.UserObject.SayHello");
       expect(publish).toEqual(correctPublish);
     });
 });
 
 test("Test getPublisherDetails method: it should throw an error when using an unknown stateMachine name", () => {
-  const componentCode = "random componentCode";
-  const stateMachineCode = "random stateMachineCode";
+  const componentCode = 101;
+  const stateMachineCode = 102;
   const messageType = "type";
   let messageError = `publisher not found - component code: ${componentCode} - statemachine code: ${stateMachineCode} - message type: ${messageType} `;
 
@@ -141,14 +177,14 @@ test("Test getSubscriberTopic method: it should get the right topic given existi
   let correctTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
   return parse(xml)
     .then(config => {
-      let topic = config.getSubscriberTopic("-69981087", "-343862282", SubscriberEventType.Update);
+      let topic = config.getSubscriberTopic(-69981087, -343862282, SubscriberEventType.Update);
       expect(topic).toEqual(correctTopic);
     });
 });
 
 test("Test getSubscriberTopic method: given a wrong component or/and a stateMachine should throw an exception", () => {
-  const componentCode = "random componentCode";
-  const stateMachineCode = "random stateMachineCode";
+  const componentCode = 101;
+  const stateMachineCode = 102;
   const messageError = `Subscriber not found - component code: ${componentCode} - statemachine code: ${stateMachineCode}`;
 
   return parse(xml)
@@ -163,13 +199,13 @@ test("Test getSnapshotTopic method: it should get the right snapshot topic given
   let correctTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
   return parse(xml)
     .then(config => {
-      let topic = config.getSnapshotTopic("-69981087");
+      let topic = config.getSnapshotTopic(-69981087);
       expect(topic).toEqual(correctTopic);
     });
 });
 
 test("Test getSnapshotTopic method: it should throw an exeption when using an unknown component code", () => {
-  const componentCode = "random componentCode";
+  const componentCode = 101;
   const messageError = `Snapshot topic not found - component code: ${componentCode}`;
 
   return parse(xml)
@@ -183,71 +219,62 @@ test("Test getSnapshotTopic method: it should throw an exeption when using an un
 test("Test getStateName method: it should get the right state name given existing componentCode StateMachineCode and stateCode", () => {
   return parse(xml)
     .then(config => {
-      expect(config.getStateName("-69981087", "-829536631", "0")).toEqual("EntryPoint");
-      expect(config.getStateName("-69981087", "-343862282", "0")).toEqual("Start");
-      expect(config.getStateName("-69981087", "-343862282", "1")).toEqual("Loop");
-      expect(config.getStateName("-69981087", "-343862282", "2")).toEqual("Done");
+      expect(config.getStateName(-69981087, -829536631, 0)).toEqual("EntryPoint");
+      expect(config.getStateName(-69981087, -343862282, 0)).toEqual("Start");
+      expect(config.getStateName(-69981087, -343862282, 1)).toEqual("Loop");
+      expect(config.getStateName(-69981087, -343862282, 2)).toEqual("Done");
     });
 });
 
 test("Test getStateName method: it should throw an exeption when using an unknown componentCode", () => {
-  const componentCode = "unknown";
+  const componentCode = 101;
   const messageError = `Component '${componentCode}' not found`;
 
   return parse(xml)
     .then(config => {
-      config.getStateName(componentCode, "-343862282", "2");
+      config.getStateName(componentCode, -343862282, 2);
       fail();
     })
     .catch(e => expect(e.message).toBe(messageError));
 });
 
 test("Test getStateName method: it should throw an exeption when using an unknown stateMachineCode", () => {
-  const stateMachineCode = "unknown";
+  const stateMachineCode = 101;
   const messageError = `StateMachine '${stateMachineCode}' not found`;
 
   return parse(xml)
     .then(config => {
-      config.getStateName("-69981087", stateMachineCode, "2");
+      config.getStateName(-69981087, stateMachineCode, 2);
       fail();
     })
     .catch(e => expect(e.message).toBe(messageError));
 });
 
 test("Test getStateName method: it should throw an exeption when using an unknown stateCode", () => {
-  const stateCode = "unknown";
+  const stateCode = -10;
   const messageError = `State '${stateCode}' not found`;
 
   return parse(xml)
     .then(config => {
-      config.getStateName("-69981087", "-343862282", stateCode);
+      config.getStateName(-69981087, -343862282, stateCode);
       fail();
     })
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("Test codesExist method method: given a componentName and a stateMachineName, should return true if parser get their codes and false otherwise", () => {
+test("Test containsPublisher method method: given a componentCode, stateMachineCode and a messageType should return true if the publisher exists and false otherwise", () => {
   return parse(xml)
     .then(config => {
-      expect(config.codesExist("HelloWorld", "HelloWorldManager")).toBe(true);
-      expect(config.codesExist("HelloWorld", "RandomStateMachine")).toBe(false);
-      expect(config.codesExist("RandomComponent", "RandomStateMachine")).toBe(false);
+      expect(config.containsPublisher(-69981087, -829536631, "XComponent.HelloWorld.UserObject.SayHello")).toBe(true);
+      expect(config.containsPublisher(101, 102, "XComponent.HelloWorld.UserObject.SayHello")).toBe(false);
     });
 });
 
-test("Test publisherExist method method: given a componentCode, stateMachineCode and a messageType should return true if the publisher exists and false otherwise", () => {
+test("Test containsSubscriber method method: given a componentName and a stateMachineName should return true if the susbscriber exists and false otherwise", () => {
   return parse(xml)
     .then(config => {
-      expect(config.publisherExist("-69981087", "-829536631", "XComponent.HelloWorld.UserObject.SayHello")).toBe(true);
-      expect(config.publisherExist("RandomCode", "RandomCode", "XComponent.HelloWorld.UserObject.SayHello")).toBe(false);
-    });
-});
-
-test("Test subscriberExist method method: given a componentName and a stateMachineName should return true if the susbscriber exists and false otherwise", () => {
-  return parse(xml)
-    .then(config => {
-      expect(config.subscriberExist("RandomComponent", "RandomStateMachine", SubscriberEventType.Update)).toBe(false);
-      expect(config.subscriberExist("-69981087", "RandomStateMachine", SubscriberEventType.Update)).toBe(false);
-      expect(config.subscriberExist("-69981087", "-343862282", SubscriberEventType.Update)).toBe(true);
+      expect(config.containsSubscriber(101, 102, SubscriberEventType.Update)).toBe(false);
+      expect(config.containsSubscriber(-69981087, 102, SubscriberEventType.Update)).toBe(false);
+      expect(config.containsSubscriber(-69981087, -343862282, SubscriberEventType.Update)).toBe(true);
     });
 });

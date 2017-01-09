@@ -5,7 +5,7 @@ import webSocketConf from "configuration/xcWebSocketBridgeConfiguration";
 // Mocking configuration
 let outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
 let snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
-let configuration = jasmine.createSpyObj("configuration", ["getSubscriberTopic", "getCodes", "getHeaderConfig", "convertToWebsocketInputFormat", "getSnapshotTopic", "getStateName", "subscriberExist"]);
+let configuration = jasmine.createSpyObj("configuration", ["getSubscriberTopic", "getCodes", "getHeaderConfig", "convertToWebsocketInputFormat", "getSnapshotTopic", "getStateName", "containsSubscriber"]);
 
 configuration.getSubscriberTopic.and.callFake(function (componentCode, stateMachineCode, type) {
     return outputTopic;

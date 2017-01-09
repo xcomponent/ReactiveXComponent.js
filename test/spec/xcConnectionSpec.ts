@@ -2,7 +2,7 @@ import { WebSocket, Server, SocketIO } from "mock-socket";
 import Connection from "communication/xcConnection";
 import pako = require("pako");
 
-const encodeServerMessage =  (strData: string) => {
+const encodeServerMessage = (strData: string) => {
     let binaryString = pako.deflate(strData, { to: "string" });
 
     return window.btoa(binaryString);
@@ -43,7 +43,13 @@ describe("Test xcConnection module", function () {
             connection.createSession(xcApiFileName, serverUrl, sessionListener);
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
-                    let content = encodeServerMessage("<test/>");
+                    const getApiResponse = `<deployment>  
+                                                <clientAPICommunication>   
+                                                </clientAPICommunication>
+                                                <codesConverter>   
+                                                </codesConverter>
+                                            </deployment>`;
+                    let content = encodeServerMessage(getApiResponse);
                     let data = { ApiFound: true, ApiName: xcApiFileName, Content: content };
                     server.send("getXcApi " + JSON.stringify(data));
                 });
