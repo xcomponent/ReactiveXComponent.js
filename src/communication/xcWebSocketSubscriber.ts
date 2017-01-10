@@ -21,7 +21,7 @@ class Subscriber {
         this.subscribedStateMachines = {};
         this.observableMsg = Rx
             .Observable
-            .fromEvent(this.webSocket, "message");
+            .fromEvent(this.webSocket.getWS(), "message");
         this.observableSubscribers = [];
         this.guid = guid;
         this.privateTopics = privateTopics;

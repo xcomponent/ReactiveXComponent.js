@@ -6,11 +6,13 @@ import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfi
 import * as definition from "definition";
 
 import Configuration from "configuration/xcConfiguration";
+import IWebSocket from "communication/IWebSocket";
+import WebSocket from "communication/WebSocket";
 
 class Session {
 
     public serverUrl : string;
-    public webSocket : any;
+    public webSocket : IWebSocket;
     public configuration : Configuration;
     public sessionData : string;
     public guid : any;
@@ -21,7 +23,7 @@ class Session {
     public subscribers : Array<Subscriber>;
     public privateTopics : Array<String>;
 
-    constructor(serverUrl : string, webSocket : any, configuration : Configuration, sessionData: string) {
+    constructor(serverUrl : string, webSocket : IWebSocket, configuration : Configuration, sessionData: string) {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
@@ -76,28 +78,28 @@ class Session {
     init(sessionListener, getXcApiRequest, xcApiFileName) {
         let thisObject = this;
 
-        this.webSocket.onopen = function (e) {
+        this.webSocket.setEventListener('onopen', function (e) {
             thisObject
                 .privateSubscriber
                 .sendSubscribeRequestToTopic(thisObject.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
             getXcApiRequest(xcApiFileName, sessionListener);
             console.log("connection started on " + thisObject.serverUrl + ".");
-        };
+        });
 
-        this.webSocket.onerror = function (e) {
+        this.webSocket.setEventListener('onerror', function (e) {
             let messageError = "Error on " + thisObject.serverUrl + ".";
             console.error(messageError);
             console.error(e);
             sessionListener(messageError, null);
-        };
+        });
 
-        this.webSocket.onclose = function (e) {
+        this.webSocket.setEventListener('onclose', function (e) {
             console.log("connection on " + thisObject.serverUrl + " closed.");
             console.log(e);
             if (!e.wasClean) {
                 throw new Error("unexpected connection close with code " + e.code);
             }
-        };
+        });
     };
 
     createPublisher() {
@@ -155,7 +157,7 @@ class Session {
 }
 
 let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) {
-    let WebSocket = javascriptHelper().WebSocket;
+    //let WebSocket = javascriptHelper().WebSocket;
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
     return session;

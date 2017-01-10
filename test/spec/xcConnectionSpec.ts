@@ -1,6 +1,8 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
 import Connection from "communication/xcConnection";
 
+import IWS from "communication/IWebSocket";
+import WS from "communication/WebSocket";
 
 describe("Test xcConnection module", function () {
 

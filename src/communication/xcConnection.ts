@@ -14,7 +14,7 @@ class Connection {
         let session = SessionFactory.create(serverUrl, null, null);
         session
             .webSocket
-            .addEventListener("open", function (e) {
+            .setEventListener('onopen', function (e) {
                 session
                     .privateSubscriber
                     .getXcApiList(function (apis) {

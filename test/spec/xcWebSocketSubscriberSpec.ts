@@ -12,11 +12,14 @@ describe("Test xcWebSocketSubscriber module", function () {
             var serverUrl = "wss://" + (new Guid()).create();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            console.log(mockWebSocket.getWS);
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             subscriber = new Subscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
         });
 
         it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
-            mockWebSocket.onopen = function (e) {
+            mockWebSocket.setEventListener('onopen', function (e) {
                 var stateMachineUpdateListener = function (data) {
                     expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                     expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
@@ -28,7 +31,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                 };
                 //subscribe send a message (subscribe request)
                 subscriber.subscribe("component", "stateMachine", stateMachineUpdateListener);
-            }
+            });
 
             mockServer.on('connection', function (server) {
                 //when subscribe request is received, we send send jsonData
@@ -113,12 +116,12 @@ describe("Test xcWebSocketSubscriber module", function () {
                     }
                 });
             });
-            mockWebSocket.onopen = function (e) {
+            mockWebSocket.setEventListener('onopen', function (e) {
                 var snapshotListener = function (items) {
                     done();
                 }
                 subscriber.getSnapshot("component", "stateMachine", snapshotListener);
-            };
+            });
         });
 
     });
