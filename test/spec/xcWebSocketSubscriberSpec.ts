@@ -12,9 +12,6 @@ describe("Test xcWebSocketSubscriber module", function () {
             var serverUrl = "wss://" + (new Guid()).create();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            console.log(mockWebSocket.getWS);
-            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             subscriber = new Subscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
         });
 

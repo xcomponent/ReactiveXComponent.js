@@ -157,7 +157,6 @@ class Session {
 }
 
 let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) {
-    //let WebSocket = javascriptHelper().WebSocket;
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
     return session;
