@@ -10,8 +10,9 @@ let Publisher = function (webSocket, configuration: ApiConfiguration, privateTop
 
 
 Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
-    let codes = this.configuration.getCodes(componentName, stateMachineName);
-    let headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
+    const componentCode = this.configuration.getComponentCode(componentName);
+    const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+    let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
     let event = {
         "Header": headerConfig.header,
         "JsonMessage": JSON.stringify(jsonMessage)
@@ -24,13 +25,13 @@ Publisher.prototype.getEventToSend = function (componentName, stateMachineName, 
 
 
 Publisher.prototype.canPublish = function (componentName, stateMachineName, messageType) {
-    try {
-        let codes = this.configuration.getCodes(componentName, stateMachineName);
-        return this.configuration.containsPublisher(codes.componentCode, codes.stateMachineCode, messageType);
+    if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
+        const componentCode = this.configuration.getComponentCode(componentName);
+        const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+        return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
     }
-    catch (_) {
-        return false;
-    }
+
+    return false;
 };
 
 

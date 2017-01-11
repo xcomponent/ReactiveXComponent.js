@@ -74,15 +74,18 @@ let corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " 
 
 
 // Mocking configuration
-let configuration = jasmine.createSpyObj("configuration", ["getCodes", "getPublisherDetails", "codesExist", "containsPublisher"]);
-configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
+let configuration = jasmine.createSpyObj("configuration", ["getComponentCode", "getStateMachineCode", "getPublisherDetails", "containsStateMachine", "containsPublisher"]);
+configuration.getComponentCode.and.callFake(function (componentName) {
+    if (!componentName){
+        throw new Error();
+    }
+    return componentCode;
+});
+configuration.getStateMachineCode.and.callFake(function (componentName, stateMachineName) {
     if (!componentName || !stateMachineName){
         throw new Error();
     }
-    return {
-        componentCode: componentCode,
-        stateMachineCode: stateMachineCode
-    };
+    return stateMachineCode;
 });
 configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
     return {
@@ -90,7 +93,7 @@ configuration.getPublisherDetails.and.callFake(function (componentCode, stateMac
         routingKey: routingKey
     };
 });
-configuration.codesExist.and.callFake(function (componentName, stateMachineName) {
+configuration.containsStateMachine.and.callFake(function (componentName, stateMachineName) {
     if (!componentName || !stateMachineName) {
         return false;
     } else {

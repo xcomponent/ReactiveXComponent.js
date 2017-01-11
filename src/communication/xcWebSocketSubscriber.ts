@@ -59,7 +59,6 @@ Subscriber.prototype.getXcApi = function (xcApiFileName, getXcApiListener) {
 };
 
 Subscriber.prototype.getSnapshot = function (componentName, stateMachineName, snapshotListener) {
-    let codes = this.configuration.getCodes(componentName, stateMachineName);
     let replyTopic = this.guid.create();
     let thisObject = this;
     this.observableMsg
@@ -88,12 +87,13 @@ Subscriber.prototype.getSnapshot = function (componentName, stateMachineName, sn
 
 
 Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachineName, replyTopic) {
-    let codes = this.configuration.getCodes(componentName, stateMachineName);
-    let topic = this.configuration.getSnapshotTopic(codes.componentCode);
+    const componentCode = this.configuration.getComponentCode(componentName);
+    const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+    let topic = this.configuration.getSnapshotTopic(componentCode);
     let thisObject = this;
     let jsonMessage = {
-        "StateMachineCode": parseInt(codes.stateMachineCode),
-        "ComponentCode": parseInt(codes.componentCode),
+        "StateMachineCode": parseInt(stateMachineCode),
+        "ComponentCode": parseInt(componentCode),
         "ReplyTopic": { "Case": "Some", "Fields": [replyTopic] },
         "PrivateTopic": {
             "Case": "Some",
@@ -104,7 +104,7 @@ Subscriber.prototype.getDataToSendSnapshot = function (componentName, stateMachi
     };
     let dataToSendSnapshot = {
         topic: topic,
-        componentCode: codes.componentCode,
+        componentCode: componentCode,
         data: {
             "Header": { "IncomingType": 0 },
             "JsonMessage": JSON.stringify(jsonMessage)
@@ -122,7 +122,8 @@ Subscriber.prototype.getStateMachineUpdates = function (componentName, stateMach
 
 
 Subscriber.prototype.prepareStateMachineUpdates = function (componentName, stateMachineName) {
-    let codes = this.configuration.getCodes(componentName, stateMachineName);
+    const componentCode = this.configuration.getComponentCode(componentName);
+    const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
     let thisObject = this;
     let filteredObservable = this.observableMsg
         .map(function (e) {
@@ -135,7 +136,7 @@ Subscriber.prototype.prepareStateMachineUpdates = function (componentName, state
         })
         .filter(function (jsonData) {
             try {
-                return isSameComponent(jsonData, codes) && isSameStateMachine(jsonData, codes);
+                return isSameComponent(jsonData, componentCode) && isSameStateMachine(jsonData, stateMachineCode);
             } catch (e) {
                 return false;
             }
@@ -145,8 +146,9 @@ Subscriber.prototype.prepareStateMachineUpdates = function (componentName, state
 
 
 Subscriber.prototype.canSubscribe = function (componentName, stateMachineName) {
-    let codes = this.configuration.getCodes(componentName, stateMachineName);
-    return this.configuration.containsSubscriber(codes.componentCode, codes.stateMachineCode);
+    const componentCode = this.configuration.getComponentCode(componentName);
+    const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+    return this.configuration.containsSubscriber(componentCode, stateMachineCode);
 };
 
 
@@ -162,8 +164,9 @@ Subscriber.prototype.subscribe = function (componentName, stateMachineName, stat
 
 Subscriber.prototype.sendSubscribeRequest = function (componentName, stateMachineName) {
     if (!isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-        let codes = this.configuration.getCodes(componentName, stateMachineName);
-        let topic = this.configuration.getSubscriberTopic(codes.componentCode, codes.stateMachineCode, SubscriberEventType.Update);
+        const componentCode = this.configuration.getComponentCode(componentName);
+        const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+        let topic = this.configuration.getSubscriberTopic(componentCode, stateMachineCode, SubscriberEventType.Update);
         let kind = xcWebSocketBridgeConfiguration.kinds.Public;
         this.sendSubscribeRequestToTopic(topic, kind);
         this.addSubscribedStateMachines(componentName, stateMachineName);
@@ -195,8 +198,9 @@ Subscriber.prototype.getDataToSend = function (topic, kind) {
 
 Subscriber.prototype.unsubscribe = function (componentName, stateMachineName) {
     if (isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
-        let codes = this.configuration.getCodes(componentName, stateMachineName);
-        let topic = this.configuration.getSubscriberTopic(codes.componentCode, codes.stateMachineCode, SubscriberEventType.Update);
+        const componentCode = this.configuration.getComponentCode(componentName);
+        const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+        let topic = this.configuration.getSubscriberTopic(componentCode, stateMachineCode, SubscriberEventType.Update);
         let kind = xcWebSocketBridgeConfiguration.kinds.Public;
         let data = this.getDataToSend(topic, kind);
         let command = xcWebSocketBridgeConfiguration.commands.unsubscribe;
@@ -236,14 +240,14 @@ function isSubscribed(subscribedStateMachines, componentName, stateMachineName) 
 }
 
 
-function isSameComponent(jsonData, codes) {
-    let sameComponent = jsonData.stateMachineRef.ComponentCode === parseInt(codes.componentCode);
+function isSameComponent(jsonData, componentCode) {
+    let sameComponent = jsonData.stateMachineRef.ComponentCode === parseInt(componentCode);
     return sameComponent;
 }
 
 
-function isSameStateMachine(jsonData, codes) {
-    let sameStateMachine = jsonData.stateMachineRef.StateMachineCode === parseInt(codes.stateMachineCode);
+function isSameStateMachine(jsonData, stateMachineCode) {
+    let sameStateMachine = jsonData.stateMachineRef.StateMachineCode === parseInt(stateMachineCode);
     return sameStateMachine;
 }
 
