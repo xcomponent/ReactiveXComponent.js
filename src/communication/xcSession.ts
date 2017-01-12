@@ -6,24 +6,23 @@ import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfi
 import * as definition from "definition";
 
 import Configuration from "configuration/xcConfiguration";
-import IWebSocket from "communication/IWebSocket";
-import WebSocket from "communication/WebSocket";
 
-class Session {
+export class Session {
 
-    public serverUrl : string;
-    public webSocket : IWebSocket;
-    public configuration : Configuration;
-    public sessionData : string;
-    public guid : any;
-    public privateTopic : string;
-    public privateSubscriber : Subscriber;
+    private serverUrl : string;
+    private sessionData : string;
+    private guid : Guid;
+    private privateTopic : string;
+    private publishers : Array<Publisher>;
+    private subscribers : Array<Subscriber>;
+    private privateTopics : Array<String>;
+    
+    public privateSubscriber : Subscriber;    
     public replyPublisher : Publisher;
-    public publishers : Array<Publisher>;
-    public subscribers : Array<Subscriber>;
-    public privateTopics : Array<String>;
+    public configuration : Configuration;
+    public webSocket : WebSocket;
 
-    constructor(serverUrl : string, webSocket : IWebSocket, configuration : Configuration, sessionData: string) {
+    constructor(serverUrl : string, webSocket : WebSocket, configuration : Configuration, sessionData: string) {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
@@ -75,31 +74,31 @@ class Session {
         }
     };
 
-    init(sessionListener, getXcApiRequest, xcApiFileName) {
-        let thisObject = this;
+    init(sessionListener: (error : any, session : Session) => void, getXcApiRequest : (xcApiFileName : string, sessionListener : (error : any, session : Session) => void) => void, xcApiFileName : string) {
+        let thisSession = this;
 
-        this.webSocket.setEventListener('onopen', function (e) {
-            thisObject
+        this.webSocket.onopen = function (e : Event) {
+            thisSession
                 .privateSubscriber
-                .sendSubscribeRequestToTopic(thisObject.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+                .sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
             getXcApiRequest(xcApiFileName, sessionListener);
-            console.log("connection started on " + thisObject.serverUrl + ".");
-        });
+            console.log("connection started on " + thisSession.serverUrl + ".");
+        };
 
-        this.webSocket.setEventListener('onerror', function (e) {
-            let messageError = "Error on " + thisObject.serverUrl + ".";
+        this.webSocket.onerror = function (e : Event) {
+            let messageError = "Error on " + thisSession.serverUrl + ".";
             console.error(messageError);
             console.error(e);
             sessionListener(messageError, null);
-        });
+        };
 
-        this.webSocket.setEventListener('onclose', function (e) {
-            console.log("connection on " + thisObject.serverUrl + " closed.");
+        this.webSocket.onclose = function (e : CloseEvent) {
+            console.log("connection on " + thisSession.serverUrl + " closed.");
             console.log(e);
             if (!e.wasClean) {
                 throw new Error("unexpected connection close with code " + e.code);
             }
-        });
+        };
     };
 
     createPublisher() {
@@ -156,15 +155,8 @@ class Session {
 
 }
 
-let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) {
+export let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) {
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
     return session;
 };
-
-let returnObject = {
-    create: SessionFactory,
-    Session: Session
-};
-
-export default returnObject;

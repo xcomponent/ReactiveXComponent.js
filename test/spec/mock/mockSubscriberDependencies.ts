@@ -2,8 +2,6 @@ import { WebSocket, Server, SocketIO } from "mock-socket";
 import Subscriber from "communication/xcWebSocketSubscriber";
 import webSocketConf from "configuration/xcWebSocketBridgeConfiguration";
 
-import IWS from "communication/IWebSocket";
-import WS from "communication/WebSocket";
 
 // Mocking configuration
 let outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
@@ -34,8 +32,8 @@ configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
 
 // Mocking webSocket
 let createWebSocket = function () {
-    let webSocket = jasmine.createSpyObj("webSocket", ["send", "addEventListener", "getWS", "close"]);
-    webSocket.getWS.and.callFake(function (componentName, stateMachineName) {
+    let webSocket = jasmine.createSpyObj("webSocket", ["send", "addEventListener", "getWebSocketCore", "close"]);
+    webSocket.getWebSocketCore.and.callFake(function (componentName, stateMachineName) {
     return {};
 });
 
@@ -82,8 +80,8 @@ let createMockServer = function (serverUrl) {
 };
 
 let createMockWebSocket = function (serverUrl) {
-    window["WebSocket"] = WebSocket;
-    let mockWebSocket = new WS(serverUrl);            
+    //window["WebSocket"] = WebSocket;
+    let mockWebSocket = new WebSocket(serverUrl);            
     return mockWebSocket;
 };
 

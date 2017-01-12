@@ -3,36 +3,41 @@ import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfi
 let Rx = require("rx");
 import pako = require("pako");
 
+import Configuration from "configuration/xcConfiguration";
+import Publisher from "communication/xcWebSocketPublisher";
+import Guid from "guid";
+
 class Subscriber {
 
-    public webSocket : any;
-    public configuration : any;
-    public replyPublisher : any;
-    public guid : any;
-    public privateTopics : any;
-    public subscribedStateMachines : any;
-    public observableMsg : any;
-    public observableSubscribers : any;
+    private webSocket : WebSocket;
+    private configuration : Configuration;
+    private guid : Guid;
+    private subscribedStateMachines : {[componentName : string] : Array<String>};
+    private observableMsg : any;
+    private observableSubscribers : Array<any>;
 
-    constructor(webSocket, configuration, replyPublisher, guid, privateTopics) {
+    public privateTopics : Array<String>;
+    public replyPublisher : Publisher;
+
+    constructor(webSocket : WebSocket, configuration : Configuration, replyPublisher : Publisher, guid : Guid, privateTopics : Array<String>) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.replyPublisher = replyPublisher;
         this.subscribedStateMachines = {};
         this.observableMsg = Rx
             .Observable
-            .fromEvent(this.webSocket.getWS(), "message");
+            .fromEvent(this.webSocket, "message");
         this.observableSubscribers = [];
         this.guid = guid;
         this.privateTopics = privateTopics;
     }
 
-    getXcApiList(getXcApiListListener) {
-        let thisObject = this;
+    getXcApiList(getXcApiListListener : (apis : Array<Object>) => void) {
+        let thisSubscriber = this;
         this
             .observableMsg
             .map(function (e) {
-                return thisObject.getJsonDataFromGetXcApiListRequest(e);
+                return thisSubscriber.getJsonDataFromGetXcApiListRequest(e);
             })
             .filter(function (apis) {
                 return apis != null;
@@ -48,13 +53,13 @@ class Subscriber {
             .send(this.convertToWebsocketInputFormat(command, data));
     };
 
-    getXcApi(xcApiFileName, getXcApiListener) {
-        let thisObject = this;
+    getXcApi(xcApiFileName : string, getXcApiListener : (xcApi : string) => void) {
+        let thisSubscriber = this;
         this
             .observableMsg
             .map(function (e) {
                 try {
-                    return thisObject.getJsonDataFromXcApiRequest(e, xcApiFileName);
+                    return thisSubscriber.getJsonDataFromXcApiRequest(e);
                 } catch (e) {
                     return null;
                 }
@@ -75,19 +80,19 @@ class Subscriber {
             .send(this.convertToWebsocketInputFormat(command, data));
     };
 
-    getSnapshot(componentName, stateMachineName, snapshotListener) {
+    getSnapshot(componentName : string, stateMachineName : string, snapshotListener : (items : Array<Object>) => void) {
         let codes = this
             .configuration
             .getCodes(componentName, stateMachineName);
         let replyTopic = this
             .guid
             .create();
-        let thisObject = this;
+        let thisSubscriber = this;
         this
             .observableMsg
             .map(function (e) {
                 try {
-                    return thisObject.getJsonDataFromSnapshot(e);
+                    return thisSubscriber.getJsonDataFromSnapshot(e);
                 } catch (e) {
                     return null;
                 }
@@ -100,7 +105,7 @@ class Subscriber {
                 }
             })
             .subscribe(function (data) {
-                thisObject.sendUnsubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
+                thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
                 snapshotListener(data.items);
             });
         this.sendSubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
@@ -110,14 +115,14 @@ class Subscriber {
             .send(this.convertToWebsocketInputFormat(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode, dataToSendSnapshot.data));
     };
 
-    getDataToSendSnapshot(componentName, stateMachineName, replyTopic) {
+    getDataToSendSnapshot(componentName : string, stateMachineName : string, replyTopic : string) {
         let topic = this
             .configuration
             .getSnapshotTopic(componentName);
         let codes = this
             .configuration
             .getCodes(componentName, stateMachineName);
-        let thisObject = this;
+        let thisSubscriber = this;
         let jsonMessage = {
             "StateMachineCode": parseInt(codes.stateMachineCode),
             "ComponentCode": parseInt(codes.componentCode),
@@ -127,7 +132,7 @@ class Subscriber {
             },
             "PrivateTopic": {
                 "Case": "Some",
-                "Fields": [thisObject.privateTopics]
+                "Fields": [thisSubscriber.privateTopics]
             }
         };
         let dataToSendSnapshot = {
@@ -143,29 +148,29 @@ class Subscriber {
         return dataToSendSnapshot;
     };
 
-    getStateMachineUpdates(componentName, stateMachineName) {
+    getStateMachineUpdates(componentName : string, stateMachineName : string) {
         let filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
         this.sendSubscribeRequest(componentName, stateMachineName);
         return filteredObservable;
     };
 
-    prepareStateMachineUpdates(componentName, stateMachineName) {
+    prepareStateMachineUpdates(componentName : string, stateMachineName : string) {
         let codes = this
             .configuration
             .getCodes(componentName, stateMachineName);
-        let thisObject = this;
+        let thisSubscriber = this;
         let filteredObservable = this
             .observableMsg
             .map(function (e) {
                 try {
-                    return thisObject.getJsonDataFromEvent(e);
+                    return thisSubscriber.getJsonDataFromEvent(e);
                 } catch (e) {
                     return null;
                 }
             })
             .filter(function (jsonData) {
                 try {
-                    return thisObject.isSameComponent(jsonData, codes) && thisObject.isSameStateMachine(jsonData, codes);
+                    return thisSubscriber.isSameComponent(jsonData, codes) && thisSubscriber.isSameStateMachine(jsonData, codes);
                 } catch (e) {
                     return false;
                 }
@@ -173,13 +178,13 @@ class Subscriber {
         return filteredObservable;
     };
 
-    canSubscribe(componentName, stateMachineName) {
+    canSubscribe(componentName : string, stateMachineName : string) {
         return this
             .configuration
             .subscriberExist(componentName, stateMachineName);
     };
 
-    subscribe(componentName, stateMachineName, stateMachineUpdateListener) {
+    subscribe(componentName : string, stateMachineName : string, stateMachineUpdateListener : (data : any) => void) {
         let observableSubscriber = this
             .prepareStateMachineUpdates(componentName, stateMachineName)
             .subscribe(function (jsonData) {
@@ -191,7 +196,7 @@ class Subscriber {
         this.sendSubscribeRequest(componentName, stateMachineName);
     };
 
-    sendSubscribeRequest(componentName, stateMachineName) {
+    sendSubscribeRequest(componentName : string, stateMachineName : string) {
         if (!this.isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
             let topic = this
                 .configuration
@@ -202,7 +207,7 @@ class Subscriber {
         }
     };
 
-    sendSubscribeRequestToTopic(topic, kind) {
+    sendSubscribeRequestToTopic(topic : string, kind : number) {
         let data = this.getDataToSend(topic, kind);
         let command = xcWebSocketBridgeConfiguration.commands.subscribe;
         this
@@ -210,7 +215,7 @@ class Subscriber {
             .send(this.convertToWebsocketInputFormat(command, data));
     };
 
-    sendUnsubscribeRequestToTopic(topic, kind) {
+    sendUnsubscribeRequestToTopic(topic : string, kind : number) {
         let data = this.getDataToSend(topic, kind);
         let command = xcWebSocketBridgeConfiguration.commands.unsubscribe;
         this
@@ -218,7 +223,7 @@ class Subscriber {
             .send(this.convertToWebsocketInputFormat(command, data));
     };
 
-    getDataToSend(topic, kind) {
+    getDataToSend(topic : string, kind : number) {
         return {
             "Header": {
                 "IncomingType": 0
@@ -232,7 +237,7 @@ class Subscriber {
         };
     };
 
-    unsubscribe(componentName, stateMachineName) {
+    unsubscribe(componentName : string, stateMachineName : string) {
         if (this.isSubscribed(this.subscribedStateMachines, componentName, stateMachineName)) {
             let topic = this
                 .configuration
@@ -256,7 +261,7 @@ class Subscriber {
         this.observableSubscribers = [];
     };
 
-    addSubscribedStateMachines(componentName, stateMachineName) {
+    addSubscribedStateMachines(componentName : string, stateMachineName : string) {
         if (this.subscribedStateMachines[componentName] === undefined) {
             this.subscribedStateMachines[componentName] = [stateMachineName];
         } else {
@@ -266,7 +271,7 @@ class Subscriber {
         }
     };
 
-    removeSubscribedStateMachines(componentName, stateMachineName) {
+    removeSubscribedStateMachines(componentName : string, stateMachineName : string) {
         let index = this
             .subscribedStateMachines[componentName]
             .indexOf(stateMachineName);
@@ -275,39 +280,39 @@ class Subscriber {
             .splice(index, 1);
     };
 
-    private isSubscribed(subscribedStateMachines, componentName, stateMachineName) {
+    private isSubscribed(subscribedStateMachines : any, componentName : any, stateMachineName : string) {
         let isSubscribed = subscribedStateMachines[componentName] !== undefined && subscribedStateMachines[componentName].indexOf(stateMachineName) > -1;
         return isSubscribed;
     }
 
-    private isSameComponent(jsonData, codes) {
+    private isSameComponent(jsonData : any, codes : any) {
         let sameComponent = jsonData.stateMachineRef.ComponentCode === parseInt(codes.componentCode);
         return sameComponent;
     }
 
-    private isSameStateMachine(jsonData, codes) {
+    private isSameStateMachine(jsonData : any, codes : any) {
         let sameStateMachine = jsonData.stateMachineRef.StateMachineCode === parseInt(codes.stateMachineCode);
         return sameStateMachine;
     }
 
-    getJsonDataFromEvent(e) {
+    getJsonDataFromEvent(e : any) {
         let jsonData = this.getJsonData(e.data);
         let componentCode = jsonData.Header.ComponentCode.Fields[0];
         let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
         let stateCode = jsonData.Header.StateCode.Fields[0];
-        let thisObject = this;
+        let thisSubscriber = this;
         let stateMachineRef = {
             "StateMachineId": jsonData.Header.StateMachineId.Fields[0],
             "AgentId": jsonData.Header.AgentId.Fields[0],
             "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
             "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
-            "StateName": thisObject
+            "StateName": thisSubscriber
                 .configuration
                 .getStateName(componentCode, stateMachineCode, stateCode),
             "send": function (messageType, jsonMessage, visibilityPrivate) {
-                thisObject
+                thisSubscriber
                     .replyPublisher
-                    .sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
+                    .sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate, undefined);
             }
         };
         return {
@@ -316,7 +321,7 @@ class Subscriber {
         };
     };
 
-    private encodeBase64(b64Data) {
+    private encodeBase64(b64Data : string) {
         let atob = javascriptHelper().atob;
         let charData = atob(b64Data)
             .split("")
@@ -337,7 +342,7 @@ class Subscriber {
         return strData;
     };
 
-    getJsonDataFromSnapshot(e) {
+    getJsonDataFromSnapshot(e : any) {
         let replyTopic = this.getCommand(e.data);
         let jsonData = this.getJsonData(e.data);
         let b64Data = JSON
@@ -350,20 +355,20 @@ class Subscriber {
             items = b64Data;
         }
         let snapshotItems = [];
-        let thisObject = this;
+        let thisSubscriber = this;
         for (let i = 0; i < items.length; i++) {
             let stateMachineRef = {
                 "StateMachineId": parseInt(items[i].StateMachineId),
                 "AgentId": parseInt(items[i].AgentId),
                 "StateMachineCode": parseInt(items[i].StateMachineCode),
                 "ComponentCode": parseInt(items[i].ComponentCode),
-                "StateName": thisObject
+                "StateName": thisSubscriber
                     .configuration
                     .getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
                 "send": function (messageType, jsonMessage, visibilityPrivate) {
-                    thisObject
+                    thisSubscriber
                         .replyPublisher
-                        .sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
+                        .sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate, undefined);
                 }
             };
             snapshotItems.push({stateMachineRef: stateMachineRef, jsonMessage: items[i].PublicMember});
@@ -372,7 +377,7 @@ class Subscriber {
         return {items: snapshotItems, replyTopic: replyTopic};
     };
 
-    getJsonDataFromXcApiRequest(e, xcApiFileName) {
+    getJsonDataFromXcApiRequest(e : any) {
         let jsonData = this.getJsonData(e.data);
         if (xcWebSocketBridgeConfiguration.commands.getXcApi !== this.getCommand(e.data)) {
             return null;
@@ -381,7 +386,7 @@ class Subscriber {
         }
     };
 
-    getJsonDataFromGetXcApiListRequest(e) {
+    getJsonDataFromGetXcApiListRequest(e : any) {
         let jsonData = this.getJsonData(e.data);
         if (xcWebSocketBridgeConfiguration.commands.getXcApiList !== this.getCommand(e.data)) {
             return null;
@@ -390,15 +395,15 @@ class Subscriber {
         }
     };
 
-    private getJsonData(data) {
+    private getJsonData(data : any) {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
     }
 
-    private getCommand(data) {
+    private getCommand(data : any) {
         return data.substring(0, data.indexOf(" "));
     }
 
-    private convertToWebsocketInputFormat(request, data) {
+    private convertToWebsocketInputFormat(request : string, data : any) {
         let input = request + " " + JSON.stringify(data);
         return input;
     }

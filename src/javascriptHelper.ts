@@ -1,12 +1,12 @@
 
 interface JavascriptHelper {
-    WebSocket: any;
+    WebSocket: WebSocket;
     DOMParser: any;
     atob: any;
 }
 
 const javascriptHelper = () : JavascriptHelper => {
-    return { WebSocket: window["WebSocket"], DOMParser: window["DOMParser"], atob: window.atob };
+    return { WebSocket: <WebSocket>window["WebSocket"], DOMParser: window["DOMParser"], atob: window.atob };
 };
 
 export { javascriptHelper };

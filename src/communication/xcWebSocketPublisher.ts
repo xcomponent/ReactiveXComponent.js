@@ -1,20 +1,22 @@
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import Configuration from "configuration/xcConfiguration";
 
 class Publisher {
 
-    public webSocket: any;
-    public configuration: any;
-    public privateTopic: any;
-    public sessionData: any;
+    private webSocket : WebSocket;
+    private sessionData : string;
+    
+    public privateTopic : string;
+    public configuration : Configuration;
 
-    constructor(webSocket, configuration, privateTopic, sessionData) {
+    constructor(webSocket : WebSocket, configuration : Configuration, privateTopic : string, sessionData : string) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.privateTopic = privateTopic;
         this.sessionData = sessionData;
     }
 
-    getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
+    getEventToSend(componentName : string, stateMachineName : string, messageType : string, jsonMessage : any, visibilityPrivate : boolean, specifiedPrivateTopic : string) {
         let codes = this
             .configuration
             .getCodes(componentName, stateMachineName);
@@ -26,7 +28,7 @@ class Publisher {
         return {event: event, routingKey: headerConfig.routingKey};
     };
 
-    canPublish(componentName, stateMachineName, messageType) {
+    canPublish(componentName : string, stateMachineName : string, messageType : string) {
         if (this.configuration.codesExist(componentName, stateMachineName)) {
             let codes = this
                 .configuration
@@ -38,14 +40,14 @@ class Publisher {
         return false;
     };
 
-    send(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
+    send(componentName : string, stateMachineName : string, messageType : string, jsonMessage : any, visibilityPrivate : boolean = false, specifiedPrivateTopic : string = undefined) {
         let data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         this
             .webSocket
             .send(this.convertToWebsocketInputFormat(data));
     };
 
-    sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
+    sendWithStateMachineRef(stateMachineRef : any, messageType : string, jsonMessage : any, visibilityPrivate : boolean = false, specifiedPrivateTopic : string = undefined) {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
         let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
@@ -73,7 +75,7 @@ class Publisher {
             .send(webSocketInputFormat);
     };
 
-    getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic) {
+    getHeaderConfig(componentCode : string, stateMachineCode : string, messageType : string, visibilityPrivate : boolean, specifiedPrivateTopic  : string) {
         let publisher = this
             .configuration
             .getPublisherDetails(componentCode, stateMachineCode, messageType);
@@ -112,12 +114,12 @@ class Publisher {
         return {header: header, routingKey: publisher.routingKey};
     };
 
-    private convertToWebsocketInputFormat(data) {
+    private convertToWebsocketInputFormat(data : any) {
         let input = data.routingKey + " " + data.event.Header.ComponentCode.Fields[0] + " " + JSON.stringify(data.event);
         return input;
     };
 
-    private mergeJsonObjects(obj1, obj2) {
+    private mergeJsonObjects(obj1 : any, obj2 : any) {
         let merged = {};
         for (let key in obj1) 
             merged[key] = obj1[key];
