@@ -4,8 +4,9 @@ import Publisher from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
+import { ApiConfiguration } from "configuration/apiConfiguration";
 
-let SessionFactory = function (serverUrl, configuration, sessionData) {
+let SessionFactory = function (serverUrl, configuration: ApiConfiguration, sessionData) {
     let WebSocket = javascriptHelper().WebSocket;
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
@@ -13,7 +14,7 @@ let SessionFactory = function (serverUrl, configuration, sessionData) {
 };
 
 
-let Session = function (serverUrl, webSocket, configuration, sessionData) {
+let Session = function (serverUrl, webSocket, configuration: ApiConfiguration, sessionData) {
     this.serverUrl = serverUrl;
     this.webSocket = webSocket;
     this.configuration = configuration;

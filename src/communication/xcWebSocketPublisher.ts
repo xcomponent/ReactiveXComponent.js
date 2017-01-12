@@ -1,6 +1,7 @@
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import { ApiConfiguration } from "configuration/apiConfiguration";
 
-let Publisher = function (webSocket, configuration, privateTopic, sessionData) {
+let Publisher = function (webSocket, configuration: ApiConfiguration, privateTopic, sessionData) {
     this.webSocket = webSocket;
     this.configuration = configuration;
     this.privateTopic = privateTopic;
@@ -9,8 +10,9 @@ let Publisher = function (webSocket, configuration, privateTopic, sessionData) {
 
 
 Publisher.prototype.getEventToSend = function (componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic) {
-    let codes = this.configuration.getCodes(componentName, stateMachineName);
-    let headerConfig = this.getHeaderConfig(codes.componentCode, codes.stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
+    const componentCode = this.configuration.getComponentCode(componentName);
+    const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+    let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
     let event = {
         "Header": headerConfig.header,
         "JsonMessage": JSON.stringify(jsonMessage)
@@ -23,12 +25,12 @@ Publisher.prototype.getEventToSend = function (componentName, stateMachineName, 
 
 
 Publisher.prototype.canPublish = function (componentName, stateMachineName, messageType) {
-    if (this.configuration.codesExist(componentName, stateMachineName)) {
-        let codes = this.configuration.getCodes(componentName, stateMachineName);
-        if (this.configuration.publisherExist(codes.componentCode, codes.stateMachineCode, messageType)) {
-            return true;
-        }
+    if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
+        const componentCode = this.configuration.getComponentCode(componentName);
+        const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+        return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
     }
+
     return false;
 };
 

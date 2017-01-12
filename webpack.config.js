@@ -22,7 +22,7 @@ var config = {
       "src"]
   },
   plugins: process.env.NODE_ENV === "production" ? [
-    new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
+    new CleanWebpackPlugin([BUILD_DIR, "junit.xml", "coverage"], {
       root: __dirname,
       verbose: true,
       dry: false,
@@ -41,7 +41,7 @@ var config = {
       }
     })
   ] : [
-      new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
+      new CleanWebpackPlugin([BUILD_DIR, "junit.xml", "coverage"], {
         root: __dirname,
         verbose: true,
         dry: false,

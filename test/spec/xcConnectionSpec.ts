@@ -1,13 +1,19 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
 import Connection from "communication/xcConnection";
+import pako = require("pako");
 
+const encodeServerMessage = (strData: string) => {
+    let binaryString = pako.deflate(strData, { to: "string" });
+
+    return window.btoa(binaryString);
+};
 
 describe("Test xcConnection module", function () {
 
     let connection;
 
     beforeEach(function () {
-        window["WebSocket"] = WebSocket;
+        (<any>window).WebSocket = WebSocket;
         connection = new Connection();
     });
 
@@ -33,10 +39,17 @@ describe("Test xcConnection module", function () {
                 expect(session).not.toBe(null);
                 done();
             };
+
             connection.createSession(xcApiFileName, serverUrl, sessionListener);
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
-                    let content = "H4sIAAAAAAAAAwXB2w0AEBAEwFbWl2Y0IW4jQmziPNo3k6TuGK0Tj/ESVRs6yzkuHRnGIqPB92qzhg8yp62UMAAAAA==";
+                    const getApiResponse = `<deployment>  
+                                                <clientAPICommunication>   
+                                                </clientAPICommunication>
+                                                <codesConverter>   
+                                                </codesConverter>
+                                            </deployment>`;
+                    let content = encodeServerMessage(getApiResponse);
                     let data = { ApiFound: true, ApiName: xcApiFileName, Content: content };
                     server.send("getXcApi " + JSON.stringify(data));
                 });
