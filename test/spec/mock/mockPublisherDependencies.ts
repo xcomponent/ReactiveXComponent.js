@@ -1,7 +1,7 @@
 // Initialisation
-let componentCode = "-69981087";
-let stateMachineCode = "-829536631";
-let eventCode = "9";
+let componentCode = -69981087;
+let stateMachineCode = -829536631;
+let eventCode = 9;
 let messageType = "XComponent.HelloWorld.UserObject.SayHello";
 let routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 let guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
@@ -14,9 +14,9 @@ guid.create.and.callFake(function () {
 
 function getHeader(visibility) {
     let header = {
-        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
-        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
-        "EventCode": parseInt(eventCode),
+        "StateMachineCode": { "Case": "Some", "Fields": [stateMachineCode] },
+        "ComponentCode": { "Case": "Some", "Fields": [componentCode] },
+        "EventCode": eventCode,
         "IncomingType": 0,
         "MessageType": { "Case": "Some", "Fields": [messageType] },
         "PublishTopic": (!visibility) ? undefined : { "Case": "Some", "Fields": [guid.create()] },
@@ -74,12 +74,18 @@ let corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " 
 
 
 // Mocking configuration
-let configuration = jasmine.createSpyObj("configuration", ["getCodes", "getPublisherDetails", "codesExist", "publisherExist"]);
-configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
-    return {
-        componentCode: componentCode,
-        stateMachineCode: stateMachineCode
-    };
+let configuration = jasmine.createSpyObj("configuration", ["getComponentCode", "getStateMachineCode", "getPublisherDetails", "containsStateMachine", "containsPublisher"]);
+configuration.getComponentCode.and.callFake(function (componentName) {
+    if (!componentName){
+        throw new Error();
+    }
+    return componentCode;
+});
+configuration.getStateMachineCode.and.callFake(function (componentName, stateMachineName) {
+    if (!componentName || !stateMachineName){
+        throw new Error();
+    }
+    return stateMachineCode;
 });
 configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
     return {
@@ -87,7 +93,7 @@ configuration.getPublisherDetails.and.callFake(function (componentCode, stateMac
         routingKey: routingKey
     };
 });
-configuration.codesExist.and.callFake(function (componentName, stateMachineName) {
+configuration.containsStateMachine.and.callFake(function (componentName, stateMachineName) {
     if (!componentName || !stateMachineName) {
         return false;
     } else {
@@ -95,12 +101,8 @@ configuration.codesExist.and.callFake(function (componentName, stateMachineName)
     }
 });
 
-configuration.publisherExist.and.callFake(function (componentCode, stateMachineCode) {
-    if (!componentCode || !stateMachineCode) {
-        return false;
-    } else {
-        return true;
-    }
+configuration.containsPublisher.and.callFake(function (compCode, stmCode, messageType) {
+    return compCode === componentCode && stmCode === stateMachineCode;
 });
 
 // Mocking webSocket

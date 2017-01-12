@@ -6,13 +6,13 @@ import webSocketConf from "configuration/xcWebSocketBridgeConfiguration";
 // Mocking configuration
 let outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
 let snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
-let configuration = jasmine.createSpyObj("configuration", ["getSubscriberTopic", "getCodes", "getHeaderConfig", "convertToWebsocketInputFormat", "getSnapshotTopic", "getStateName", "subscriberExist"]);
+let configuration = jasmine.createSpyObj("configuration", ["getSubscriberTopic", "getComponentCode", "getStateMachineCode", "getHeaderConfig", "convertToWebsocketInputFormat", "getSnapshotTopic", "getStateName", "containsSubscriber"]);
 
-configuration.getSubscriberTopic.and.callFake(function (componentName, stateMachineName) {
+configuration.getSubscriberTopic.and.callFake(function (componentCode, stateMachineCode, type) {
     return outputTopic;
 });
 
-configuration.getSnapshotTopic.and.callFake(function (componentName) {
+configuration.getSnapshotTopic.and.callFake(function (componentCode) {
     return "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
 });
 
@@ -20,13 +20,13 @@ let stateName = "stateName";
 configuration.getStateName.and.callFake(function () {
     return stateName;
 });
-let componentCode = "-69981087";
-let stateMachineCode = "-829536631";
-configuration.getCodes.and.callFake(function (componentName, stateMachineName) {
-    return {
-        componentCode: componentCode,
-        stateMachineCode: stateMachineCode
-    };
+let componentCode = -69981087;
+let stateMachineCode = -829536631;
+configuration.getComponentCode.and.callFake(function (componentName, stateMachineName) {
+    return componentCode;
+});
+configuration.getStateMachineCode.and.callFake(function (componentName, stateMachineName) {
+    return stateMachineCode;
 });
 
 
@@ -52,8 +52,8 @@ let stateMachineId = 2;
 let jsonMessage:any = { key: "value" };
 let jsonData = {
     Header: {
-        StateMachineCode: { "Case": "Some", Fields: [parseInt(stateMachineCode)] },
-        ComponentCode: { "Case": "Some", Fields: [parseInt(componentCode)] },
+        StateMachineCode: { "Case": "Some", Fields: [stateMachineCode] },
+        ComponentCode: { "Case": "Some", Fields: [componentCode] },
         StateMachineId: { "Case": "Some", Fields: [stateMachineId] },
         AgentId: { "Case": "Some", Fields: [agentId] },
         StateCode: { "Case": "Some", Fields: [0] }
@@ -95,8 +95,8 @@ guid.create.and.callFake(function () {
 });
 
 jsonMessage = {
-    "StateMachineCode": parseInt(stateMachineCode),
-    "ComponentCode": parseInt(componentCode),
+    "StateMachineCode": stateMachineCode,
+    "ComponentCode": componentCode,
     "ReplyTopic": { "Case": "Some", "Fields": [guiExample] },
     "PrivateTopic": {
         "Case": "Some",

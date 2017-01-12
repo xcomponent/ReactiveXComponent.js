@@ -4,8 +4,7 @@ import Publisher from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
 import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
-
-import Configuration from "configuration/xcConfiguration";
+import { ApiConfiguration } from "configuration/apiConfiguration";
 
 export class Session {
 
@@ -19,10 +18,10 @@ export class Session {
     
     public privateSubscriber : Subscriber;    
     public replyPublisher : Publisher;
-    public configuration : Configuration;
+    public configuration : ApiConfiguration;
     public webSocket : WebSocket;
 
-    constructor(serverUrl : string, webSocket : WebSocket, configuration : Configuration, sessionData: string) {
+    constructor(serverUrl : string, webSocket : WebSocket, configuration : ApiConfiguration, sessionData: string) {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
@@ -155,7 +154,7 @@ export class Session {
 
 }
 
-export let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) : Session {
+export let SessionFactory = function (serverUrl : string, configuration : ApiConfiguration, sessionData : string) : Session {
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
     return session;
