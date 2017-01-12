@@ -77,25 +77,11 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findComponent(predicate: (component: any) => boolean): any {
-        const component = this._config.deployment.codesConverter[0].components[0].component
-            .find(predicate);
-
-        if (!component) {
-            return undefined;
-        }
-
-        return component;
+        return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
     }
 
     private findStateMachine(component, predicate: (stateMachine: any) => boolean): any {
-        const stateMachine = component.stateMachines[0].stateMachine
-            .find(predicate);
-
-        if (!stateMachine) {
-            return undefined;
-        }
-
-        return stateMachine;
+        return component.stateMachines[0].stateMachine.find(predicate);
     }
 
     getPublisherDetails(componentCode: number, stateMachineCode: number, messageType: string): PublisherDetails {
@@ -119,10 +105,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     containsPublisher(componentCode: number, stateMachineCode: number, messageType: string): boolean {
-        if (this.getPublisher(componentCode, stateMachineCode, messageType)) {
-            return true;
-        }
-        return false;
+        return this.getPublisher(componentCode, stateMachineCode, messageType) !== undefined;
     }
 
     getSubscriberTopic(componentCode: number, stateMachineCode: number, type: SubscriberEventType): string {
@@ -136,10 +119,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     containsSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): boolean {
-        if (this.getSubscriber(componentCode, stateMachineCode, type)) {
-            return true;
-        }
-        return false;
+        return this.getSubscriber(componentCode, stateMachineCode, type) !== undefined;
     }
 
     private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType) {

@@ -53,7 +53,7 @@ test("GetStateMachineCode should return the right code given existing component 
     });
 });
 
-test("getComponentCode throws exception when using an unkonwn component name", () => {
+test("GetComponentCode throws exception when using an unkonwn component name", () => {
   const componentName = "random component";
   const messageError = "Component '" + componentName + "' not found";
   return parse()
@@ -64,7 +64,7 @@ test("getComponentCode throws exception when using an unkonwn component name", (
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getStateMachineCode throws exception when using an unkonwn component name", () => {
+test("GetStateMachineCode throws exception when using an unkonwn component name", () => {
   const componentName = "random component";
   const messageError = "Component '" + componentName + "' not found";
   return parse()
@@ -75,7 +75,7 @@ test("getStateMachineCode throws exception when using an unkonwn component name"
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getStateMachineCode: throws exception when using an unknown stateMachine name", () => {
+test("GetStateMachineCode: throws exception when using an unknown stateMachine name", () => {
   const stateMachine = "random stateMachine";
   const messageError = "StateMachine '" + stateMachine + "' not found";
   return parse()
@@ -86,7 +86,7 @@ test("getStateMachineCode: throws exception when using an unknown stateMachine n
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getPublisherDetails should return the right publisher details given existing component and stateMachine codes", () => {
+test("GetPublisherDetails should return the right publisher details given existing component and stateMachine codes", () => {
   return parse()
     .then(config => {
       let correctPublish = {
@@ -98,7 +98,7 @@ test("getPublisherDetails should return the right publisher details given existi
     });
 });
 
-test("getPublisherDetails should throw exeption when using an unknown stateMachine name", () => {
+test("GetPublisherDetails should throw exeption when using an unknown stateMachine name", () => {
   const componentCode = 101;
   const stateMachineCode = 102;
   const messageType = "type";
@@ -121,7 +121,7 @@ test("getSubscriberTopic should return the right topic given existing component 
     });
 });
 
-test("getSubscriberTopic throws exception on wrong component or/and a stateMachine", () => {
+test("GetSubscriberTopic throws exception on wrong component or/and a stateMachine", () => {
   const componentCode = 101;
   const stateMachineCode = 102;
   const messageError = `Subscriber not found - component code: ${componentCode} - statemachine code: ${stateMachineCode}`;
@@ -134,7 +134,7 @@ test("getSubscriberTopic throws exception on wrong component or/and a stateMachi
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getSnapshotTopic should return the right snapshot topic given an existing component", () => {
+test("GetSnapshotTopic should return the right snapshot topic given an existing component", () => {
   let correctTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
   return parse()
     .then(config => {
@@ -143,7 +143,7 @@ test("getSnapshotTopic should return the right snapshot topic given an existing 
     });
 });
 
-test("getSnapshotTopic should throw exception when using an unknown component code", () => {
+test("GetSnapshotTopic should throw exception when using an unknown component code", () => {
   const componentCode = 101;
   const messageError = `Snapshot topic not found - component code: ${componentCode}`;
 
@@ -155,7 +155,7 @@ test("getSnapshotTopic should throw exception when using an unknown component co
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getStateName should return the right state name given existing componentCode StateMachineCode and stateCode", () => {
+test("GetStateName should return the right state name given existing componentCode StateMachineCode and stateCode", () => {
   return parse()
     .then(config => {
       expect(config.getStateName(-69981087, -829536631, 0)).toEqual("EntryPoint");
@@ -165,7 +165,7 @@ test("getStateName should return the right state name given existing componentCo
     });
 });
 
-test("getStateName should throw exeption when using an unknown componentCode", () => {
+test("GetStateName should throw exeption when using an unknown componentCode", () => {
   const componentCode = 101;
   const messageError = `Component '${componentCode}' not found`;
 
@@ -177,7 +177,7 @@ test("getStateName should throw exeption when using an unknown componentCode", (
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getStateName should throw exeption when using an unknown stateMachineCode", () => {
+test("GetStateName should throw exeption when using an unknown stateMachineCode", () => {
   const stateMachineCode = 101;
   const messageError = `StateMachine '${stateMachineCode}' not found`;
 
@@ -189,7 +189,7 @@ test("getStateName should throw exeption when using an unknown stateMachineCode"
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("getStateName should throw exeption when using an unknown stateCode", () => {
+test("GetStateName should throw exeption when using an unknown stateCode", () => {
   const stateCode = -10;
   const messageError = `State '${stateCode}' not found`;
 
@@ -201,7 +201,7 @@ test("getStateName should throw exeption when using an unknown stateCode", () =>
     .catch(e => expect(e.message).toBe(messageError));
 });
 
-test("given a componentCode, stateMachineCode and a messageType, containsPublisher should return true if the publisher exists and false otherwise", () => {
+test("Given a componentCode, stateMachineCode and a messageType, containsPublisher should return true if the publisher exists and false otherwise", () => {
   return parse()
     .then(config => {
       expect(config.containsPublisher(-69981087, -829536631, "XComponent.HelloWorld.UserObject.SayHello")).toBe(true);
@@ -209,7 +209,7 @@ test("given a componentCode, stateMachineCode and a messageType, containsPublish
     });
 });
 
-test("given a componentName and a stateMachineName, containsSubscriber should return true if the susbscriber exists and false otherwise", () => {
+test("Given a componentName and a stateMachineName, containsSubscriber should return true if the susbscriber exists and false otherwise", () => {
   return parse()
     .then(config => {
       expect(config.containsSubscriber(101, 102, SubscriberEventType.Update)).toBe(false);
@@ -218,7 +218,7 @@ test("given a componentName and a stateMachineName, containsSubscriber should re
     });
 });
 
-test("given a component name, containsComponent should return true if the component exists and false otherwise", () => {
+test("Given a component name, containsComponent should return true if the component exists and false otherwise", () => {
   return parse()
     .then(config => {
       expect(config.containsComponent("HelloWorld")).toBe(true);
@@ -226,7 +226,7 @@ test("given a component name, containsComponent should return true if the compon
     });
 });
 
-test("given a component name and a stateMachine name, containsStateMachine should return true if they exist and false otherwise", () => {
+test("Given a component name and a stateMachine name, containsStateMachine should return true if they exist and false otherwise", () => {
   return parse()
     .then(config => {
       expect(config.containsStateMachine("HelloWorld", "HelloWorldResponse")).toBe(true);
