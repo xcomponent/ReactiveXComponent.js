@@ -3,7 +3,6 @@ import Publisher from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
 import {Session} from "communication/xcSession";
 
-import XCWebSsocket from "communication/WebSocket";
 
 describe("Test xcSession module", function () {
 
@@ -11,8 +10,7 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            window["WebSocket"] = WebSocket;
-            let mockWebSocket = new XCWebSsocket(serverUrl);            
+            let mockWebSocket = new WebSocket(serverUrl);            
             session = new Session(serverUrl, mockWebSocket, null, null);
         });
 
@@ -27,8 +25,7 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            window["WebSocket"] = WebSocket;
-            let mockWebSocket = new XCWebSsocket(serverUrl);            
+            let mockWebSocket = new WebSocket(serverUrl);            
             session = new Session(serverUrl, mockWebSocket, null, null);
         });
         it("should return a new instance of Subscriber", function () {
@@ -41,14 +38,13 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            window["WebSocket"] = WebSocket;
-            let mockWebSocket = new XCWebSsocket(serverUrl);            
+            let mockWebSocket = new WebSocket(serverUrl);            
             session = new Session(serverUrl, mockWebSocket, null, null);
         });
         it("should call onclose method when session is closed", function (done) {
-            session.webSocket.setEventListener('onclose', function (e) {
+            session.webSocket.onclose = function (e) {
                 done();
-            });
+            };
             session.close();
         });
     });
