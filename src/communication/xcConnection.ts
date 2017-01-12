@@ -11,7 +11,7 @@ class Connection {
         this.apis = {};
     }
 
-    getXcApiList(serverUrl : string, getXcApiListListener : (apis : Array<Object>) => void) {
+    getXcApiList(serverUrl : string, getXcApiListListener : (apis : Array<Object>) => void) : void{
         let session = SessionFactory(serverUrl, null, null);
         session
             .webSocket
@@ -25,15 +25,15 @@ class Connection {
             };
     };
 
-    createSession(xcApiFileName : string, serverUrl : string, sessionListener : (error : any, session : Session) => void) {
+    createSession(xcApiFileName : string, serverUrl : string, sessionListener : (error : any, session : Session) => void) : void {
         this.init(xcApiFileName, serverUrl, null, sessionListener);
     };
 
-    createAuthenticatedSession(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) {
+    createAuthenticatedSession(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) : void {
         this.init(xcApiFileName, serverUrl, sessionData, sessionListener);
     };
 
-    private init(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) {
+    private init(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) : void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let thisConnection = this;
         let getXcApiRequest = function (xcApiFileName, sessionListener) {

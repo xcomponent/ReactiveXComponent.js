@@ -38,7 +38,7 @@ export class Session {
         this.privateTopics = [this.privateTopic];
     }
 
-    setPrivateTopic(privateTopic : string) {
+    setPrivateTopic(privateTopic : string) : void {
         this.addPrivateTopic(privateTopic);
         this.removePrivateTopic(this.privateTopic);
         this.privateTopic = privateTopic;
@@ -50,7 +50,7 @@ export class Session {
         }
     };
 
-    addPrivateTopic(privateTopic : string) {
+    addPrivateTopic(privateTopic : string) : void {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
         this
             .privateSubscriber
@@ -63,7 +63,7 @@ export class Session {
         }
     };
 
-    removePrivateTopic(privateTopic : string) {
+    removePrivateTopic(privateTopic : string) : void {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
         this
             .privateSubscriber
@@ -74,7 +74,7 @@ export class Session {
         }
     };
 
-    init(sessionListener: (error : any, session : Session) => void, getXcApiRequest : (xcApiFileName : string, sessionListener : (error : any, session : Session) => void) => void, xcApiFileName : string) {
+    init(sessionListener: (error : any, session : Session) => void, getXcApiRequest : (xcApiFileName : string, sessionListener : (error : any, session : Session) => void) => void, xcApiFileName : string) : void {
         let thisSession = this;
 
         this.webSocket.onopen = function (e : Event) {
@@ -101,7 +101,7 @@ export class Session {
         };
     };
 
-    createPublisher() {
+    createPublisher() : Publisher {
         let publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this
             .publishers
@@ -109,7 +109,7 @@ export class Session {
         return publisher;
     };
 
-    createSubscriber() {
+    createSubscriber() : Subscriber {
         let subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
         this
             .subscribers
@@ -117,7 +117,7 @@ export class Session {
         return subscriber;
     };
 
-    private removeElement(array : Array<Object>, e : Object, msg : string) {
+    private removeElement(array : Array<Object>, e : Object, msg : string) : void{
         let index = array.indexOf(e);
         if (index > -1) {
             array.splice(index, 1);
@@ -126,15 +126,15 @@ export class Session {
         }
     };
 
-    disposePublisher(publisher : Publisher) {
+    disposePublisher(publisher : Publisher) : void {
         this.removeElement(this.publishers, publisher, "Publisher not found");
     };
 
-    disposeSubscriber(subscriber : Subscriber) {
+    disposeSubscriber(subscriber : Subscriber) : void{
         this.removeElement(this.subscribers, subscriber, "Subscriber not found");
     };
 
-    dispose() {
+    dispose() : void{
         for (let i = 0; i < this.publishers.length; i++) {
             this.disposePublisher(this.publishers[i]);
         }
@@ -143,7 +143,7 @@ export class Session {
         }
     };
 
-    close() {
+    close() : void {
         this
             .privateSubscriber
             .sendUnsubscribeRequestToTopic(this.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
@@ -155,7 +155,7 @@ export class Session {
 
 }
 
-export let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) {
+export let SessionFactory = function (serverUrl : string, configuration : Configuration, sessionData : string) : Session {
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
     return session;
