@@ -3,19 +3,19 @@ import { ApiConfiguration } from "configuration/apiConfiguration";
 
 class Publisher {
 
-    public webSocket : WebSocket;
-    public configuration : ApiConfiguration;
-    public privateTopic : string;
-    public sessionData : string;
+    public webSocket: WebSocket;
+    public configuration: ApiConfiguration;
+    public privateTopic: string;
+    public sessionData: string;
 
-    constructor(webSocket : WebSocket, configuration : ApiConfiguration, privateTopic : string, sessionData : string) {
+    constructor(webSocket: WebSocket, configuration: ApiConfiguration, privateTopic: string, sessionData: string) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.privateTopic = privateTopic;
         this.sessionData = sessionData;
     }
 
-    getEventToSend(componentName : string, stateMachineName : string, messageType : string, jsonMessage : any, visibilityPrivate : boolean, specifiedPrivateTopic : string) {
+    getEventToSend(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string) {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
@@ -29,24 +29,24 @@ class Publisher {
         };
     };
 
-    canPublish(componentName : string, stateMachineName : string, messageType : string) {
-    if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
-        const componentCode = this.configuration.getComponentCode(componentName);
-        const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
-        return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
-    }
+    canPublish(componentName: string, stateMachineName: string, messageType: string) {
+        if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
+            const componentCode = this.configuration.getComponentCode(componentName);
+            const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+            return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
+        }
 
-    return false;
+        return false;
     };
 
-    send(componentName : string, stateMachineName : string, messageType : string, jsonMessage : any, visibilityPrivate : boolean = false, specifiedPrivateTopic : string = undefined) {
+    send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined) {
         let data = this.getEventToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         this
             .webSocket
             .send(this.convertToWebsocketInputFormat(data));
     };
 
-    sendWithStateMachineRef(stateMachineRef : any, messageType : string, jsonMessage : any, visibilityPrivate : boolean = false, specifiedPrivateTopic : string = undefined) {
+    sendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined) {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
         let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
@@ -74,7 +74,7 @@ class Publisher {
             .send(webSocketInputFormat);
     };
 
-    getHeaderConfig(componentCode : number, stateMachineCode : number, messageType : string, visibilityPrivate : boolean, specifiedPrivateTopic  : string) {
+    getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic: string) {
         let publisher = this
             .configuration
             .getPublisherDetails(componentCode, stateMachineCode, messageType);
@@ -100,8 +100,8 @@ class Publisher {
                 : {
                     "Case": "Some",
                     "Fields": [(specifiedPrivateTopic)
-                            ? specifiedPrivateTopic
-                            : thisObject.privateTopic]
+                        ? specifiedPrivateTopic
+                        : thisObject.privateTopic]
                 },
             "SessionData": (!this.sessionData)
                 ? undefined
@@ -110,7 +110,7 @@ class Publisher {
                     "Fields": [this.sessionData]
                 }
         };
-        return {header: header, routingKey: publisher.routingKey};
+        return { header: header, routingKey: publisher.routingKey };
     };
 
     private convertToWebsocketInputFormat(data) {
@@ -120,9 +120,9 @@ class Publisher {
 
     private mergeJsonObjects(obj1, obj2) {
         let merged = {};
-        for (let key in obj1) 
+        for (let key in obj1)
             merged[key] = obj1[key];
-        for (let key in obj2) 
+        for (let key in obj2)
             merged[key] = obj2[key];
         return merged;
     };

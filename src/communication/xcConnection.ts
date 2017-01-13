@@ -1,20 +1,20 @@
-import {SessionFactory, Session} from "communication/xcSession";
-import {ApiConfiguration} from "configuration/apiConfiguration";
-import {DefaultApiConfigurationParser} from "configuration/apiConfigurationParser";
+import { SessionFactory, Session } from "communication/xcSession";
+import { ApiConfiguration } from "configuration/apiConfiguration";
+import { DefaultApiConfigurationParser } from "configuration/apiConfigurationParser";
 
 class Connection {
 
-    private apis : {
-        [xcApiFileName : string]: ApiConfiguration
+    private apis: {
+        [xcApiFileName: string]: ApiConfiguration
     };
 
     constructor() {
         this.apis = {};
     }
 
-    getXcApiList(serverUrl : string, getXcApiListListener : (apis : Array < Object >) => void) : void {
+    getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<Object>) => void): void {
         let session = SessionFactory(serverUrl, null, null);
-        session.webSocket.onopen = function (e : Event) {
+        session.webSocket.onopen = function (e: Event) {
             session
                 .privateSubscriber
                 .getXcApiList(function (apis) {
@@ -24,15 +24,15 @@ class Connection {
         };
     };
 
-    createSession(xcApiFileName : string, serverUrl : string, sessionListener : (error : any, session : Session) => void) : void {
+    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: any, session: Session) => void): void {
         this.init(xcApiFileName, serverUrl, null, sessionListener);
     };
 
-    createAuthenticatedSession(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) : void {
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: any, session: Session) => void): void {
         this.init(xcApiFileName, serverUrl, sessionData, sessionListener);
     };
 
-    private init(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) : void {
+    private init(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: any, session: Session) => void): void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let getXcApiRequest = function (xcApiFileName, sessionListener) {
             session

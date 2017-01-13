@@ -1,4 +1,4 @@
-import {javascriptHelper} from "javascriptHelper";
+import { javascriptHelper } from "javascriptHelper";
 import Guid from "guid";
 import Publisher from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
@@ -8,20 +8,20 @@ import { ApiConfiguration } from "configuration/apiConfiguration";
 
 export class Session {
 
-    private serverUrl : string;
-    private sessionData : string;
-    private guid : Guid;
-    private privateTopic : string;
-    private publishers : Array<Publisher>;
-    private subscribers : Array<Subscriber>;
-    private privateTopics : Array<String>;
-    
-    public privateSubscriber : Subscriber;    
-    public replyPublisher : Publisher;
-    public configuration : ApiConfiguration;
-    public webSocket : WebSocket;
+    private serverUrl: string;
+    private sessionData: string;
+    private guid: Guid;
+    private privateTopic: string;
+    private publishers: Array<Publisher>;
+    private subscribers: Array<Subscriber>;
+    private privateTopics: Array<String>;
 
-    constructor(serverUrl : string, webSocket : WebSocket, configuration : ApiConfiguration, sessionData: string) {
+    public privateSubscriber: Subscriber;
+    public replyPublisher: Publisher;
+    public configuration: ApiConfiguration;
+    public webSocket: WebSocket;
+
+    constructor(serverUrl: string, webSocket: WebSocket, configuration: ApiConfiguration, sessionData: string) {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
@@ -37,7 +37,7 @@ export class Session {
         this.privateTopics = [this.privateTopic];
     }
 
-    setPrivateTopic(privateTopic : string) : void {
+    setPrivateTopic(privateTopic: string): void {
         this.addPrivateTopic(privateTopic);
         this.removePrivateTopic(this.privateTopic);
         this.privateTopic = privateTopic;
@@ -49,7 +49,7 @@ export class Session {
         }
     };
 
-    addPrivateTopic(privateTopic : string) : void {
+    addPrivateTopic(privateTopic: string): void {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
         this
             .privateSubscriber
@@ -62,7 +62,7 @@ export class Session {
         }
     };
 
-    removePrivateTopic(privateTopic : string) : void {
+    removePrivateTopic(privateTopic: string): void {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
         this
             .privateSubscriber
@@ -73,10 +73,10 @@ export class Session {
         }
     };
 
-    init(sessionListener: (error : any, session : Session) => void, getXcApiRequest : (xcApiFileName : string, sessionListener : (error : any, session : Session) => void) => void, xcApiFileName : string) : void {
+    init(sessionListener: (error: any, session: Session) => void, getXcApiRequest: (xcApiFileName: string, sessionListener: (error: any, session: Session) => void) => void, xcApiFileName: string): void {
         let thisSession = this;
 
-        this.webSocket.onopen = function (e : Event) {
+        this.webSocket.onopen = function (e: Event) {
             thisSession
                 .privateSubscriber
                 .sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
@@ -84,14 +84,14 @@ export class Session {
             console.log("connection started on " + thisSession.serverUrl + ".");
         };
 
-        this.webSocket.onerror = function (e : Event) {
+        this.webSocket.onerror = function (e: Event) {
             let messageError = "Error on " + thisSession.serverUrl + ".";
             console.error(messageError);
             console.error(e);
             sessionListener(messageError, null);
         };
 
-        this.webSocket.onclose = function (e : CloseEvent) {
+        this.webSocket.onclose = function (e: CloseEvent) {
             console.log("connection on " + thisSession.serverUrl + " closed.");
             console.log(e);
             if (!e.wasClean) {
@@ -100,7 +100,7 @@ export class Session {
         };
     };
 
-    createPublisher() : Publisher {
+    createPublisher(): Publisher {
         let publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this
             .publishers
@@ -108,7 +108,7 @@ export class Session {
         return publisher;
     };
 
-    createSubscriber() : Subscriber {
+    createSubscriber(): Subscriber {
         let subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
         this
             .subscribers
@@ -116,7 +116,7 @@ export class Session {
         return subscriber;
     };
 
-    private removeElement(array : Array<Object>, e : Object, msg : string) : void{
+    private removeElement(array: Array<Object>, e: Object, msg: string): void {
         let index = array.indexOf(e);
         if (index > -1) {
             array.splice(index, 1);
@@ -125,15 +125,15 @@ export class Session {
         }
     };
 
-    disposePublisher(publisher : Publisher) : void {
+    disposePublisher(publisher: Publisher): void {
         this.removeElement(this.publishers, publisher, "Publisher not found");
     };
 
-    disposeSubscriber(subscriber : Subscriber) : void{
+    disposeSubscriber(subscriber: Subscriber): void {
         this.removeElement(this.subscribers, subscriber, "Subscriber not found");
     };
 
-    dispose() : void{
+    dispose(): void {
         for (let i = 0; i < this.publishers.length; i++) {
             this.disposePublisher(this.publishers[i]);
         }
@@ -142,7 +142,7 @@ export class Session {
         }
     };
 
-    close() : void {
+    close(): void {
         this
             .privateSubscriber
             .sendUnsubscribeRequestToTopic(this.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
@@ -154,7 +154,7 @@ export class Session {
 
 }
 
-export let SessionFactory = function (serverUrl : string, configuration : ApiConfiguration, sessionData : string) : Session {
+export let SessionFactory = function (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session {
     let webSocket = new WebSocket(serverUrl);
     let session = new Session(serverUrl, webSocket, configuration, sessionData);
     return session;
