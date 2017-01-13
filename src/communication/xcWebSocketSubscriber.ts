@@ -173,7 +173,7 @@ class Subscriber {
         return sameStateMachine;
     }
 
-    getStateMachineUpdates = function (componentName : string, stateMachineName : string) {
+    getStateMachineUpdates(componentName : string, stateMachineName : string) {
         let filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
         this.sendSubscribeRequest(componentName, stateMachineName);
         return filteredObservable;
