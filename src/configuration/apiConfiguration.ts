@@ -1,3 +1,5 @@
+import { RawApiConfiguration, ApiCommunicationDefinition, ComponentDefinition, StateDefinition, StateMachineDefinition } from "configuration/rawApiConfiguration";
+
 export interface PublisherDetails {
     eventCode: number;
     routingKey: string;
@@ -23,24 +25,23 @@ export interface ApiConfiguration {
 
 export class DefaultApiConfiguration implements ApiConfiguration {
 
-    private _config: any;
+    private _config: RawApiConfiguration;
 
-    constructor(configObject: any) {
-        this._config = configObject;
+    constructor(rawConfig: RawApiConfiguration) {
+        this._config = rawConfig;
         if (!this.validate()) {
             throw new Error("invalid configuration");
         }
     }
 
     private validate(): boolean {
-        return this._config
-            && this._config.deployment
-            && this._config.deployment.codesConverter
-            && this._config.deployment.clientAPICommunication;
+        return this._config.deployment !== undefined
+            && this._config.deployment.codesConverter !== undefined
+            && this._config.deployment.clientAPICommunication !== undefined ;
     }
 
     getComponentCode(componentName: string): number {
-        const component = this.getComponent(componentName);
+        const component = this.findComponentByName(componentName);
         return Number(component.$.id);
     }
 
@@ -51,7 +52,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     getStateMachineCode(componentName: string, stateMachineName: string): number {
-        const component = this.getComponent(componentName);
+        const component = this.findComponentByName(componentName);
         const stateMachine = this.findStateMachine(component, stm => stm.$.name === stateMachineName);
         if (!stateMachine) {
             throw new Error(`StateMachine '${stateMachineName}' not found`);
@@ -68,7 +69,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return stateMachine ? true : false;
     }
 
-    private getComponent(componentName: string): any {
+    private findComponentByName(componentName: string): ComponentDefinition {
         const component = this.findComponent(component => component.$.name === componentName);
         if (!component) {
             throw new Error(`Component '${componentName}' not found`);
@@ -76,11 +77,11 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return component;
     }
 
-    private findComponent(predicate: (component: any) => boolean): any {
+    private findComponent(predicate: (component: ComponentDefinition) => boolean): ComponentDefinition {
         return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
     }
 
-    private findStateMachine(component, predicate: (stateMachine: any) => boolean): any {
+    private findStateMachine(component, predicate: (stateMachine: StateMachineDefinition) => boolean): StateMachineDefinition {
         return component.stateMachines[0].stateMachine.find(predicate);
     }
 
@@ -97,7 +98,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         };
     }
 
-    private getPublisher(componentCode: number, stateMachineCode: number, messageType: string) {
+    private getPublisher(componentCode: number, stateMachineCode: number, messageType: string): ApiCommunicationDefinition {
         return this._config.deployment.clientAPICommunication[0].publish
             .find(pub => Number(pub.$.componentCode) === componentCode
                 && Number(pub.$.stateMachineCode) === stateMachineCode
@@ -122,7 +123,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return this.getSubscriber(componentCode, stateMachineCode, type) !== undefined;
     }
 
-    private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType) {
+    private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): ApiCommunicationDefinition {
         return this._config.deployment.clientAPICommunication[0].subscribe
             .find(pub => Number(pub.$.componentCode) === componentCode
                 && Number(pub.$.stateMachineCode) === stateMachineCode
@@ -152,7 +153,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         }
 
         const state = stateMachine.states[0].State
-            .find(state => Number(state.$.id) === stateCode);
+            .find((state) => Number(state.$.id) === stateCode);
 
         if (!state) {
             throw new Error(`State '${stateCode}' not found`);
