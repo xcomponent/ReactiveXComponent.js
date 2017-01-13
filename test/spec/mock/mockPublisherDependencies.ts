@@ -50,8 +50,8 @@ function getCorretWebsocketInputFormat(visibility) {
 let stateMachineRef = {
     "StateMachineId": 1,
     "AgentId": 2,
-    "StateMachineCode": parseInt(stateMachineCode),
-    "ComponentCode": parseInt(componentCode),
+    "StateMachineCode": stateMachineCode,
+    "ComponentCode": componentCode,
 };
 let correctDataForSMRef = {
     event: {
@@ -60,7 +60,7 @@ let correctDataForSMRef = {
             "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] },
             "StateMachineCode": { "Case": "Some", "Fields": [stateMachineRef.StateMachineCode] },
             "ComponentCode": { "Case": "Some", "Fields": [stateMachineRef.ComponentCode] },
-            "EventCode": parseInt(eventCode),
+            "EventCode": eventCode,
             "IncomingType": 0,
             "MessageType": { "Case": "Some", "Fields": [messageType] },
             "SessionData": { "Case": "Some", "Fields": [sessionData] }

@@ -1,21 +1,27 @@
 import Connection from "communication/xcConnection";
+import {Session} from "communication/xcSession";
 
-let XComponentAPI = function () {
-    this.connection = new Connection();
-};
+class XComponentAPI {
+    private connection : Connection;
 
-XComponentAPI.prototype.getXcApiList = function (serverUrl, connectionListener) {
-    this.connection.getXcApiList(serverUrl, (function (apis) {
-        connectionListener(this.connection, apis);
-    }).bind(this));
-};
+    constructor() {
+        this.connection = new Connection();
+    }
 
-XComponentAPI.prototype.createSession = function (xcApiFileName, serverUrl, sessionListener) {
-    this.connection.createSession(xcApiFileName, serverUrl, sessionListener);
-};
+    getXcApiList(serverUrl : string, connectionListener : (connection : Connection, apis : Array < Object >) => void) {
+        this.connection.getXcApiList(serverUrl, (function (apis : Array < Object >) {
+            connectionListener(this.connection, apis);
+        }).bind(this));
+    };
 
-XComponentAPI.prototype.createAuthenticatedSession = function (xcApiFileName, serverUrl, sessionData, sessionListener) {
-    this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, sessionListener);
-};
+    createSession(xcApiFileName : string, serverUrl : string, sessionListener : (error : any, session : Session) => void) {
+        this.connection.createSession(xcApiFileName, serverUrl, sessionListener);
+    };
+
+    createAuthenticatedSession(xcApiFileName : string, serverUrl : string, sessionData : string, sessionListener : (error : any, session : Session) => void) {
+        this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, sessionListener);
+    };
+}
+
 
 export default XComponentAPI;
