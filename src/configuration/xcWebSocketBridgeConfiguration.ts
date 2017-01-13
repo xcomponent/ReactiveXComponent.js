@@ -6,6 +6,8 @@ let kinds = {
 };
 
 let commands = {
+    update: "update",
+    snapshot: "snapshot",
     subscribe: "subscribe",
     unsubscribe: "unsubscribe",
     getXcApi: "getXcApi",

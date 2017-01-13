@@ -34,80 +34,59 @@ class Subscriber {
 
     getXcApiList(getXcApiListListener: (apis: Array<Object>) => void) {
         let thisSubscriber = this;
-        this
-            .observableMsg
-            .map(function (e) {
-                return thisSubscriber.getJsonDataFromGetXcApiListRequest(e);
-            })
-            .filter(function (apis) {
-                return apis != null;
-            })
-            .subscribe(function (apis) {
-                console.log("ApiList received successfully");
-                getXcApiListListener(apis);
-            });
         let command = xcWebSocketBridgeConfiguration.commands.getXcApiList;
+        this.observableMsg
+            .map(function (e) {
+                return thisSubscriber.deserializeWithoutTopic(e.data);
+            })
+            .filter(function (data) {
+                return data.command === command;
+            })
+            .subscribe(function (data) {
+                console.log("ApiList received successfully");
+                getXcApiListListener(thisSubscriber.getJsonDataFromGetXcApiListRequest(data.stringData));
+            });
         let data = {};
-        this
-            .webSocket
-            .send(this.convertToWebsocketInputFormat(command, data));
+        this.webSocket.send(thisSubscriber.convertToWebsocketInputFormat(command, data));
     };
 
 
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void) {
         let thisSubscriber = this;
-        this
-            .observableMsg
-            .map(function (e) {
-                try {
-                    return thisSubscriber.getJsonDataFromXcApiRequest(e);
-                } catch (e) {
-                    return null;
-                }
-            })
-            .filter(function (xcApi) {
-                return xcApi != null;
-            })
-            .subscribe(function (xcApi) {
-                console.log(xcApiFileName + " received successfully");
-                getXcApiListener(xcApi);
-            });
         let command = xcWebSocketBridgeConfiguration.commands.getXcApi;
-        let data = {
-            Name: xcApiFileName
-        };
-        this
-            .webSocket
-            .send(this.convertToWebsocketInputFormat(command, data));
+        this.observableMsg
+            .map(function (e) {
+                return thisSubscriber.deserializeWithoutTopic(e.data);
+            })
+            .filter(function (data) {
+                return data.command === command;
+            })
+            .subscribe(function (data) {
+                console.log(xcApiFileName + " " + "received successfully");
+                getXcApiListener(thisSubscriber.getJsonDataFromXcApiRequest(data.stringData));
+            });
+        let data = { Name: xcApiFileName };
+        this.webSocket.send(thisSubscriber.convertToWebsocketInputFormat(command, data));
     };
 
 
     getSnapshot(componentName: string, stateMachineName: string, snapshotListener: (items: Array<Object>) => void) {
         let replyTopic = this.guid.create();
-        let thisObject = this;
+        let thisSubscriber = this;
         this.observableMsg
             .map(function (e) {
-                try {
-                    return thisObject.getJsonDataFromSnapshot(e);
-                } catch (e) {
-                    return null;
-                }
+                return thisSubscriber.deserialize(e.data);
             })
             .filter(function (data) {
-                try {
-                    return data.replyTopic === replyTopic;
-                } catch (e) {
-                    return false;
-                }
+                return data.command === xcWebSocketBridgeConfiguration.commands.snapshot && data.topic === replyTopic;
             })
             .subscribe(function (data) {
-                thisObject.sendUnsubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
-                snapshotListener(data.items);
+                thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
+                snapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
             });
         this.sendSubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
         this.webSocket.send(this.convertToWebsocketInputFormat(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode, dataToSendSnapshot.data));
-
     };
 
     getDataToSendSnapshot(componentName: string, stateMachineName: string, replyTopic: string) {
@@ -141,21 +120,17 @@ class Subscriber {
     prepareStateMachineUpdates(componentName: string, stateMachineName: string) {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
-        let thisObject = this;
+        let thisSubscriber = this;
         let filteredObservable = this.observableMsg
             .map(function (e) {
-                try {
-                    return thisObject.getJsonDataFromEvent(e);
-                } catch (e) {
-                    console.error(e);
-                    return null;
-                }
+                return thisSubscriber.deserialize(e.data);
             })
-            .filter(function (jsonData) {
-                try {
-                    return thisObject.isSameComponent(jsonData, componentCode) && thisObject.isSameStateMachine(jsonData, stateMachineCode);
-                } catch (e) {
+            .filter(function (data) {
+                if (data.command !== xcWebSocketBridgeConfiguration.commands.update) {
                     return false;
+                } else {
+                    let jsonData = thisSubscriber.getJsonDataFromEvent(data.stringData);
+                    return thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode);
                 }
             });
         return filteredObservable;
@@ -188,10 +163,11 @@ class Subscriber {
 
 
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void) {
+        let thisSubscriber = this;
         let observableSubscriber = this
             .prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe(function (jsonData) {
-                stateMachineUpdateListener(jsonData);
+            .subscribe(function (data) {
+                stateMachineUpdateListener(thisSubscriber.getJsonDataFromEvent(data.stringData));
             });
         this
             .observableSubscribers
@@ -287,8 +263,8 @@ class Subscriber {
     };
 
 
-    getJsonDataFromEvent(e: MessageEvent) {
-        let jsonData = this.getJsonData(e.data);
+    getJsonDataFromEvent(data: string) {
+        let jsonData = this.getJsonData(data);
         let componentCode = jsonData.Header.ComponentCode.Fields[0];
         let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
         let stateCode = jsonData.Header.StateCode.Fields[0];
@@ -309,9 +285,8 @@ class Subscriber {
         };
     };
 
-    getJsonDataFromSnapshot(e: MessageEvent) {
-        let replyTopic = this.getCommand(e.data);
-        let jsonData = this.getJsonData(e.data);
+    getJsonDataFromSnapshot(data: string) {
+        let jsonData = this.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
         try {
@@ -337,11 +312,7 @@ class Subscriber {
                 jsonMessage: items[i].PublicMember
             });
         }
-
-        return {
-            items: snapshotItems,
-            replyTopic: replyTopic
-        };
+        return snapshotItems;
     };
 
     private decodeServerMessage(b64Data: string) {
@@ -362,35 +333,45 @@ class Subscriber {
         return strData;
     };
 
-    private getJsonDataFromXcApiRequest(e: MessageEvent) {
-        let jsonData = this.getJsonData(e.data);
-        if (xcWebSocketBridgeConfiguration.commands.getXcApi !== this.getCommand(e.data)) {
-            return null;
-        } else {
-            return this.decodeServerMessage(jsonData.Content);
-        }
+    private getJsonDataFromXcApiRequest(data) {
+        let jsonData = this.getJsonData(data);
+        return this.decodeServerMessage(jsonData.Content);
     };
 
-    private getJsonDataFromGetXcApiListRequest(e: MessageEvent) {
-        let jsonData = this.getJsonData(e.data);
-        if (xcWebSocketBridgeConfiguration.commands.getXcApiList !== this.getCommand(e.data)) {
-            return null;
-        } else {
-            return jsonData.Apis;
-        }
+    private getJsonDataFromGetXcApiListRequest(data) {
+        let jsonData = this.getJsonData(data);
+        return jsonData.Apis;
     };
 
     private getJsonData(data: string) {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
     }
 
-    private getCommand(data: string) {
-        return data.substring(0, data.indexOf(" "));
-    }
-
     private convertToWebsocketInputFormat(request: string, data: any) {
         let input = request + " " + JSON.stringify(data);
         return input;
+    }
+
+    private deserialize(data) {
+        let s = data.split(" ");
+        let command = s.splice(0, 1)[0];
+        let topic = s.splice(0, 1)[0];
+        let stringData = s.join("");
+        return {
+            command: command,
+            topic: topic,
+            stringData: stringData
+        };
+    }
+
+    private deserializeWithoutTopic(data) {
+        let s = data.split(" ");
+        let command = s.splice(0, 1)[0];
+        let stringData = s.join("");
+        return {
+            command: command,
+            stringData: stringData
+        };
     }
 
 }
