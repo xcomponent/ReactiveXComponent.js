@@ -34,8 +34,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                 //when subscribe request is received, we send send jsonData
                 server.on('message', function (subscribeRequest) {
                     expect(subscribeRequest).toEqual(Mock.correctSubscribeRequest);
-                    server.send();
-                    server.send(JSON.stringify(Mock.jsonData));
+                    server.send(Mock.updateResponse);
                 });
             });
 

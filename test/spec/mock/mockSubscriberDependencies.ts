@@ -61,6 +61,8 @@ let jsonData = {
     JsonMessage: JSON.stringify(jsonMessage)
 };
 
+let updateResponse = "update " + "topic " + JSON.stringify(jsonData);
+
 let correctReceivedData = {
     stateMachineRef: {
         "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
@@ -117,7 +119,7 @@ let correctDataToSendSnapshot = {
 let correctSnapshotRequest = correctDataToSendSnapshot.topic + " " + correctDataToSendSnapshot.componentCode +
     " " + JSON.stringify(correctDataToSendSnapshot.data);
 
-let snapshotResponse = guiExample + " " + "{\"Header\":{\"EventCode\":0,\"Probes\":[],\"IsContainsHashCode\":false,\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.Common.Processing.SnapshotResponse\"]}},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAItmiGUAAKZ0XTIEAAAA\\\"}\"}";
+let snapshotResponse = "snapshot " + guiExample + " " + "{\"Header\":{\"EventCode\":0,\"Probes\":[],\"IsContainsHashCode\":false,\"IncomingType\":0,\"MessageType\":{\"Case\":\"Some\",\"Fields\":[\"XComponent.Common.Processing.SnapshotResponse\"]}},\"JsonMessage\":\"{\\\"Items\\\":\\\"H4sIAAAAAAAEAItmiGUAAKZ0XTIEAAAA\\\"}\"}";
 
 let snapshotSubscribeRequest = "subscribe " + JSON.stringify({ "Header": { "IncomingType": 0 }, "JsonMessage": JSON.stringify({ "Topic": { "Key": guiExample, "kind": 1 } }) });
 let snapshotUnsubscribeRequest = "unsubscribe " + JSON.stringify({ "Header": { "IncomingType": 0 }, "JsonMessage": JSON.stringify({ "Topic": { "Key": guiExample, "kind": 1 } }) });
@@ -128,6 +130,7 @@ let returnObj = {
     correctData: correctData,
     jsonMessage: jsonMessage,
     jsonData: jsonData,
+    updateResponse: updateResponse,
     correctReceivedData: correctReceivedData,
     correctSubscribeRequest: correctSubscribeRequest,
     correctUnsubscribeRequest: correctUnsubscribeRequest,
