@@ -26,8 +26,7 @@ export class DefaultConnection implements Connection {
                 session.close();
             });
         };
-        let errorListener = function (err: Error) {
-            console.error(err);
+        let errorListener = function (_: Error) {
             console.error("Error while getting Apis List");
         };
         session.init(openListener, errorListener);

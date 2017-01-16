@@ -6,7 +6,24 @@ import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfi
 import * as definition from "definition";
 import { ApiConfiguration } from "configuration/apiConfiguration";
 
-export class Session {
+export interface Session {
+    privateSubscriber: Subscriber;
+    replyPublisher: Publisher;
+    configuration: ApiConfiguration;
+    webSocket: WebSocket;
+    setPrivateTopic(privateTopic: string): void;
+    addPrivateTopic(privateTopic: string): void;
+    removePrivateTopic(privateTopic: string): void;
+    init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void;
+    createPublisher(): Publisher;
+    createSubscriber(): Subscriber;
+    disposePublisher(publisher: Publisher): void;
+    disposeSubscriber(subscriber: Subscriber): void;
+    dispose(): void;
+    close(): void;
+}
+
+export class DefaultSession implements Session {
 
     private serverUrl: string;
     private sessionData: string;
@@ -26,9 +43,7 @@ export class Session {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.guid = new Guid();
-        this.privateTopic = this
-            .guid
-            .create();
+        this.privateTopic = this.guid.create();
         this.sessionData = sessionData;
         this.privateSubscriber = new Subscriber(this.webSocket, null, null, null, null);
         this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
@@ -41,36 +56,30 @@ export class Session {
         this.addPrivateTopic(privateTopic);
         this.removePrivateTopic(this.privateTopic);
         this.privateTopic = privateTopic;
-        for (let i = 0; i < this.publishers.length; i++) {
-            this.publishers[i].privateTopic = privateTopic;
-        }
-        for (let j = 0; j < this.subscribers.length; j++) {
-            this.subscribers[j].replyPublisher = this.replyPublisher;
-        }
+        this.publishers.forEach(function (publisher) {
+            publisher.privateTopic = privateTopic;
+        });
+        this.subscribers.forEach(function (subscriber) {
+            subscriber.replyPublisher = this.replyPublisher;
+        }, this);
     };
 
     addPrivateTopic(privateTopic: string): void {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
-        this
-            .privateSubscriber
-            .sendSubscribeRequestToTopic(privateTopic, kindPrivate);
-        this
-            .privateTopics
-            .push(privateTopic);
-        for (let i = 0; i < this.subscribers.length; i++) {
-            this.subscribers[i].privateTopics = this.privateTopics;
-        }
+        this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
+        this.privateTopics.push(privateTopic);
+        this.subscribers.forEach(function (subscriber) {
+            subscriber.privateTopics = this.privateTopics;
+        }, this);
     };
 
     removePrivateTopic(privateTopic: string): void {
         let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
-        this
-            .privateSubscriber
-            .sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
-        this.removeElement(this.privateTopics, privateTopic, "private topic not found");
-        for (let i = 0; i < this.subscribers.length; i++) {
-            this.subscribers[i].privateTopics = this.privateTopics;
-        }
+        this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
+        this.removeElement(this.privateTopics, privateTopic);
+        this.subscribers.forEach(function (subscriber) {
+            subscriber.privateTopics = this.privateTopics;
+        }, this);
     };
 
     init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void {
@@ -100,60 +109,54 @@ export class Session {
 
     createPublisher(): Publisher {
         let publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
-        this
-            .publishers
-            .push(publisher);
+        this.publishers.push(publisher);
         return publisher;
     };
 
     createSubscriber(): Subscriber {
         let subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
-        this
-            .subscribers
-            .push(subscriber);
+        this.subscribers.push(subscriber);
         return subscriber;
     };
 
-    private removeElement(array: Array<Object>, e: Object, msg: string): void {
+    private removeElement<T>(array: Array<T>, e: T): void {
         let index = array.indexOf(e);
         if (index > -1) {
             array.splice(index, 1);
         } else {
-            throw new Error(msg);
+            throw new Error("Element to remove not found");
         }
     };
 
     disposePublisher(publisher: Publisher): void {
-        this.removeElement(this.publishers, publisher, "Publisher not found");
+        this.removeElement(this.publishers, publisher);
     };
 
     disposeSubscriber(subscriber: Subscriber): void {
-        this.removeElement(this.subscribers, subscriber, "Subscriber not found");
+        this.removeElement(this.subscribers, subscriber);
     };
 
     dispose(): void {
-        for (let i = 0; i < this.publishers.length; i++) {
-            this.disposePublisher(this.publishers[i]);
-        }
-        for (let j = 0; j < this.subscribers.length; j++) {
-            this.disposeSubscriber(this.subscribers[j]);
-        }
+        this.publishers.forEach(function (publisher) {
+            this.disposePublisher(publisher);
+        }, this);
+        this.subscribers.forEach(function (subscriber) {
+            this.disposeSubscriber(subscriber);
+        }, this);
     };
 
     close(): void {
-        this
-            .privateSubscriber
-            .sendUnsubscribeRequestToTopic(this.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+        this.privateTopics.forEach(function (privateTopic) {
+            this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+        }, this);
         this.dispose();
-        this
-            .webSocket
-            .close();
+        this.webSocket.close();
     };
 
 }
 
 export let SessionFactory = function (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session {
     let webSocket = new WebSocket(serverUrl);
-    let session = new Session(serverUrl, webSocket, configuration, sessionData);
+    let session = new DefaultSession(serverUrl, webSocket, configuration, sessionData);
     return session;
 };
