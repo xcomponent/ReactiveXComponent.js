@@ -84,7 +84,6 @@ export class DefaultSession implements Session {
 
     init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void {
         let thisSession = this;
-
         this.webSocket.onopen = function (e: Event) {
             thisSession.privateSubscriber.sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
             openListener(e);
@@ -93,8 +92,6 @@ export class DefaultSession implements Session {
 
         this.webSocket.onerror = function (e: Event) {
             let messageError = "Error on " + thisSession.serverUrl + ".";
-            console.error(messageError);
-            console.error(e);
             errorListener(new Error(messageError));
         };
 

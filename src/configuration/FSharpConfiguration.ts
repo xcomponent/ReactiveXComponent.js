@@ -1,8 +1,11 @@
-export interface FSharpFormat {
-    Case : string;
-    Fields : Array < any >
+export interface FSharpFormat<T> {
+    Case: string;
+    Fields: Array<T>;
 }
 
-export let getFSharpFormat = function (value : any) : FSharpFormat {
-    return {"Case": "Some", "Fields": [value]}
-}
+export let getFSharpFormat = function <T>(value: T): FSharpFormat<T> {
+    if (value === undefined || value === null)
+        return undefined;
+    else
+        return { "Case": "Some", "Fields": [value] };
+};

@@ -20,11 +20,10 @@ describe("Test xcConnection module", function () {
     describe("Test createSession method", function () {
         it("given an unknown server url, should call the session listener with an error argument", function (done) {
             let serverUrl = "wss://wrongServerUrl";
-            let messageError = "Error on " + serverUrl + ".";
 
             let sessionListener = function (error, session) {
-                expect(error).toEqual(messageError);
-                expect(session).toBe(null);
+                 expect(error).not.toBe(null);
+                 expect(session).toBe(null);
                 done();
             };
             connection.createSession("xcApiFileName", serverUrl, sessionListener);
