@@ -14,11 +14,11 @@ class XComponentAPI {
         }).bind(this));
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: any, session: Session) => void) {
+    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: Error, session: Session) => void) {
         this.connection.createSession(xcApiFileName, serverUrl, sessionListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: any, session: Session) => void) {
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void) {
         this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, sessionListener);
     };
 }

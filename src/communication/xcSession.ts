@@ -73,12 +73,12 @@ export class Session {
         }
     };
 
-    init(openListener: () => void, errorListener: (err: any) => void): void {
+    init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void {
         let thisSession = this;
 
         this.webSocket.onopen = function (e: Event) {
             thisSession.privateSubscriber.sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
-            openListener();
+            openListener(e);
             console.log("connection started on " + thisSession.serverUrl + ".");
         };
 
@@ -86,7 +86,7 @@ export class Session {
             let messageError = "Error on " + thisSession.serverUrl + ".";
             console.error(messageError);
             console.error(e);
-            errorListener(messageError);
+            errorListener(new Error(messageError));
         };
 
         this.webSocket.onclose = function (e: CloseEvent) {

@@ -4,8 +4,8 @@ import { DefaultApiConfigurationParser } from "configuration/apiConfigurationPar
 
 export interface Connection {
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void;
-    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: any, session: Session) => void): void;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: any, session: Session) => void): void;
+    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: Error, session: Session) => void): void;
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void): void;
 }
 
 export class DefaultConnection implements Connection {
@@ -20,31 +20,31 @@ export class DefaultConnection implements Connection {
 
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void {
         let session = SessionFactory(serverUrl, null, null);
-        let openListener = function () {
+        let openListener = function (_: Event) {
             session.privateSubscriber.getXcApiList(function (apis: Array<String>) {
                 getXcApiListListener(apis);
                 session.close();
             });
         };
-        let errorListener = function (err) {
+        let errorListener = function (err: Error) {
             console.error(err);
             console.error("Error while getting Apis List");
         };
         session.init(openListener, errorListener);
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: any, session: Session) => void): void {
+    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: Error, session: Session) => void): void {
         this.init(xcApiFileName, serverUrl, null, sessionListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: any, session: Session) => void): void {
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void): void {
         this.init(xcApiFileName, serverUrl, sessionData, sessionListener);
     };
 
-    private init(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: any, session: Session) => void): void {
+    private init(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void): void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let thisConnection = this;
-        let getXcApiRequest = function (xcApiFileName: string, sessionListener: (error: any, session: Session) => void) {
+        let getXcApiRequest = function (xcApiFileName: string, sessionListener: (error: Error, session: Session) => void) {
             if (thisConnection.apis[xcApiFileName] === undefined) {
                 session.privateSubscriber.getXcApi(xcApiFileName, function (xcApi: string) {
                     const parser = new DefaultApiConfigurationParser();
@@ -62,10 +62,10 @@ export class DefaultConnection implements Connection {
                 sessionListener(null, session);
             }
         };
-        let openListener = function () {
+        let openListener = function (_: Event) {
             getXcApiRequest(xcApiFileName, sessionListener);
         };
-        let errorListener = function (err) {
+        let errorListener = function (err: Error) {
             sessionListener(err, null);
         };
         session.init(openListener, errorListener);
