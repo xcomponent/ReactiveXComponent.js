@@ -3,12 +3,12 @@ Reactive XComponent is a javaScript client API that allows you to interact with 
 
 ## Install
 Use npm to install the latest version of the API:
-``` npm i reactivexcomponent.js ```
+``` npm i reactivexcomponent.js --save ```
 
 ## Usage
 Import *xcomponentapi.js* module:
 ```html
-import xcomponentapi from 'reactivexcomponent.js/dist/xcomponentapi';
+import xcomponentapi from 'reactivexcomponent.js';
 ```
 
 Example of XComponent API usage

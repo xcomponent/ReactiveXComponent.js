@@ -65,7 +65,6 @@ Publisher.prototype.sendWithStateMachineRef = function (stateMachineRef, message
 Publisher.prototype.getHeaderConfig = function (componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic) {
     let publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
     let thisObject = this;
-    let publishTopic = undefined;
     let header = {
         "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
         "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
