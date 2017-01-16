@@ -1,5 +1,5 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import Connection from "communication/xcConnection";
+import { Connection, DefaultConnection } from "communication/xcConnection";
 import pako = require("pako");
 
 const encodeServerMessage = (strData: string) => {
@@ -14,7 +14,7 @@ describe("Test xcConnection module", function () {
 
     beforeEach(function () {
         (<any>window).WebSocket = WebSocket;
-        connection = new Connection();
+        connection = new DefaultConnection();
     });
 
     describe("Test createSession method", function () {

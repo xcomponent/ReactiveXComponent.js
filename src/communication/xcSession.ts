@@ -73,14 +73,12 @@ export class Session {
         }
     };
 
-    init(sessionListener: (error: any, session: Session) => void, getXcApiRequest: (xcApiFileName: string, sessionListener: (error: any, session: Session) => void) => void, xcApiFileName: string): void {
+    init(openListener: () => void, errorListener: (err: any) => void): void {
         let thisSession = this;
 
         this.webSocket.onopen = function (e: Event) {
-            thisSession
-                .privateSubscriber
-                .sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
-            getXcApiRequest(xcApiFileName, sessionListener);
+            thisSession.privateSubscriber.sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+            openListener();
             console.log("connection started on " + thisSession.serverUrl + ".");
         };
 
@@ -88,7 +86,7 @@ export class Session {
             let messageError = "Error on " + thisSession.serverUrl + ".";
             console.error(messageError);
             console.error(e);
-            sessionListener(messageError, null);
+            errorListener(messageError);
         };
 
         this.webSocket.onclose = function (e: CloseEvent) {

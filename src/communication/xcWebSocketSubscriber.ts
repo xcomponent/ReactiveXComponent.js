@@ -32,7 +32,7 @@ class Subscriber {
         this.privateTopics = privateTopics;
     }
 
-    getXcApiList(getXcApiListListener: (apis: Array<Object>) => void) {
+    getXcApiList(getXcApiListListener: (apis: Array<String>) => void) {
         let thisSubscriber = this;
         let command = xcWebSocketBridgeConfiguration.commands.getXcApiList;
         this.observableMsg

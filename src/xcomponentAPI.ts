@@ -1,15 +1,15 @@
-import Connection from "communication/xcConnection";
+import { Connection, DefaultConnection } from "communication/xcConnection";
 import { Session } from "communication/xcSession";
 
 class XComponentAPI {
     private connection: Connection;
 
     constructor() {
-        this.connection = new Connection();
+        this.connection = new DefaultConnection();
     }
 
-    getXcApiList(serverUrl: string, connectionListener: (connection: Connection, apis: Array<Object>) => void) {
-        this.connection.getXcApiList(serverUrl, (function (apis: Array<Object>) {
+    getXcApiList(serverUrl: string, connectionListener: (connection: Connection, apis: Array<String>) => void) {
+        this.connection.getXcApiList(serverUrl, (function (apis: Array<String>) {
             connectionListener(this.connection, apis);
         }).bind(this));
     };
