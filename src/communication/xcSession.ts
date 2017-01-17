@@ -1,10 +1,10 @@
-import { javascriptHelper } from "javascriptHelper";
-import Guid from "guid";
-import { Publisher, DefaultPublisher } from "communication/xcWebSocketPublisher";
-import Subscriber from "communication/xcWebSocketSubscriber";
-import { Kinds } from "configuration/xcWebSocketBridgeConfiguration";
+import { javascriptHelper } from "../javascriptHelper";
+import Guid from "../guid";
+import { Publisher, DefaultPublisher } from "./xcWebSocketPublisher";
+import Subscriber from "./xcWebSocketSubscriber";
+import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
-import { ApiConfiguration } from "configuration/apiConfiguration";
+import { ApiConfiguration } from "../configuration/apiConfiguration";
 
 export interface Session {
     privateSubscriber: Subscriber;

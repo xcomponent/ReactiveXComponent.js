@@ -1,4 +1,4 @@
-import Guid from "guid";
+import Guid from "../../src/guid";
 
 test("It should create a random guid with the right format", () => {
     let guid = new Guid();

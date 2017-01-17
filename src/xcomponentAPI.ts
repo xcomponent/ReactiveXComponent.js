@@ -1,5 +1,5 @@
-import { Connection, DefaultConnection } from "communication/xcConnection";
-import { Session } from "communication/xcSession";
+import { Connection, DefaultConnection } from "./communication/xcConnection";
+import { Session } from "./communication/xcSession";
 
 class XComponentAPI {
     private connection: Connection;

@@ -1,5 +1,5 @@
-import { DefaultApiConfigurationParser } from "configuration/apiConfigurationParser";
-import { SubscriberEventType } from "configuration/apiConfiguration";
+import { DefaultApiConfigurationParser } from "../../src/configuration/apiConfigurationParser";
+import { SubscriberEventType } from "../../src/configuration/apiConfiguration";
 import fs = require("fs");
 
 const parse = (input?: string) => {

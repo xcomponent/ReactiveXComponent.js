@@ -1,6 +1,6 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import Subscriber from "communication/xcWebSocketSubscriber";
-import { Kinds } from "configuration/xcWebSocketBridgeConfiguration";
+import Subscriber from "../../../src/communication/xcWebSocketSubscriber";
+import { Kinds } from "../../../src/configuration/xcWebSocketBridgeConfiguration";
 
 
 // Mocking configuration

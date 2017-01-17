@@ -1,11 +1,11 @@
-import { javascriptHelper } from "javascriptHelper";
-import { Commands, Kinds } from "configuration/xcWebSocketBridgeConfiguration";
-import { ApiConfiguration, SubscriberEventType } from "configuration/apiConfiguration";
+import { javascriptHelper } from "../javascriptHelper";
+import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
+import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 let Rx = require("rx");
 import pako = require("pako");
 
-import { Publisher } from "communication/xcWebSocketPublisher";
-import Guid from "guid";
+import { Publisher } from "./xcWebSocketPublisher";
+import Guid from "../guid";
 
 class Subscriber {
 

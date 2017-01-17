@@ -1,5 +1,5 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import { Connection, DefaultConnection } from "communication/xcConnection";
+import { Connection, DefaultConnection } from "../../src/communication/xcConnection";
 import pako = require("pako");
 
 const encodeServerMessage = (strData: string) => {

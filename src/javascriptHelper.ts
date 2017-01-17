@@ -1,5 +1,5 @@
 
-interface JavascriptHelper {
+export interface JavascriptHelper {
     WebSocket: WebSocket;
     atob: any;
 }

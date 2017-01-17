@@ -1,5 +1,5 @@
-import { ApiConfiguration } from "configuration/apiConfiguration";
-import { FSharpFormat, getFSharpFormat } from "configuration/FSharpConfiguration";
+import { ApiConfiguration } from "../configuration/apiConfiguration";
+import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 
 interface Header {
     StateMachineCode: FSharpFormat<Number>;

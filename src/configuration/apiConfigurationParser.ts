@@ -1,6 +1,6 @@
 import { parseString } from "xml2js";
-import { DefaultApiConfiguration, ApiConfiguration } from "configuration/apiConfiguration";
-import { ParsedApiConfiguration } from "configuration/parsedApiConfiguration";
+import { DefaultApiConfiguration, ApiConfiguration } from "./apiConfiguration";
+import { ParsedApiConfiguration } from "./parsedApiConfiguration";
 
 export interface ApiConfigurationParser {
     parse(xmlConfig: string): Promise<ApiConfiguration>;
