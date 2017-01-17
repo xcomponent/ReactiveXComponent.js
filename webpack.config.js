@@ -1,8 +1,9 @@
 var webpack = require("webpack");
 var path = require("path");
 var CleanWebpackPlugin = require("clean-webpack-plugin");
+var nodeExternals = require("webpack-node-externals");
 
-var BUILD_DIR = path.resolve(__dirname, "dist");
+var BUILD_DIR = path.resolve(__dirname, "lib");
 var APP_DIR = path.resolve(__dirname, "src");
 
 var config = {
@@ -64,10 +65,7 @@ var config = {
     configFile: false,
     failOnHint: true
   },
-  externals: {
-    "websocket": "websocket",
-    "xmldoc": "xmldoc"
-  }
+  externals: [nodeExternals()]
 };
 
 module.exports = config;

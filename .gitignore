@@ -5,4 +5,5 @@ test_out/
 .DS_Store
 *.tgz
 dist/
+lib/
 junit.xml

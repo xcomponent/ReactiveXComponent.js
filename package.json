@@ -3,8 +3,9 @@
   "version": "2.0.0",
   "description": "Javascript reactive client API for XComponent",
   "directories": {
-    "test": "test"
-  },
+    "test": "test",
+    "lib": "./lib"
+  },  
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
@@ -44,11 +45,11 @@
   ],
   "author": "xcomponent",
   "license": "Apache-2.0",
+  "main": "./lib/xcomponentapi",
   "files": [
     "LICENSE",
     "Readme.md",
-    "dist/xcomponentapi.js",
-    "dist/xcomponentapi.map"
+    "lib"    
   ],
   "bugs": {
     "url": "https://github.com/xcomponent/ReactiveXComponent.js/issues"
@@ -86,6 +87,7 @@
     "tslint": "^4.1.0",
     "tslint-loader": "^3.3.0",
     "typescript": "^2.1.4",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.1",
+    "webpack-node-externals": "^1.5.4"
   }
 }

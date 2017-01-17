@@ -94,7 +94,6 @@ export class DefaultPublisher implements Publisher {
         this.webSocket.send(webSocketInput);
     };
 
-
     private getDataToSendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
