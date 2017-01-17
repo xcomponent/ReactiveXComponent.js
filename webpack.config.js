@@ -47,11 +47,11 @@ var config = {
         verbose: true,
         dry: false,
         exclude: []
-      }),
+      })
     ],
   module: {
     loaders: [
-      { test: /\.ts$/, loader: "awesome-typescript-loader" },
+      { test: /\.ts$/, loader: "ts-loader" },
     ],
     preLoaders: [
       {

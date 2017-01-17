@@ -1,7 +1,7 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import { Publisher, DefaultPublisher } from "communication/xcWebSocketPublisher";
-import { Subscriber, DefaultSubscriber } from "communication/xcWebSocketSubscriber";
-import { DefaultSession } from "communication/xcSession";
+import { Publisher, DefaultPublisher } from "../../src/communication/xcWebSocketPublisher";
+import { Subscriber, DefaultSubscriber } from "../../src/communication/xcWebSocketSubscriber";
+import { DefaultSession } from "../../src/communication/xcSession";
 
 
 describe("Test xcSession module", function () {

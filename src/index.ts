@@ -1,3 +1,3 @@
-import xcomponentapi from "xcomponentAPI";
+import xcomponentapi from "./xcomponentAPI";
 
-module.exports = new xcomponentapi();
+export default new xcomponentapi();

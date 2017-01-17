@@ -1,7 +1,7 @@
-import { SessionFactory, Session } from "communication/xcSession";
-import { ApiConfiguration } from "configuration/apiConfiguration";
-import { DefaultApiConfigurationParser } from "configuration/apiConfigurationParser";
-import { Model } from "communication/EventObecjts";
+import { SessionFactory, Session } from "./xcSession";
+import { ApiConfiguration } from "../configuration/apiConfiguration";
+import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
+import { Model } from "../communication/EventObecjts";
 
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void);

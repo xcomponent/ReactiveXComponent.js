@@ -1,13 +1,13 @@
-import { javascriptHelper } from "javascriptHelper";
-import { Commands, Kinds } from "configuration/xcWebSocketBridgeConfiguration";
-import { ApiConfiguration, SubscriberEventType } from "configuration/apiConfiguration";
+import { javascriptHelper } from "../javascriptHelper";
+import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
+import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 let Rx = require("rx");
 import pako = require("pako");
 
-import { Publisher } from "communication/xcWebSocketPublisher";
-import Guid from "guid";
-import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "communication/EventObecjts";
-import { FSharpFormat, getFSharpFormat } from "configuration/FSharpConfiguration";
+import { Publisher } from "./xcWebSocketPublisher";
+import Guid from "../guid";
+import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "./EventObecjts";
+import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 
 export interface Subscriber {
     privateTopics: Array<String>;

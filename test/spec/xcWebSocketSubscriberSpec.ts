@@ -1,6 +1,6 @@
-import { DefaultSubscriber, Subscriber } from "communication/xcWebSocketSubscriber";
+import { DefaultSubscriber, Subscriber } from "../../src/communication/xcWebSocketSubscriber";
 import Rx = require("rx");
-import Guid from "guid";
+import Guid from "../../src/guid";
 import Mock from "./mock/mockSubscriberDependencies";
 import { EventEmitter } from "events";
 

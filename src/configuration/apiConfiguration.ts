@@ -4,7 +4,7 @@ import {
     Component,
     State,
     StateMachine
-} from "configuration/parsedApiConfiguration";
+} from "./parsedApiConfiguration";
 
 export interface PublisherDetails {
     eventCode: number;

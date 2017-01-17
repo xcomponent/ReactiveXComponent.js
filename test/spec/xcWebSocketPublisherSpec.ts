@@ -1,4 +1,4 @@
-import {DefaultPublisher} from "communication/xcWebSocketPublisher";
+import {DefaultPublisher} from "../../src/communication/xcWebSocketPublisher";
 import Mock from "./mock/mockPublisherDependencies";
 
 describe("Test xcWebSocketPublisher module", function () {
