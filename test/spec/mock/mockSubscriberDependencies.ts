@@ -1,6 +1,6 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
 import Subscriber from "communication/xcWebSocketSubscriber";
-import webSocketConf from "configuration/xcWebSocketBridgeConfiguration";
+import {Kinds} from "configuration/xcWebSocketBridgeConfiguration";
 
 
 // Mocking configuration
@@ -43,7 +43,7 @@ let createWebSocket = function () {
 // Initilisation of expected data
 let correctData = {
     "Header": { "IncomingType": 0 },
-    "JsonMessage": JSON.stringify({ "Topic": { "Key": outputTopic, kind: webSocketConf.kinds.Public } })
+    "JsonMessage": JSON.stringify({ "Topic": { "Key": outputTopic, kind: Kinds.Public } })
 };
 
 

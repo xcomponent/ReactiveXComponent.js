@@ -1,4 +1,3 @@
-import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration } from "configuration/apiConfiguration";
 import { FSharpFormat, getFSharpFormat } from "configuration/FSharpConfiguration";
 

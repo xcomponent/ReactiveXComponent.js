@@ -2,7 +2,7 @@ import { javascriptHelper } from "javascriptHelper";
 import Guid from "guid";
 import Publisher from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
-import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import {Kinds} from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "configuration/apiConfiguration";
 
@@ -56,42 +56,42 @@ export class DefaultSession implements Session {
         this.addPrivateTopic(privateTopic);
         this.removePrivateTopic(this.privateTopic);
         this.privateTopic = privateTopic;
-        this.publishers.forEach(function (publisher) {
+        this.publishers.forEach((publisher: Publisher) => {
             publisher.privateTopic = privateTopic;
         });
-        this.subscribers.forEach(function (subscriber) {
+        this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.replyPublisher = this.replyPublisher;
         }, this);
     };
 
     addPrivateTopic(privateTopic: string): void {
-        let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
+        const kindPrivate = Kinds.Private;
         this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
         this.privateTopics.push(privateTopic);
-        this.subscribers.forEach(function (subscriber) {
+        this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.privateTopics = this.privateTopics;
         }, this);
     };
 
     removePrivateTopic(privateTopic: string): void {
-        let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
+        const kindPrivate = Kinds.Private;
         this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
         this.removeElement(this.privateTopics, privateTopic);
-        this.subscribers.forEach(function (subscriber) {
+        this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.privateTopics = this.privateTopics;
         }, this);
     };
 
     init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void {
-        let thisSession = this;
+        const thisSession = this;
         this.webSocket.onopen = function (e: Event) {
-            thisSession.privateSubscriber.sendSubscribeRequestToTopic(thisSession.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+            thisSession.privateSubscriber.sendSubscribeRequestToTopic(thisSession.privateTopic, Kinds.Private);
             openListener(e);
             console.log("connection started on " + thisSession.serverUrl + ".");
         };
 
         this.webSocket.onerror = function (e: Event) {
-            let messageError = "Error on " + thisSession.serverUrl + ".";
+            const messageError = "Error on " + thisSession.serverUrl + ".";
             errorListener(new Error(messageError));
         };
 
@@ -105,19 +105,19 @@ export class DefaultSession implements Session {
     };
 
     createPublisher(): Publisher {
-        let publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
+        const publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this.publishers.push(publisher);
         return publisher;
     };
 
     createSubscriber(): Subscriber {
-        let subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
+        const subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
         this.subscribers.push(subscriber);
         return subscriber;
     };
 
     private removeElement<T>(array: Array<T>, e: T): void {
-        let index = array.indexOf(e);
+        const index = array.indexOf(e);
         if (index > -1) {
             array.splice(index, 1);
         } else {
@@ -134,17 +134,17 @@ export class DefaultSession implements Session {
     };
 
     dispose(): void {
-        this.publishers.forEach(function (publisher) {
+        this.publishers.forEach((publisher: Publisher) => {
             this.disposePublisher(publisher);
         }, this);
-        this.subscribers.forEach(function (subscriber) {
+        this.subscribers.forEach((subscriber: Subscriber) => {
             this.disposeSubscriber(subscriber);
         }, this);
     };
 
     close(): void {
-        this.privateTopics.forEach(function (privateTopic) {
-            this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
+        this.privateTopics.forEach((privateTopic: string) => {
+            this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, Kinds.Private);
         }, this);
         this.dispose();
         this.webSocket.close();
@@ -152,8 +152,8 @@ export class DefaultSession implements Session {
 
 }
 
-export let SessionFactory = function (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session {
-    let webSocket = new WebSocket(serverUrl);
-    let session = new DefaultSession(serverUrl, webSocket, configuration, sessionData);
+export const SessionFactory = function (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session {
+    const webSocket = new WebSocket(serverUrl);
+    const session = new DefaultSession(serverUrl, webSocket, configuration, sessionData);
     return session;
 };

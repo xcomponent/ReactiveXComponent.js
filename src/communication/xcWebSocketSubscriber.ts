@@ -1,5 +1,5 @@
 import { javascriptHelper } from "javascriptHelper";
-import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import { Commands, Kinds } from "configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "configuration/apiConfiguration";
 let Rx = require("rx");
 import pako = require("pako");
@@ -34,7 +34,7 @@ class Subscriber {
 
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void) {
         let thisSubscriber = this;
-        let command = xcWebSocketBridgeConfiguration.commands.getXcApiList;
+        let command = Commands[Commands.getXcApiList];
         this.observableMsg
             .map(function (e) {
                 return thisSubscriber.deserializeWithoutTopic(e.data);
@@ -53,7 +53,7 @@ class Subscriber {
 
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void) {
         let thisSubscriber = this;
-        let command = xcWebSocketBridgeConfiguration.commands.getXcApi;
+        let command = Commands[Commands.getXcApi];
         this.observableMsg
             .map(function (e) {
                 return thisSubscriber.deserializeWithoutTopic(e.data);
@@ -78,13 +78,13 @@ class Subscriber {
                 return thisSubscriber.deserialize(e.data);
             })
             .filter(function (data) {
-                return data.command === xcWebSocketBridgeConfiguration.commands.snapshot && data.topic === replyTopic;
+                return data.command === Commands[Commands.snapshot] && data.topic === replyTopic;
             })
             .subscribe(function (data) {
-                thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
+                thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
                 snapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
             });
-        this.sendSubscribeRequestToTopic(replyTopic, xcWebSocketBridgeConfiguration.kinds.Snapshot);
+        this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
         this.webSocket.send(this.convertToWebsocketInputFormat(dataToSendSnapshot.topic + " " + dataToSendSnapshot.componentCode, dataToSendSnapshot.data));
     };
@@ -126,7 +126,7 @@ class Subscriber {
                 return thisSubscriber.deserialize(e.data);
             })
             .filter(function (data) {
-                if (data.command !== xcWebSocketBridgeConfiguration.commands.update) {
+                if (data.command !== Commands[Commands.update]) {
                     return false;
                 } else {
                     let jsonData = thisSubscriber.getJsonDataFromEvent(data.stringData);
@@ -180,7 +180,7 @@ class Subscriber {
             const componentCode = this.configuration.getComponentCode(componentName);
             const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
             let topic = this.configuration.getSubscriberTopic(componentCode, stateMachineCode, SubscriberEventType.Update);
-            let kind = xcWebSocketBridgeConfiguration.kinds.Public;
+            let kind = Kinds.Public;
             this.sendSubscribeRequestToTopic(topic, kind);
             this.addSubscribedStateMachines(componentName, stateMachineName);
         }
@@ -188,18 +188,16 @@ class Subscriber {
 
     sendSubscribeRequestToTopic(topic: string, kind: number) {
         let data = this.getDataToSend(topic, kind);
-        let command = xcWebSocketBridgeConfiguration.commands.subscribe;
         this
             .webSocket
-            .send(this.convertToWebsocketInputFormat(command, data));
+            .send(this.convertToWebsocketInputFormat(Commands[Commands.subscribe], data));
     };
 
     sendUnsubscribeRequestToTopic(topic: string, kind: number) {
         let data = this.getDataToSend(topic, kind);
-        let command = xcWebSocketBridgeConfiguration.commands.unsubscribe;
         this
             .webSocket
-            .send(this.convertToWebsocketInputFormat(command, data));
+            .send(this.convertToWebsocketInputFormat(Commands[Commands.unsubscribe], data));
     };
 
     getDataToSend(topic: string, kind: number) {
@@ -221,10 +219,9 @@ class Subscriber {
             const componentCode = this.configuration.getComponentCode(componentName);
             const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
             let topic = this.configuration.getSubscriberTopic(componentCode, stateMachineCode, SubscriberEventType.Update);
-            let kind = xcWebSocketBridgeConfiguration.kinds.Public;
+            let kind = Kinds.Public;
             let data = this.getDataToSend(topic, kind);
-            let command = xcWebSocketBridgeConfiguration.commands.unsubscribe;
-            this.webSocket.send(this.convertToWebsocketInputFormat(command, data));
+            this.webSocket.send(this.convertToWebsocketInputFormat(Commands[Commands.unsubscribe], data));
             this.removeSubscribedStateMachines(componentName, stateMachineName);
         }
     };
@@ -347,8 +344,8 @@ class Subscriber {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
     }
 
-    private convertToWebsocketInputFormat(request: string, data: any) {
-        let input = request + " " + JSON.stringify(data);
+    private convertToWebsocketInputFormat(command: string, data: any) {
+        let input = command + " " + JSON.stringify(data);
         return input;
     }
 
