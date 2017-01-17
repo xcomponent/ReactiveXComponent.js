@@ -1,7 +1,8 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import Publisher from "communication/xcWebSocketPublisher";
+import {Publisher, DefaultPublisher} from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
-import xcSession from "communication/xcSession";
+import {DefaultSession} from "communication/xcSession";
+
 
 describe("Test xcSession module", function () {
 
@@ -9,13 +10,13 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);
-            session = new xcSession.Session(serverUrl, mockWebSocket, null, null);
+            let mockWebSocket = new WebSocket(serverUrl);            
+            session = new DefaultSession(serverUrl, mockWebSocket, null, null);
         });
 
         it("should return a new instance of Publisher", function () {
             let publisher = session.createPublisher();
-            expect(publisher instanceof Publisher).toBe(true);
+            expect(publisher instanceof DefaultPublisher).toBe(true);
         });
 
     });
@@ -24,8 +25,8 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);
-            session = new xcSession.Session(serverUrl, mockWebSocket, null, null);
+            let mockWebSocket = new WebSocket(serverUrl);            
+            session = new DefaultSession(serverUrl, mockWebSocket, null, null);
         });
         it("should return a new instance of Subscriber", function () {
             let subscriber = session.createSubscriber();
@@ -37,8 +38,8 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);
-            session = new xcSession.Session(serverUrl, mockWebSocket, null, null);
+            let mockWebSocket = new WebSocket(serverUrl);            
+            session = new DefaultSession(serverUrl, mockWebSocket, null, null);
         });
         it("should call onclose method when session is closed", function (done) {
             session.webSocket.onclose = function (e) {

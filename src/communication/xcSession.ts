@@ -1,145 +1,159 @@
 import { javascriptHelper } from "javascriptHelper";
 import Guid from "guid";
-import Publisher from "communication/xcWebSocketPublisher";
+import { Publisher, DefaultPublisher } from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
-import xcWebSocketBridgeConfiguration from "configuration/xcWebSocketBridgeConfiguration";
+import { Kinds } from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "configuration/apiConfiguration";
 
-let SessionFactory = function (serverUrl, configuration: ApiConfiguration, sessionData) {
-    let WebSocket = javascriptHelper().WebSocket;
-    let webSocket = new WebSocket(serverUrl);
-    let session = new Session(serverUrl, webSocket, configuration, sessionData);
-    return session;
-};
+export interface Session {
+    privateSubscriber: Subscriber;
+    replyPublisher: Publisher;
+    configuration: ApiConfiguration;
+    webSocket: WebSocket;
+    setPrivateTopic(privateTopic: string): void;
+    addPrivateTopic(privateTopic: string): void;
+    removePrivateTopic(privateTopic: string): void;
+    init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void;
+    createPublisher(): Publisher;
+    createSubscriber(): Subscriber;
+    disposePublisher(publisher: Publisher): void;
+    disposeSubscriber(subscriber: Subscriber): void;
+    dispose(): void;
+    close(): void;
+}
 
+export class DefaultSession implements Session {
 
-let Session = function (serverUrl, webSocket, configuration: ApiConfiguration, sessionData) {
-    this.serverUrl = serverUrl;
-    this.webSocket = webSocket;
-    this.configuration = configuration;
-    this.guid = new Guid();
-    this.privateTopic = this.guid.create();
-    this.sessionData = sessionData;
-    this.privateSubscriber = new Subscriber(this.webSocket, null, null, null, null);
-    this.replyPublisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
-    this.publishers = [this.replyPublisher];
-    this.subscribers = [];
-    this.privateTopics = [this.privateTopic];
-};
+    private serverUrl: string;
+    private sessionData: string;
+    private guid: Guid;
+    private privateTopic: string;
+    private publishers: Array<Publisher>;
+    private subscribers: Array<Subscriber>;
+    private privateTopics: Array<String>;
 
+    public privateSubscriber: Subscriber;
+    public replyPublisher: Publisher;
+    public configuration: ApiConfiguration;
+    public webSocket: WebSocket;
 
-Session.prototype.setPrivateTopic = function (privateTopic) {
-    this.addPrivateTopic(privateTopic);
-    this.removePrivateTopic(this.privateTopic);
-    this.privateTopic = privateTopic;
-    for (let i = 0; i < this.publishers.length; i++) {
-        this.publishers[i].privateTopic = privateTopic;
+    constructor(serverUrl: string, webSocket: WebSocket, configuration: ApiConfiguration, sessionData: string) {
+        this.serverUrl = serverUrl;
+        this.webSocket = webSocket;
+        this.configuration = configuration;
+        this.guid = new Guid();
+        this.privateTopic = this.guid.create();
+        this.sessionData = sessionData;
+        this.privateSubscriber = new Subscriber(this.webSocket, null, null, null, null);
+        this.replyPublisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
+        this.publishers = [this.replyPublisher];
+        this.subscribers = [];
+        this.privateTopics = [this.privateTopic];
     }
-    for (let j = 0; j < this.subscribers.length; j++) {
-        this.subscribers[j].replyPublisher = this.replyPublisher;
-    }
-};
 
-
-Session.prototype.addPrivateTopic = function (privateTopic) {
-    let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
-    this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
-    this.privateTopics.push(privateTopic);
-    for (let i = 0; i < this.subscribers.length; i++) {
-        this.subscribers[i].privateTopics = this.privateTopics;
-    }
-};
-
-Session.prototype.removePrivateTopic = function (privateTopic) {
-    let kindPrivate = xcWebSocketBridgeConfiguration.kinds.Private;
-    this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
-    this.privateTopics.removeElement(privateTopic, "private topic not found");
-    for (let i = 0; i < this.subscribers.length; i++) {
-        this.subscribers[i].privateTopics = this.privateTopics;
-    }
-};
-
-
-Session.prototype.init = function (sessionListener, getXcApiRequest, xcApiFileName) {
-    let thisObject = this;
-
-    this.webSocket.onopen = function (e) {
-        thisObject.privateSubscriber.sendSubscribeRequestToTopic(thisObject.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
-        getXcApiRequest(xcApiFileName, sessionListener);
-        console.log("connection started on " + thisObject.serverUrl + ".");
+    setPrivateTopic(privateTopic: string): void {
+        this.addPrivateTopic(privateTopic);
+        this.removePrivateTopic(this.privateTopic);
+        this.privateTopic = privateTopic;
+        this.publishers.forEach((publisher: Publisher) => {
+            publisher.privateTopic = privateTopic;
+        });
+        this.subscribers.forEach((subscriber: Subscriber) => {
+            subscriber.replyPublisher = this.replyPublisher;
+        }, this);
     };
 
-    this.webSocket.onerror = function (e) {
-        let messageError = "Error on " + thisObject.serverUrl + ".";
-        console.error(messageError);
-        console.error(e);
-        sessionListener(messageError, null);
+    addPrivateTopic(privateTopic: string): void {
+        const kindPrivate = Kinds.Private;
+        this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
+        this.privateTopics.push(privateTopic);
+        this.subscribers.forEach((subscriber: Subscriber) => {
+            subscriber.privateTopics = this.privateTopics;
+        }, this);
     };
 
-    this.webSocket.onclose = function (e) {
-        console.log("connection on " + thisObject.serverUrl + " closed.");
-        console.log(e);
-        if (!e.wasClean) {
-            throw new Error("unexpected connection close with code " + e.code);
+    removePrivateTopic(privateTopic: string): void {
+        const kindPrivate = Kinds.Private;
+        this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
+        this.removeElement(this.privateTopics, privateTopic);
+        this.subscribers.forEach((subscriber: Subscriber) => {
+            subscriber.privateTopics = this.privateTopics;
+        }, this);
+    };
+
+    init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void {
+        const thisSession = this;
+        this.webSocket.onopen = function (e: Event) {
+            thisSession.privateSubscriber.sendSubscribeRequestToTopic(thisSession.privateTopic, Kinds.Private);
+            openListener(e);
+            console.log("connection started on " + thisSession.serverUrl + ".");
+        };
+
+        this.webSocket.onerror = function (e: Event) {
+            const messageError = "Error on " + thisSession.serverUrl + ".";
+            errorListener(new Error(messageError));
+        };
+
+        this.webSocket.onclose = function (e: CloseEvent) {
+            console.log("connection on " + thisSession.serverUrl + " closed.");
+            console.log(e);
+            if (!e.wasClean) {
+                throw new Error("unexpected connection close with code " + e.code);
+            }
+        };
+    };
+
+    createPublisher(): Publisher {
+        const publisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
+        this.publishers.push(publisher);
+        return publisher;
+    };
+
+    createSubscriber(): Subscriber {
+        const subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
+        this.subscribers.push(subscriber);
+        return subscriber;
+    };
+
+    private removeElement<T>(array: Array<T>, e: T): void {
+        const index = array.indexOf(e);
+        if (index > -1) {
+            array.splice(index, 1);
+        } else {
+            throw new Error("Element to remove not found");
         }
     };
+
+    disposePublisher(publisher: Publisher): void {
+        this.removeElement(this.publishers, publisher);
+    };
+
+    disposeSubscriber(subscriber: Subscriber): void {
+        this.removeElement(this.subscribers, subscriber);
+    };
+
+    dispose(): void {
+        this.publishers.forEach((publisher: Publisher) => {
+            this.disposePublisher(publisher);
+        }, this);
+        this.subscribers.forEach((subscriber: Subscriber) => {
+            this.disposeSubscriber(subscriber);
+        }, this);
+    };
+
+    close(): void {
+        this.privateTopics.forEach((privateTopic: string) => {
+            this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, Kinds.Private);
+        }, this);
+        this.dispose();
+        this.webSocket.close();
+    };
+
+}
+
+export const SessionFactory = function (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session {
+    const webSocket = new WebSocket(serverUrl);
+    const session = new DefaultSession(serverUrl, webSocket, configuration, sessionData);
+    return session;
 };
-
-
-Session.prototype.createPublisher = function () {
-    let publisher = new Publisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
-    this.publishers.push(publisher);
-    return publisher;
-};
-
-
-Session.prototype.createSubscriber = function () {
-    let subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
-    this.subscribers.push(subscriber);
-    return subscriber;
-};
-
-Array.prototype.removeElement = function (e, msg) {
-    let index = this.indexOf(e);
-    if (index > -1) {
-        return this.splice(index, 1);
-    } else {
-        throw new Error(msg);
-    }
-};
-
-
-Session.prototype.disposePublisher = function (publisher) {
-    this.publishers.removeElement(publisher, "Publisher not found");
-};
-
-
-Session.prototype.disposeSubscriber = function (subscriber) {
-    this.subscribers.removeElement(subscriber, "Subscriber not found");
-};
-
-
-Session.prototype.dispose = function () {
-    for (let i = 0; i < this.publishers.length; i++) {
-        this.disposePublisher(this.publishers[i]);
-    }
-    for (let j = 0; j < this.subscribers.length; j++) {
-        this.disposeSubscriber(this.subscribers[j]);
-    }
-};
-
-
-Session.prototype.close = function () {
-    this.privateSubscriber.sendUnsubscribeRequestToTopic(this.privateTopic, xcWebSocketBridgeConfiguration.kinds.Private);
-    this.dispose();
-    this.webSocket.close();
-};
-
-
-let returnObject = {
-    create: SessionFactory,
-    Session: Session
-};
-
-export default returnObject;

@@ -28,14 +28,13 @@ describe("Test xcWebSocketSubscriber module", function () {
                 };
                 //subscribe send a message (subscribe request)
                 subscriber.subscribe("component", "stateMachine", stateMachineUpdateListener);
-            }
+            };
 
             mockServer.on('connection', function (server) {
                 //when subscribe request is received, we send send jsonData
                 server.on('message', function (subscribeRequest) {
                     expect(subscribeRequest).toEqual(Mock.correctSubscribeRequest);
-                    server.send();
-                    server.send(JSON.stringify(Mock.jsonData));
+                    server.send(Mock.updateResponse);
                 });
             });
 
@@ -43,7 +42,7 @@ describe("Test xcWebSocketSubscriber module", function () {
 
         it("can subscribe method : return true if subscriber exists and false otherwise", function () {
             subscriber.canSubscribe("RandomComponent", "RandomStateMachine");
-            expect(Mock.configuration.containsSubscriber).toHaveBeenCalledWith("-69981087", "-829536631");
+            expect(Mock.configuration.containsSubscriber).toHaveBeenCalledWith(-69981087, -829536631, 0);
         });
     });
 

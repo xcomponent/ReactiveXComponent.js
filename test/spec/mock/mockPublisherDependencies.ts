@@ -1,7 +1,7 @@
 // Initialisation
-let componentCode = "-69981087";
-let stateMachineCode = "-829536631";
-let eventCode = "9";
+let componentCode = -69981087;
+let stateMachineCode = -829536631;
+let eventCode = 9;
 let messageType = "XComponent.HelloWorld.UserObject.SayHello";
 let routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager";
 let guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
@@ -14,9 +14,9 @@ guid.create.and.callFake(function () {
 
 function getHeader(visibility) {
     let header = {
-        "StateMachineCode": { "Case": "Some", "Fields": [parseInt(stateMachineCode)] },
-        "ComponentCode": { "Case": "Some", "Fields": [parseInt(componentCode)] },
-        "EventCode": parseInt(eventCode),
+        "StateMachineCode": { "Case": "Some", "Fields": [stateMachineCode] },
+        "ComponentCode": { "Case": "Some", "Fields": [componentCode] },
+        "EventCode": eventCode,
         "IncomingType": 0,
         "MessageType": { "Case": "Some", "Fields": [messageType] },
         "PublishTopic": (!visibility) ? undefined : { "Case": "Some", "Fields": [guid.create()] },
@@ -50,8 +50,8 @@ function getCorretWebsocketInputFormat(visibility) {
 let stateMachineRef = {
     "StateMachineId": 1,
     "AgentId": 2,
-    "StateMachineCode": parseInt(stateMachineCode),
-    "ComponentCode": parseInt(componentCode),
+    "StateMachineCode": stateMachineCode,
+    "ComponentCode": componentCode,
 };
 let correctDataForSMRef = {
     event: {
@@ -60,7 +60,7 @@ let correctDataForSMRef = {
             "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] },
             "StateMachineCode": { "Case": "Some", "Fields": [stateMachineRef.StateMachineCode] },
             "ComponentCode": { "Case": "Some", "Fields": [stateMachineRef.ComponentCode] },
-            "EventCode": parseInt(eventCode),
+            "EventCode": eventCode,
             "IncomingType": 0,
             "MessageType": { "Case": "Some", "Fields": [messageType] },
             "SessionData": { "Case": "Some", "Fields": [sessionData] }
