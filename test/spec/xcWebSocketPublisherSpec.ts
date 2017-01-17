@@ -1,4 +1,4 @@
-import Publisher from "communication/xcWebSocketPublisher";
+import {DefaultPublisher} from "communication/xcWebSocketPublisher";
 import Mock from "./mock/mockPublisherDependencies";
 
 describe("Test xcWebSocketPublisher module", function () {
@@ -6,7 +6,7 @@ describe("Test xcWebSocketPublisher module", function () {
     describe("Test send method", function () {
         var publisher;
         beforeEach(function () {
-            publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
+            publisher = new DefaultPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
         });
 
         it("sould send a message to the given stateMachine and component", function () {
@@ -26,7 +26,7 @@ describe("Test xcWebSocketPublisher module", function () {
     describe("Test sendWithStateMachineRef", function () {
         var publisher;
         beforeEach(function () {
-            publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
+            publisher = new DefaultPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
         });
 
         it("sould send a message to the given instance of stateMachine", function () {
@@ -39,7 +39,7 @@ describe("Test xcWebSocketPublisher module", function () {
     describe("Test canPublish", function () {
         var publisher;
         beforeEach(function () {
-            publisher = new Publisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
+            publisher = new DefaultPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
         });
 
         it("should return true if there is a publisher details and false otherwise", function () {

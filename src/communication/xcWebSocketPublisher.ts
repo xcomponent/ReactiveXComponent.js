@@ -24,7 +24,17 @@ interface Data {
     Event: Event;
 }
 
-class Publisher {
+export interface Publisher {
+    webSocket: WebSocket;
+    configuration: ApiConfiguration;
+    privateTopic: string;
+    sessionData: string;
+    sendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
+    send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
+    canPublish(componentName: string, stateMachineName: string, messageType: string): boolean;
+}
+
+export class DefaultPublisher implements Publisher {
 
     public webSocket: WebSocket;
     public configuration: ApiConfiguration;
@@ -115,5 +125,3 @@ class Publisher {
     };
 
 }
-
-export default Publisher;

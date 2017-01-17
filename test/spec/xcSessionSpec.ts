@@ -1,5 +1,5 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import Publisher from "communication/xcWebSocketPublisher";
+import {Publisher, DefaultPublisher} from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
 import {DefaultSession} from "communication/xcSession";
 
@@ -16,7 +16,7 @@ describe("Test xcSession module", function () {
 
         it("should return a new instance of Publisher", function () {
             let publisher = session.createPublisher();
-            expect(publisher instanceof Publisher).toBe(true);
+            expect(publisher instanceof DefaultPublisher).toBe(true);
         });
 
     });

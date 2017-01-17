@@ -4,7 +4,7 @@ import { ApiConfiguration, SubscriberEventType } from "configuration/apiConfigur
 let Rx = require("rx");
 import pako = require("pako");
 
-import Publisher from "communication/xcWebSocketPublisher";
+import { Publisher } from "communication/xcWebSocketPublisher";
 import Guid from "guid";
 
 class Subscriber {
@@ -273,7 +273,7 @@ class Subscriber {
             "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
             "StateName": thisObject.configuration.getStateName(componentCode, stateMachineCode, stateCode),
             "send": function (messageType, jsonMessage, visibilityPrivate) {
-                thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
+                thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate, undefined);
             }
         };
         return {
@@ -301,7 +301,7 @@ class Subscriber {
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisObject.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
                 "send": function (messageType, jsonMessage, visibilityPrivate) {
-                    thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate);
+                    thisObject.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate, undefined);
                 }
             };
             snapshotItems.push({
