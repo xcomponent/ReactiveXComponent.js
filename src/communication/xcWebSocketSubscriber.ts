@@ -32,6 +32,24 @@ class Subscriber {
         this.privateTopics = privateTopics;
     }
 
+    getHeartBeat(heartBeatInterval: number) {
+        let thisSubscriber = this;
+        let command = Commands[Commands.hb];
+        this.observableMsg
+            .map(function (e) {
+                return thisSubscriber.deserializeWithoutTopic(e.data);
+            })
+            .filter(function (data) {
+                return data.command === command;
+            })
+            .subscribe(function (data) {
+                console.log("HeartBeat received successfully");
+            });
+        return setInterval(() => {
+            thisSubscriber.webSocket.send(thisSubscriber.convertToWebsocketInputFormat(command, {}));
+        }, heartBeatInterval * 1000);
+    }
+
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void) {
         let thisSubscriber = this;
         let command = Commands[Commands.getXcApiList];
