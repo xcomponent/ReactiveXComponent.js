@@ -56,24 +56,28 @@ export class DefaultSession implements Session {
     }
 
     setPrivateTopic(privateTopic: string): void {
-        this.addPrivateTopic(privateTopic);
-        this.removePrivateTopic(this.privateTopic);
-        this.privateTopic = privateTopic;
-        this.publishers.forEach((publisher: Publisher) => {
-            publisher.privateTopic = privateTopic;
-        });
-        this.subscribers.forEach((subscriber: Subscriber) => {
-            subscriber.replyPublisher = this.replyPublisher;
-        }, this);
+        if (privateTopic) {
+            this.addPrivateTopic(privateTopic);
+            this.removePrivateTopic(this.privateTopic);
+            this.privateTopic = privateTopic;
+            this.publishers.forEach((publisher: Publisher) => {
+                publisher.privateTopic = privateTopic;
+            });
+            this.subscribers.forEach((subscriber: Subscriber) => {
+                subscriber.replyPublisher = this.replyPublisher;
+            }, this);
+        }
     };
 
     addPrivateTopic(privateTopic: string): void {
-        const kindPrivate = Kinds.Private;
-        this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
-        this.privateTopics.push(privateTopic);
-        this.subscribers.forEach((subscriber: Subscriber) => {
-            subscriber.privateTopics = this.privateTopics;
-        }, this);
+        if (privateTopic) {
+            const kindPrivate = Kinds.Private;
+            this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
+            this.privateTopics.push(privateTopic);
+            this.subscribers.forEach((subscriber: Subscriber) => {
+                subscriber.privateTopics = this.privateTopics;
+            }, this);
+        }
     };
 
     removePrivateTopic(privateTopic: string): void {

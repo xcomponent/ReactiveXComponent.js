@@ -140,17 +140,10 @@ class Subscriber {
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
         let filteredObservable = this.observableMsg
-            .map(function (e) {
-                return thisSubscriber.deserialize(e.data);
-            })
-            .filter(function (data) {
-                if (data.command !== Commands[Commands.update]) {
-                    return false;
-                } else {
-                    let jsonData = thisSubscriber.getJsonDataFromEvent(data.stringData);
-                    return thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode);
-                }
-            });
+            .map(rawMessage => thisSubscriber.deserialize(rawMessage.data))
+            .filter(data => data.command === Commands[Commands.update])
+            .map(data => thisSubscriber.getJsonDataFromEvent(data.stringData))
+            .filter(jsonData => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
         return filteredObservable;
     };
 
@@ -181,12 +174,9 @@ class Subscriber {
 
 
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void) {
-        let thisSubscriber = this;
         let observableSubscriber = this
             .prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe(function (data) {
-                stateMachineUpdateListener(thisSubscriber.getJsonDataFromEvent(data.stringData));
-            });
+            .subscribe(jsonData => stateMachineUpdateListener(jsonData));
         this
             .observableSubscribers
             .push(observableSubscriber);
