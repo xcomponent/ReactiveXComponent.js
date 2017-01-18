@@ -8,8 +8,14 @@ class XComponentAPI {
         this.connection = new DefaultConnection();
     }
 
+    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: any) => void) {
+        this.connection.getModel(xcApiName, serverUrl, ((model) => {
+            connectionListener(this.connection, model);
+        }).bind(this));
+    }
+
     getXcApiList(serverUrl: string, connectionListener: (connection: Connection, apis: Array<String>) => void) {
-        this.connection.getXcApiList(serverUrl, (function (apis: Array<String>) {
+        this.connection.getXcApiList(serverUrl, ((apis: Array<String>) => {
             connectionListener(this.connection, apis);
         }).bind(this));
     };
