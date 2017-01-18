@@ -1,7 +1,7 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import {Publisher, DefaultPublisher} from "communication/xcWebSocketPublisher";
+import { Publisher, DefaultPublisher } from "communication/xcWebSocketPublisher";
 import Subscriber from "communication/xcWebSocketSubscriber";
-import {DefaultSession} from "communication/xcSession";
+import { DefaultSession } from "communication/xcSession";
 
 
 describe("Test xcSession module", function () {
@@ -10,7 +10,7 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);            
+            let mockWebSocket = new WebSocket(serverUrl);
             session = new DefaultSession(serverUrl, mockWebSocket, null, null);
         });
 
@@ -25,7 +25,7 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);            
+            let mockWebSocket = new WebSocket(serverUrl);
             session = new DefaultSession(serverUrl, mockWebSocket, null, null);
         });
         it("should return a new instance of Subscriber", function () {
@@ -38,7 +38,7 @@ describe("Test xcSession module", function () {
         let session;
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);            
+            let mockWebSocket = new WebSocket(serverUrl);
             session = new DefaultSession(serverUrl, mockWebSocket, null, null);
         });
         it("should call onclose method when session is closed", function (done) {
@@ -46,6 +46,18 @@ describe("Test xcSession module", function () {
                 done();
             };
             session.close();
+        });
+    });
+
+    describe("Add private topic / SetPrivateTopic", function () {
+        it("should not trigger server subscription on undefined topic", () => {
+            const serverUrl = "wss:\\serverUrl";
+            let mockWebSocket: any = {};
+            mockWebSocket.send = jest.fn();
+            const session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            session.setPrivateTopic(undefined);
+            session.addPrivateTopic(undefined);
+            expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
         });
     });
 

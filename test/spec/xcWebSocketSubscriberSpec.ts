@@ -2,14 +2,15 @@ import Subscriber from "communication/xcWebSocketSubscriber";
 import Rx = require("rx");
 import Guid from "guid";
 import Mock from "./mock/mockSubscriberDependencies";
+import { EventEmitter } from "events";
 
 describe("Test xcWebSocketSubscriber module", function () {
 
 
     describe("Test subscribe method", function () {
-        var subscriber, mockServer, mockWebSocket;
+        let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
-            var serverUrl = "wss://" + (new Guid()).create();
+            let serverUrl = "wss://" + (new Guid()).create();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
             subscriber = new Subscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
@@ -17,7 +18,7 @@ describe("Test xcWebSocketSubscriber module", function () {
 
         it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
             mockWebSocket.onopen = function (e) {
-                var stateMachineUpdateListener = function (data) {
+                let stateMachineUpdateListener = function (data) {
                     expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                     expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
                     expect(data.stateMachineRef.AgentId).toEqual(Mock.correctReceivedData.stateMachineRef.AgentId);
@@ -26,13 +27,13 @@ describe("Test xcWebSocketSubscriber module", function () {
                     expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
                     done();
                 };
-                //subscribe send a message (subscribe request)
+                // subscribe send a message (subscribe request)
                 subscriber.subscribe("component", "stateMachine", stateMachineUpdateListener);
             };
 
-            mockServer.on('connection', function (server) {
-                //when subscribe request is received, we send send jsonData
-                server.on('message', function (subscribeRequest) {
+            mockServer.on("connection", function (server) {
+                // when subscribe request is received, we send send jsonData
+                server.on("message", function (subscribeRequest) {
                     expect(subscribeRequest).toEqual(Mock.correctSubscribeRequest);
                     server.send(Mock.updateResponse);
                 });
@@ -48,8 +49,8 @@ describe("Test xcWebSocketSubscriber module", function () {
 
 
     describe("Test unsubscribe method", function () {
-        var subscriber, mockWebSocket;
-        var componentName = "componentName",
+        let subscriber, mockWebSocket;
+        let componentName = "componentName",
             stateMachineName = "stateMachineName";
         beforeEach(function () {
             mockWebSocket = Mock.createWebSocket();
@@ -67,34 +68,44 @@ describe("Test xcWebSocketSubscriber module", function () {
 
 
     describe("Test getStateMachineUpdates method", function () {
-        var subscriber, mockWebSocket;
-        beforeEach(function () {
-            mockWebSocket = Mock.createWebSocket();
-            subscriber = new Subscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
-        });
 
-        it("get an observable collection from a subscribed state machine", function () {
-            var observable = subscriber.getStateMachineUpdates();
-            expect(subscriber.webSocket.send).toHaveBeenCalledTimes(1);
-            expect(subscriber.webSocket.send).toHaveBeenCalledWith(Mock.correctSubscribeRequest);
+        it("should receive jsonData updates on ObservableCollection", function () {
+            return new Promise((resolve, reject) => {
+                let mockWebSocket: any = new EventEmitter();
+                mockWebSocket.send = jest.fn();
+                const subscriber = new Subscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
+
+                let observable = subscriber.getStateMachineUpdates("componentName", "stateMachineName");
+
+                expect(mockWebSocket.send).toHaveBeenCalledTimes(1);
+                expect(mockWebSocket.send).toHaveBeenCalledWith(Mock.correctSubscribeRequest);
+                observable.subscribe(jsonData => {
+                    expect(jsonData.stateMachineRef).toBeDefined();
+                    expect(jsonData.stateMachineRef.StateName).toEqual("stateName");
+                    expect(jsonData.jsonMessage).toBeDefined();
+                    resolve();
+                });
+
+                mockWebSocket.emit("message", { data: Mock.updateResponse });
+            });
         });
     });
 
 
 
     describe("Test getSnapshot method", function () {
-        var subscriber, mockServer, mockWebSocket;
+        let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
-            var serverUrl = "wss://" + (new Guid()).create();
+            let serverUrl = "wss://" + (new Guid()).create();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
             subscriber = new Subscriber(mockWebSocket, Mock.configuration, null, Mock.guid, Mock.privateTopics);
         });
 
         it("send snapshot request, snapshotListener callback should be executed when a response is received", function (done) {
-            mockServer.on('connection', function (server) {
-                var n = 0;
-                server.on('message', function (message) {
+            mockServer.on("connection", function (server) {
+                let n = 0;
+                server.on("message", function (message) {
                     switch (n) {
                         case 0:
                             expect(message).toEqual(Mock.snapshotSubscribeRequest);
@@ -113,9 +124,9 @@ describe("Test xcWebSocketSubscriber module", function () {
                 });
             });
             mockWebSocket.onopen = function (e) {
-                var snapshotListener = function (items) {
+                let snapshotListener = function (items) {
                     done();
-                }
+                };
                 subscriber.getSnapshot("component", "stateMachine", snapshotListener);
             };
         });
