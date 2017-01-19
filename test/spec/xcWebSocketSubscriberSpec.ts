@@ -134,4 +134,34 @@ describe("Test xcWebSocketSubscriber module", function () {
     });
 
 
+    describe("Test getModel method", function () {
+        let subscriber, mockServer, mockWebSocket;
+        beforeEach(function () {
+            let serverUrl = "wss://" + (new Guid()).create();
+            mockServer = Mock.createMockServer(serverUrl);
+            mockWebSocket = Mock.createMockWebSocket(serverUrl);
+            subscriber = new Subscriber(mockWebSocket, null, null, null, null);
+        });
+
+        it("send getModel request, modelListener callback should be executed when a response is received", function (done) {
+            mockWebSocket.onopen = function (e) {
+                let apiName = "xcApi";                
+                subscriber.getModel(apiName, function (model) {
+                    expect(model.projectName).not.toBe(null);
+                    expect(model.components).not.toBe(null);
+                    expect(model.composition).not.toBe(null);
+                    done();
+                });
+            };
+
+            mockServer.on("connection", function (server) {
+                server.on("message", function (message) {
+                    server.send(Mock.getModelResponse);
+                });
+            });
+
+        });
+
+    });
+
 });

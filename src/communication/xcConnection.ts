@@ -27,8 +27,9 @@ export class DefaultConnection implements Connection {
                 session.close();
             });
         };
-        let errorListener = (_: Error) => {
+        let errorListener = (err: Error) => {
             console.error("getModel request failed");
+            console.error(err);
         };
         session.init(openListener, errorListener);
     }
@@ -41,8 +42,9 @@ export class DefaultConnection implements Connection {
                 session.close();
             });
         };
-        let errorListener = (_: Error) => {
+        let errorListener = (err: Error) => {
             console.error("Error while getting Apis List");
+            console.error(err);
         };
         session.init(openListener, errorListener);
     };

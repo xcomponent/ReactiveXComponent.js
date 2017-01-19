@@ -50,7 +50,8 @@ class Subscriber {
         let data = {
             "Name": xcApiName
         };
-        this.webSocket.send(this.convertToWebsocketInputFormat(command, data));
+        let input = this.convertToWebsocketInputFormat(command, data);
+        this.webSocket.send(input);
     }
 
 
