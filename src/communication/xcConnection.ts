@@ -5,8 +5,8 @@ import { DefaultApiConfigurationParser } from "configuration/apiConfigurationPar
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (model: any) => void);
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void;
-    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: Error, session: Session) => void): void;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void): void;
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void;
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void;
 }
 
 export class DefaultConnection implements Connection {
@@ -49,18 +49,18 @@ export class DefaultConnection implements Connection {
         session.init(openListener, errorListener);
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, sessionListener: (error: Error, session: Session) => void): void {
-        this.init(xcApiFileName, serverUrl, null, sessionListener);
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void {
+        this.init(xcApiFileName, serverUrl, null, createSessionListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void): void {
-        this.init(xcApiFileName, serverUrl, sessionData, sessionListener);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void {
+        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener);
     };
 
-    private init(xcApiFileName: string, serverUrl: string, sessionData: string, sessionListener: (error: Error, session: Session) => void): void {
+    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void): void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let thisConnection = this;
-        let getXcApiRequest = (xcApiFileName: string, sessionListener: (error: Error, session: Session) => void) => {
+        let getXcApiRequest = (xcApiFileName: string, createSessionListener: (error: Error, session: Session) => void) => {
             if (thisConnection.apis[xcApiFileName] === undefined) {
                 session.privateSubscriber.getXcApi(xcApiFileName, (xcApi: string) => {
                     const parser = new DefaultApiConfigurationParser();
@@ -69,20 +69,20 @@ export class DefaultConnection implements Connection {
                         thisConnection.apis[xcApiFileName] = configuration;
                         session.configuration = configuration;
                         session.replyPublisher.configuration = configuration;
-                        sessionListener(null, session);
-                    }).catch(e => sessionListener(e, null));
+                        createSessionListener(null, session);
+                    }).catch(e => createSessionListener(e, null));
                 });
             } else {
                 session.configuration = thisConnection.apis[xcApiFileName];
                 session.replyPublisher.configuration = thisConnection.apis[xcApiFileName];
-                sessionListener(null, session);
+                createSessionListener(null, session);
             }
         };
         let openListener = (_: Event) => {
-            getXcApiRequest(xcApiFileName, sessionListener);
+            getXcApiRequest(xcApiFileName, createSessionListener);
         };
         let errorListener = (err: Error) => {
-            sessionListener(err, null);
+            createSessionListener(err, null);
         };
         session.init(openListener, errorListener);
     }
