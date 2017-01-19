@@ -32,7 +32,7 @@ class Subscriber {
         this.privateTopics = privateTopics;
     }
 
-    getHeartbeat(heartbeatInterval: number): NodeJS.Timer {
+    getHeartbeat(heartbeatIntervalSeconds: number): NodeJS.Timer {
         let thisSubscriber = this;
         let command = Commands[Commands.hb];
         this.observableMsg
@@ -48,7 +48,7 @@ class Subscriber {
         let input = this.convertToWebsocketInputFormat(command, {});
         return setInterval(() => {
             thisSubscriber.webSocket.send(input);
-        }, heartbeatInterval * 1000);
+        }, heartbeatIntervalSeconds * 1000);
     }
 
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void) {
