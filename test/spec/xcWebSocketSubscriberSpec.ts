@@ -143,7 +143,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             subscriber = new Subscriber(mockWebSocket, null, null, null, null);
         });
 
-        it("send getModel request, modelListener callback should be executed when a response is received", function (done) {
+        it("send getModel request, getModelListener callback should be executed when a response is received", function (done) {
             mockWebSocket.onopen = function (e) {
                 let apiName = "xcApi";                
                 subscriber.getModel(apiName, function (model) {
