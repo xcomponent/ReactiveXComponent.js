@@ -32,8 +32,8 @@ export class DefaultSession implements Session {
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
     private privateTopics: Array<String>;
-    private heartBeatId: NodeJS.Timer;
-    private heartBeatInterval: number;
+    private heartbeatId: NodeJS.Timer;
+    private heartbeatSecondsInterval: number;
 
     public privateSubscriber: Subscriber;
     public replyPublisher: Publisher;
@@ -52,7 +52,7 @@ export class DefaultSession implements Session {
         this.publishers = [this.replyPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
-        this.heartBeatInterval = 120;
+        this.heartbeatSecondsInterval = 120;
     }
 
     setPrivateTopic(privateTopic: string): void {
@@ -94,7 +94,7 @@ export class DefaultSession implements Session {
 
         this.webSocket.onopen = (function (e: Event) {
             this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
-            this.heartBeatId = this.privateSubscriber.getHeartBeat(this.heartBeatInterval);
+            this.heartbeatId = this.privateSubscriber.getHeartbeat(this.heartbeatSecondsInterval);
             openListener(e);
             console.log("connection started on " + this.serverUrl + ".");
         }).bind(this);
@@ -155,7 +155,7 @@ export class DefaultSession implements Session {
         this.privateTopics.forEach((privateTopic: string) => {
             this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, Kinds.Private);
         }, this);
-        clearInterval(this.heartBeatId);
+        clearInterval(this.heartbeatId);
         this.dispose();
         this.webSocket.close();
     };
