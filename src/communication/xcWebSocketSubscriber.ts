@@ -93,7 +93,7 @@ class Subscriber {
     };
 
 
-    getSnapshot(componentName: string, stateMachineName: string, snapshotListener: (items: Array<Object>) => void) {
+    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void) {
         let replyTopic = this.guid.create();
         let thisSubscriber = this;
         this.observableMsg
@@ -105,7 +105,7 @@ class Subscriber {
             })
             .subscribe(function (data) {
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
-                snapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
+                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
             });
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
