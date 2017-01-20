@@ -37,7 +37,16 @@ xcomponentapi.getXcApiList(serverUrl, function (connection, apis) {
         });
         publisher.send(component.HelloWorld, stateMachine.HelloWorldManager, MessageType.SayHello, jsonMessage, true);
         session.addPrivateTopic(privateTopic);
-        publisher.send(component.HelloWorld, stateMachine.HelloWorldManager, MessageType.SayHello, jsonMessage, true, privateTopic);        
+        publisher.send(component.HelloWorld, stateMachine.HelloWorldManager, MessageType.SayHello, jsonMessage, true, privateTopic);   
+
+        setTimeout(function() {
+            session.close();
+        },5000)     
     });
 
+    /*connection.getModel(apis[0], serverUrl, function (model) {
+        console.log(model);
+    });*/
+
 })
+
