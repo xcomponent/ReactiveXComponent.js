@@ -32,7 +32,7 @@ class Subscriber {
         this.privateTopics = privateTopics;
     }
 
-    getHeartbeat(heartbeatIntervalSeconds: number): NodeJS.Timer {
+    getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer {
         let thisSubscriber = this;
         let command = Commands[Commands.hb];
         this.observableMsg

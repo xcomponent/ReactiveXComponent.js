@@ -94,7 +94,7 @@ export class DefaultSession implements Session {
 
         this.webSocket.onopen = (function (e: Event) {
             this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
-            this.heartbeatTimer = this.privateSubscriber.getHeartbeat(this.heartbeatIntervalSeconds);
+            this.heartbeatTimer = this.privateSubscriber.getHeartbeatTimer(this.heartbeatIntervalSeconds);
             openListener(e);
             console.log("connection started on " + this.serverUrl + ".");
         }).bind(this);

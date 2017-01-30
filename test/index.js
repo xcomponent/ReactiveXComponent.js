@@ -44,9 +44,5 @@ xcomponentapi.getXcApiList(serverUrl, function (connection, apis) {
         },5000)     
     });
 
-    /*connection.getModel(apis[0], serverUrl, function (model) {
-        console.log(model);
-    });*/
-
 })
 
