@@ -7,6 +7,7 @@ export const Kinds = {
 
 
 export enum Commands {
+    hb,
     update,
     snapshot,
     subscribe,
