@@ -51,6 +51,28 @@ class Subscriber {
         }, heartbeatIntervalSeconds * 1000);
     }
 
+    getModel(xcApiName: string, getModelListener: (model: any) => void) {
+        let thisSubscriber = this;
+        let command = Commands[Commands.getModel];
+        this.observableMsg
+            .map(function (e) {
+                return thisSubscriber.deserializeWithoutTopic(e.data);
+            })
+            .filter(function (data) {
+                return data.command === command;
+            })
+            .subscribe(function (data) {
+                console.log("Model " + xcApiName + " received successfully");
+                let model = thisSubscriber.getJsonDataFromGetModelRequest(data.stringData);
+                getModelListener(model);
+            });
+        let data = {
+            "Name": xcApiName
+        };
+        let input = this.convertToWebsocketInputFormat(command, data);
+        this.webSocket.send(input);
+    }
+
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void) {
         let thisSubscriber = this;
         let command = Commands[Commands.getXcApiList];
@@ -89,7 +111,7 @@ class Subscriber {
     };
 
 
-    getSnapshot(componentName: string, stateMachineName: string, snapshotListener: (items: Array<Object>) => void) {
+    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void) {
         let replyTopic = this.guid.create();
         let thisSubscriber = this;
         this.observableMsg
@@ -101,7 +123,7 @@ class Subscriber {
             })
             .subscribe(function (data) {
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
-                snapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
+                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
             });
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
@@ -320,6 +342,23 @@ class Subscriber {
         }
         return snapshotItems;
     };
+
+    private getJsonDataFromGetModelRequest(stringData: string) {
+        let jsonData = this.getJsonData(stringData);
+        let components = [];
+        let zippedComponents = jsonData.ModelContent.Components;
+        for (let i = 0; i < zippedComponents.length; i++) {
+            components.push({
+                name: zippedComponents[i].Name,
+                content: this.decodeServerMessage(zippedComponents[i].Content)
+            });
+        }
+        return {
+            projectName: jsonData.ModelContent.ProjectName,
+            components: components,
+            composition: this.decodeServerMessage(jsonData.ModelContent.Composition)
+        };
+    }
 
     private decodeServerMessage(b64Data: string) {
         let atob = javascriptHelper().atob;
