@@ -160,7 +160,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserialize(rawMessage.data))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData))
-            .filter(jsonData => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
+            .filter((jsonData: any) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
         return filteredObservable;
     };
 
@@ -193,7 +193,7 @@ export class DefaultSubscriber implements Subscriber {
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void {
         let observableSubscriber = this
             .prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe(jsonData => stateMachineUpdateListener(jsonData));
+            .subscribe((jsonData: any) => stateMachineUpdateListener(jsonData));
         this
             .observableSubscribers
             .push(observableSubscriber);
@@ -352,7 +352,7 @@ export class DefaultSubscriber implements Subscriber {
 
     private decodeServerMessage(b64Data: string): string {
         let atob = javascriptHelper().atob;
-        let charData = atob(b64Data).split("").map((x) => {
+        let charData = atob(b64Data).split("").map((x: string) => {
             return x.charCodeAt(0);
         });
         let binData = new Uint8Array(charData);

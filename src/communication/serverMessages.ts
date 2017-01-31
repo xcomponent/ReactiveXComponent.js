@@ -44,7 +44,7 @@ export interface StateMachineRef {
     StateMachineCode: number;
     ComponentCode: number;
     StateName: string;
-    send(messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string);
+    send(messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
 };
 
 export interface Packet {
