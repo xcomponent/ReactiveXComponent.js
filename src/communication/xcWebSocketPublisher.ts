@@ -1,6 +1,6 @@
-import { ApiConfiguration } from "configuration/apiConfiguration";
-import { FSharpFormat, getFSharpFormat } from "configuration/FSharpConfiguration";
-import { Header, Event, Data, convertToWebsocketInputFormat } from "communication/EventObecjts";
+import { ApiConfiguration } from "../configuration/apiConfiguration";
+import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
+import { Header, Event, Data, convertToWebsocketInputFormat } from "./serverMessages";
 
 
 
@@ -63,7 +63,7 @@ export class DefaultPublisher implements Publisher {
         };
     };
 
-    private getRoutingKey(componentCode, stateMachineCode, messageType): string {
+    private getRoutingKey(componentCode: number, stateMachineCode: number, messageType: string): string {
         let publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
         return publisher.routingKey;
     }

@@ -4,7 +4,7 @@ import {
     Component,
     State,
     StateMachine
-} from "configuration/parsedApiConfiguration";
+} from "./parsedApiConfiguration";
 
 export interface PublisherDetails {
     eventCode: number;
@@ -88,7 +88,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
     }
 
-    private findStateMachine(component, predicate: (stateMachine: StateMachine) => boolean): StateMachine {
+    private findStateMachine(component: Component, predicate: (stateMachine: StateMachine) => boolean): StateMachine {
         return component.stateMachines[0].stateMachine.find(predicate);
     }
 

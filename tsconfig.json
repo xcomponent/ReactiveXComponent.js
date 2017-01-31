@@ -1,15 +1,18 @@
 {
-    "compilerOptions": {        
-        "sourceMap": true,                
-        "allowJs": true,        
+    "compilerOptions": {
+        "sourceMap": true,
+        "allowJs": false,
+        "noImplicitAny": true,
         "module": "commonjs",
-        "target": "es5",        
-        "baseUrl": "src"        
+        "target": "es5",
+        "declaration": true,
+        "declarationDir": "types"
     },
     "include": [
         "./**/*"
-    ],    
+    ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "test"
     ]
 }

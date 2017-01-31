@@ -1,13 +1,13 @@
-import { javascriptHelper } from "javascriptHelper";
-import { Commands, Kinds } from "configuration/xcWebSocketBridgeConfiguration";
-import { ApiConfiguration, SubscriberEventType } from "configuration/apiConfiguration";
+import { javascriptHelper } from "../javascriptHelper";
+import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
+import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 let Rx = require("rx");
 import pako = require("pako");
 
-import { Publisher } from "communication/xcWebSocketPublisher";
-import Guid from "guid";
-import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "communication/EventObecjts";
-import { FSharpFormat, getFSharpFormat } from "configuration/FSharpConfiguration";
+import { Publisher } from "./xcWebSocketPublisher";
+import Guid from "../guid";
+import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "./serverMessages";
+import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 
 export interface Subscriber {
     privateTopics: Array<String>;
@@ -160,7 +160,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserialize(rawMessage.data))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData))
-            .filter(jsonData => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
+            .filter((jsonData: any) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
         return filteredObservable;
     };
 
@@ -193,7 +193,7 @@ export class DefaultSubscriber implements Subscriber {
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void {
         let observableSubscriber = this
             .prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe(jsonData => stateMachineUpdateListener(jsonData));
+            .subscribe((jsonData: any) => stateMachineUpdateListener(jsonData));
         this
             .observableSubscribers
             .push(observableSubscriber);
@@ -352,7 +352,7 @@ export class DefaultSubscriber implements Subscriber {
 
     private decodeServerMessage(b64Data: string): string {
         let atob = javascriptHelper().atob;
-        let charData = atob(b64Data).split("").map((x) => {
+        let charData = atob(b64Data).split("").map((x: string) => {
             return x.charCodeAt(0);
         });
         let binData = new Uint8Array(charData);

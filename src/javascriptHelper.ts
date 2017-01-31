@@ -1,11 +1,12 @@
+import * as definition from "definition";
 
-interface JavascriptHelper {
+export interface JavascriptHelper {
     WebSocket: WebSocket;
     atob: any;
 }
 
 const javascriptHelper = (): JavascriptHelper => {
-    return { WebSocket: <WebSocket>window["WebSocket"], atob: window.atob };
+    return { WebSocket: window.WebSocket, atob: window.atob };
 };
 
 export { javascriptHelper };
