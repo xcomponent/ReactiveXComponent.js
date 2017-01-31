@@ -378,8 +378,7 @@ export class DefaultSubscriber implements Subscriber {
     };
 
     private getJsonData(data: string): any {
-        let jsonData = JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
-        return jsonData;
+        return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
     }
 
     private convertToWebsocketInputFormat(command: string, data: any): string {
