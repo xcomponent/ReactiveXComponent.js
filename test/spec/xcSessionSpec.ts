@@ -1,6 +1,6 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
 import { Publisher, DefaultPublisher } from "communication/xcWebSocketPublisher";
-import Subscriber from "communication/xcWebSocketSubscriber";
+import { Subscriber, DefaultSubscriber } from "communication/xcWebSocketSubscriber";
 import { DefaultSession } from "communication/xcSession";
 
 
@@ -30,7 +30,7 @@ describe("Test xcSession module", function () {
         });
         it("should return a new instance of Subscriber", function () {
             let subscriber = session.createSubscriber();
-            expect(subscriber instanceof Subscriber).toBe(true);
+            expect(subscriber instanceof DefaultSubscriber).toBe(true);
         });
     });
 

@@ -1,9 +1,10 @@
 import { SessionFactory, Session } from "communication/xcSession";
 import { ApiConfiguration } from "configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "configuration/apiConfigurationParser";
+import { Model } from "communication/EventObecjts";
 
 export interface Connection {
-    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: any) => void);
+    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void);
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void;
     createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void;
     createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void;
@@ -19,10 +20,10 @@ export class DefaultConnection implements Connection {
         this.apis = {};
     }
 
-    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: any) => void) {
+    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void) {
         let session = SessionFactory(serverUrl, null, null);
         let openListener = (_: Event) => {
-            session.privateSubscriber.getModel(xcApiName, (model: any) => {
+            session.privateSubscriber.getModel(xcApiName, (model: Model) => {
                 getModelListener(model);
                 session.close();
             });

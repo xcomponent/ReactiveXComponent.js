@@ -1,28 +1,8 @@
 import { ApiConfiguration } from "configuration/apiConfiguration";
 import { FSharpFormat, getFSharpFormat } from "configuration/FSharpConfiguration";
+import { Header, Event, Data, convertToWebsocketInputFormat } from "communication/EventObecjts";
 
-interface Header {
-    StateMachineCode: FSharpFormat<Number>;
-    ComponentCode: FSharpFormat<Number>;
-    MessageType: FSharpFormat<String>;
-    PublishTopic: FSharpFormat<String>;
-    SessionData: FSharpFormat<String>;
-    StateMachineId: FSharpFormat<Number>;
-    AgentId: FSharpFormat<Number>;
-    EventCode: number;
-    IncomingType: number;
-}
 
-interface Event {
-    Header: Header;
-    JsonMessage: string;
-}
-
-interface Data {
-    RoutingKey: string;
-    ComponentCode: number;
-    Event: Event;
-}
 
 export interface Publisher {
     webSocket: WebSocket;
@@ -50,7 +30,7 @@ export class DefaultPublisher implements Publisher {
 
     send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-        let webSocketInput = this.convertToWebsocketInputFormat(data);
+        let webSocketInput = convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
     };
 
@@ -90,7 +70,7 @@ export class DefaultPublisher implements Publisher {
 
     sendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-        let webSocketInput = this.convertToWebsocketInputFormat(data);
+        let webSocketInput = convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
     };
 
@@ -116,11 +96,6 @@ export class DefaultPublisher implements Publisher {
             return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
         }
         return false;
-    };
-
-    private convertToWebsocketInputFormat(data: Data): string {
-        let input = data.RoutingKey + " " + data.ComponentCode + " " + JSON.stringify(data.Event);
-        return input;
     };
 
 }

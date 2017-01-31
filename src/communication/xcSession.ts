@@ -1,7 +1,7 @@
 import { javascriptHelper } from "javascriptHelper";
 import Guid from "guid";
 import { Publisher, DefaultPublisher } from "communication/xcWebSocketPublisher";
-import Subscriber from "communication/xcWebSocketSubscriber";
+import { DefaultSubscriber, Subscriber } from "communication/xcWebSocketSubscriber";
 import { Kinds } from "configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "configuration/apiConfiguration";
@@ -47,7 +47,7 @@ export class DefaultSession implements Session {
         this.guid = new Guid();
         this.privateTopic = this.guid.create();
         this.sessionData = sessionData;
-        this.privateSubscriber = new Subscriber(this.webSocket, null, null, null, null);
+        this.privateSubscriber = new DefaultSubscriber(this.webSocket, null, null, null, null);
         this.replyPublisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this.publishers = [this.replyPublisher];
         this.subscribers = [];
@@ -120,7 +120,7 @@ export class DefaultSession implements Session {
     };
 
     createSubscriber(): Subscriber {
-        const subscriber = new Subscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
+        const subscriber = new DefaultSubscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
         this.subscribers.push(subscriber);
         return subscriber;
     };

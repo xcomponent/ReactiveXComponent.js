@@ -1,5 +1,6 @@
 import { Connection, DefaultConnection } from "communication/xcConnection";
 import { Session } from "communication/xcSession";
+import { Model } from "communication/EventObecjts";
 
 class XComponentAPI {
     private connection: Connection;
@@ -8,8 +9,8 @@ class XComponentAPI {
         this.connection = new DefaultConnection();
     }
 
-    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: any) => void) {
-        this.connection.getModel(xcApiName, serverUrl, ((model) => {
+    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: Model) => void) {
+        this.connection.getModel(xcApiName, serverUrl, ((model: Model) => {
             connectionListener(this.connection, model);
         }).bind(this));
     }
