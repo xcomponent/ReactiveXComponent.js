@@ -1,4 +1,4 @@
-import { FSharpFormat } from "configuration/FSharpConfiguration";
+import { FSharpFormat } from "../configuration/FSharpConfiguration";
 
 export interface Header {
     StateMachineCode: FSharpFormat<Number>;

@@ -6,7 +6,7 @@ import pako = require("pako");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
-import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "./EventObecjts";
+import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "./serverMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 
 export interface Subscriber {

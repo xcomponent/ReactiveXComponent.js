@@ -1,6 +1,6 @@
 import { Connection, DefaultConnection } from "./communication/xcConnection";
 import { Session } from "./communication/xcSession";
-import { Model } from "./communication/EventObecjts";
+import { Model } from "./communication/serverMessages";
 
 class XComponentAPI {
     private connection: Connection;
