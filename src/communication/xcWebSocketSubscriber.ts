@@ -67,8 +67,8 @@ export class DefaultSubscriber implements Subscriber {
         };
         let input = convertCommandDataToWebsocketInputFormat(commandData);
         return setInterval(() => {
-            log.error("Heartbeat send");
             thisSubscriber.webSocket.send(input);
+            log.info("Heartbeat sent");            
         }, heartbeatIntervalSeconds * 1000);
     }
 
