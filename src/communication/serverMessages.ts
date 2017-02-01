@@ -25,7 +25,7 @@ export interface Data {
 
 export interface CommandData {
     Command: string;
-    JsonMessage: string;
+    Data: any;
 }
 
 export let convertToWebsocketInputFormat = (data: Data): string => {
@@ -33,8 +33,8 @@ export let convertToWebsocketInputFormat = (data: Data): string => {
     return input;
 };
 
-export let convertCommandDataToWebsocketInputFormat = (data: CommandData): string => {
-    let input = data.Command + " " + data.JsonMessage;
+export let convertCommandDataToWebsocketInputFormat = (commandData: CommandData): string => {
+    let input = commandData.Command + " " + JSON.stringify(commandData.Data);
     return input;
 };
 

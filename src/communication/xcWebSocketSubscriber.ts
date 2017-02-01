@@ -60,7 +60,11 @@ export class DefaultSubscriber implements Subscriber {
             .subscribe((data: DeserializedData) => {
                 console.log("Heartbeat received successfully");
             });
-        let input = this.convertToWebsocketInputFormat(command, {});
+        let commandData = {
+            Command: command,
+            Data: {}
+        };
+        let input = convertCommandDataToWebsocketInputFormat(commandData);
         return setInterval(() => {
             thisSubscriber.webSocket.send(input);
         }, heartbeatIntervalSeconds * 1000);
@@ -77,10 +81,11 @@ export class DefaultSubscriber implements Subscriber {
                 let model = thisSubscriber.getJsonDataFromGetModelRequest(data.stringData);
                 getModelListener(model);
             });
-        let data = {
-            "Name": xcApiName
+        let commandData = {
+            Command: command,
+            Data: { "Name": xcApiName }
         };
-        let input = this.convertToWebsocketInputFormat(command, data);
+        let input = convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
     }
 
@@ -94,8 +99,11 @@ export class DefaultSubscriber implements Subscriber {
                 console.log("ApiList received successfully");
                 getXcApiListListener(thisSubscriber.getJsonDataFromGetXcApiListRequest(data.stringData));
             });
-        let data = {};
-        this.webSocket.send(thisSubscriber.convertToWebsocketInputFormat(command, data));
+        let commandData = {
+            Command: command,
+            Data: {}
+        };
+        this.webSocket.send(convertCommandDataToWebsocketInputFormat(commandData));
     };
 
 
@@ -109,8 +117,11 @@ export class DefaultSubscriber implements Subscriber {
                 console.log(xcApiFileName + " " + "received successfully");
                 getXcApiListener(thisSubscriber.getJsonDataFromXcApiRequest(data.stringData));
             });
-        let data = { Name: xcApiFileName };
-        this.webSocket.send(thisSubscriber.convertToWebsocketInputFormat(command, data));
+        let commandData = {
+            Command: command,
+            Data: { Name: xcApiFileName }
+        };
+        this.webSocket.send(convertCommandDataToWebsocketInputFormat(commandData));
     };
 
 
@@ -213,13 +224,21 @@ export class DefaultSubscriber implements Subscriber {
 
     sendSubscribeRequestToTopic(topic: string, kind: number): void {
         let data = this.getDataToSend(topic, kind);
-        let input = this.convertToWebsocketInputFormat(Commands[Commands.subscribe], data);
+        let commandData = {
+            Command: Commands[Commands.subscribe],
+            Data: data
+        };
+        let input = convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
     };
 
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void {
         let data = this.getDataToSend(topic, kind);
-        let input = this.convertToWebsocketInputFormat(Commands[Commands.unsubscribe], data);
+        let commandData = {
+            Command: Commands[Commands.unsubscribe],
+            Data: data
+        };
+        let input = convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
     };
 
@@ -242,7 +261,11 @@ export class DefaultSubscriber implements Subscriber {
             let topic = this.configuration.getSubscriberTopic(componentCode, stateMachineCode, SubscriberEventType.Update);
             let kind = Kinds.Public;
             let data = this.getDataToSend(topic, kind);
-            this.webSocket.send(this.convertToWebsocketInputFormat(Commands[Commands.unsubscribe], data));
+            let commandData = {
+                Command: Commands[Commands.unsubscribe],
+                Data: data
+            };
+            this.webSocket.send(convertCommandDataToWebsocketInputFormat(commandData));
             this.removeSubscribedStateMachines(componentName, stateMachineName);
         }
     };
@@ -294,7 +317,7 @@ export class DefaultSubscriber implements Subscriber {
             "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
             "StateName": thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
             "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
-                thisSubscriber.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+                thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
             }
         };
         return {
@@ -322,7 +345,7 @@ export class DefaultSubscriber implements Subscriber {
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisSubscriber.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
                 "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
-                    thisSubscriber.replyPublisher.sendWithStateMachineRef(this, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+                    thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
                 }
             };
             snapshotItems.push({
@@ -379,11 +402,6 @@ export class DefaultSubscriber implements Subscriber {
 
     private getJsonData(data: string): any {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
-    }
-
-    private convertToWebsocketInputFormat(command: string, data: any): string {
-        let input = command + " " + JSON.stringify(data);
-        return input;
     }
 
     private deserialize(data: string): DeserializedData {
