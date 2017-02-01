@@ -29,7 +29,10 @@
       "**/src/**/*.ts",
       "!**/src/**/*.d.ts"
     ],
-    "testResultsProcessor": "./node_modules/jest-junit",
+    "setupTestFrameworkScriptFile": "./setup-jasmine-env.js",
+    "unmockedModulePathPatterns": [
+      "./node_modules/jasmine-reporters"
+    ],
     "testEnvironment": "jsdom"
   },
   "repository": {
@@ -75,9 +78,9 @@
     "babel-loader": "^6.2.4",
     "clean-webpack-plugin": "^0.1.14",
     "compression": "^1.6.2",
+    "jasmine-reporters": "^2.2.0",
     "jest": "^18.1.0",
     "jest-cli": "^18.1.0",
-    "jest-junit": "https://github.com/palmerj3/jest-junit.git",
     "mock-socket": "^6.0.4",
     "source-map-loader": "^0.1.5",
     "ts-jest": "^18.0.1",
