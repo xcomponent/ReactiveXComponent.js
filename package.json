@@ -9,8 +9,7 @@
   "scripts": {
     "dev": "webpack -d --watch",
     "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
-    "test": "jest --coverage ",
-    "lint": "tslint src/**/*.ts*"
+    "test": "jest --coverage "
   },
   "jest": {
     "moduleFileExtensions": [
@@ -30,7 +29,10 @@
       "**/src/**/*.ts",
       "!**/src/**/*.d.ts"
     ],
-    "testResultsProcessor": "./node_modules/jest-junit",
+    "setupTestFrameworkScriptFile": "./setup-jasmine-env.js",
+    "unmockedModulePathPatterns": [
+      "./node_modules/jasmine-reporters"
+    ],
     "testEnvironment": "jsdom"
   },
   "repository": {
@@ -58,7 +60,7 @@
   "homepage": "https://github.com/xcomponent/ReactiveXComponent.js#readme",
   "dependencies": {
     "@types/es6-shim": "^0.31.32",
-    "@types/jest": "^16.0.1",
+    "@types/jest": "^18.1.1",
     "@types/pako": "^0.2.31",
     "@types/rx": "^4.1.1",
     "@types/websocket": "0.0.32",
@@ -77,17 +79,17 @@
     "babel-loader": "^6.2.4",
     "clean-webpack-plugin": "^0.1.14",
     "compression": "^1.6.2",
+    "jasmine-reporters": "^2.2.0",
     "jest": "^18.1.0",
     "jest-cli": "^18.1.0",
-    "jest-junit": "https://github.com/palmerj3/jest-junit.git",
     "mock-socket": "^6.0.4",
     "source-map-loader": "^0.1.5",
     "ts-jest": "^18.0.1",
-    "ts-loader": "^1.3.3",
+    "ts-loader": "^2.0.0",
     "tslint": "^4.1.0",
     "tslint-loader": "^3.3.0",
     "typescript": "^2.1.4",
-    "webpack": "^1.13.1",
+    "webpack": "^2.2.1",
     "webpack-node-externals": "^1.5.4"
   }
 }
