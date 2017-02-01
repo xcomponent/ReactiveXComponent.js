@@ -17,8 +17,8 @@ var config = {
     library: "xcomponentapi",
   },
   resolve: {
-    extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
-    modulesDirectories: [
+    extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+    modules: [
       "node_modules",
       "src"]
   },
@@ -29,17 +29,14 @@ var config = {
       dry: false,
       exclude: []
     }),
-    new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
         "NODE_ENV": JSON.stringify("production")
       }
     }),
     new webpack.optimize.UglifyJsPlugin({
-      compressor: {
-        warnings: false
-      }
+      sourceMap: true,
+      minimize: true
     })
   ] : [
       new CleanWebpackPlugin([BUILD_DIR, "junit.xml", "coverage"], {
@@ -50,20 +47,19 @@ var config = {
       })
     ],
   module: {
-    loaders: [
-      { test: /\.ts$/, loader: "ts-loader" },
-    ],
-    preLoaders: [
+    rules: [
+      { test: /\.ts$/, use: "ts-loader" },
       {
         test: /\.ts$/,
-        loader: "tslint-loader"
+        enforce: "pre",
+        loader: "tslint-loader",
+        options: {
+          typeCheck: false,
+          configFile: false,
+          failOnHint: true
+        }
       }
     ]
-  },
-  tslint: {
-    typeCheck: false,
-    configFile: false,
-    failOnHint: true
   },
   externals: [nodeExternals()]
 };
