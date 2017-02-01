@@ -8,6 +8,7 @@ import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
 import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "./serverMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
+let log = require("loglevel");
 
 export interface Subscriber {
     privateTopics: Array<String>;
@@ -58,7 +59,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
-                console.log("Heartbeat received successfully");
+                log.info("Heartbeat received successfully");
             });
         let commandData = {
             Command: command,
@@ -66,6 +67,7 @@ export class DefaultSubscriber implements Subscriber {
         };
         let input = convertCommandDataToWebsocketInputFormat(commandData);
         return setInterval(() => {
+            log.error("Heartbeat send");
             thisSubscriber.webSocket.send(input);
         }, heartbeatIntervalSeconds * 1000);
     }
@@ -77,7 +79,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
-                console.log("Model " + xcApiName + " received successfully");
+                log.info("Model " + xcApiName + " received successfully");
                 let model = thisSubscriber.getJsonDataFromGetModelRequest(data.stringData);
                 getModelListener(model);
             });
@@ -96,7 +98,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
-                console.log("ApiList received successfully");
+                log.info("ApiList received successfully");
                 getXcApiListListener(thisSubscriber.getJsonDataFromGetXcApiListRequest(data.stringData));
             });
         let commandData = {
@@ -114,7 +116,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
-                console.log(xcApiFileName + " " + "received successfully");
+                log.info(xcApiFileName + " " + "received successfully");
                 getXcApiListener(thisSubscriber.getJsonDataFromXcApiRequest(data.stringData));
             });
         let commandData = {

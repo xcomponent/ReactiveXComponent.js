@@ -1,4 +1,5 @@
 import { FSharpFormat } from "../configuration/FSharpConfiguration";
+let log = require("loglevel");
 
 export interface Header {
     StateMachineCode: FSharpFormat<Number>;
@@ -30,11 +31,13 @@ export interface CommandData {
 
 export let convertToWebsocketInputFormat = (data: Data): string => {
     let input = data.RoutingKey + " " + data.ComponentCode + " " + JSON.stringify(data.Event);
+    log.debug(input);
     return input;
 };
 
 export let convertCommandDataToWebsocketInputFormat = (commandData: CommandData): string => {
     let input = commandData.Command + " " + JSON.stringify(commandData.Data);
+    log.debug(input);
     return input;
 };
 
