@@ -3,6 +3,7 @@ import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
 import { Model } from "../communication/serverMessages";
 let log = require("loglevel");
+import { logDebug } from "../loggerConfiguration";
 
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void): void;
@@ -30,8 +31,8 @@ export class DefaultConnection implements Connection {
             });
         };
         let errorListener = (err: Error) => {
-            log.debug("getModel request failed");
-            log.debug(err);
+            logDebug("getModel request failed");
+            logDebug(err);
         };
         session.init(openListener, errorListener);
     }
@@ -45,8 +46,8 @@ export class DefaultConnection implements Connection {
             });
         };
         let errorListener = (err: Error) => {
-            log.debug("Error while getting Apis List");
-            log.debug(err);
+            logDebug("Error while getting Apis List");
+            logDebug(err);
         };
         session.init(openListener, errorListener);
     };

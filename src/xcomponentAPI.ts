@@ -2,6 +2,7 @@ import { Connection, DefaultConnection } from "./communication/xcConnection";
 import { Session } from "./communication/xcSession";
 import { Model } from "./communication/serverMessages";
 let log = require("loglevel");
+import { LogLevel } from "./loggerConfiguration";
 
 class XComponentAPI {
     private connection: Connection;
@@ -31,16 +32,8 @@ class XComponentAPI {
         this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener);
     };
 
-    setSilentLogLevel() {
-        log.setLevel(log.levels.SILENT);
-    }
-
-    setDebugLogLevel() {
-        log.setLevel(log.levels.DEBUG);
-    }
-
-    setInfoLogLevel() {
-        log.setLevel(log.levels.INFO);
+    setLogLevel(logLevel: LogLevel) {
+        log.setLevel(log.levels[LogLevel[logLevel]]);
     }
 
 }

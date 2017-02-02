@@ -6,9 +6,11 @@ import pako = require("pako");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
-import { Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, Packet, StateMachineRef, Component, Model, DeserializedData } from "./serverMessages";
+import { Packet, StateMachineRef, Component, Model, DeserializedData } from "./serverMessages";
+import { CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 let log = require("loglevel");
+import { logDebug } from "../loggerConfiguration";
 
 export interface Subscriber {
     privateTopics: Array<String>;
@@ -68,7 +70,7 @@ export class DefaultSubscriber implements Subscriber {
         let input = convertCommandDataToWebsocketInputFormat(commandData);
         return setInterval(() => {
             thisSubscriber.webSocket.send(input);
-            log.info("Heartbeat sent");            
+            log.info("Heartbeat sent");
         }, heartbeatIntervalSeconds * 1000);
     }
 
@@ -307,6 +309,7 @@ export class DefaultSubscriber implements Subscriber {
 
 
     private getJsonDataFromEvent(data: string): Packet {
+        logDebug(`JsonData received from event: ${data}`);
         let jsonData = this.getJsonData(data);
         let componentCode = jsonData.Header.ComponentCode.Fields[0];
         let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
@@ -329,6 +332,7 @@ export class DefaultSubscriber implements Subscriber {
     };
 
     private getJsonDataFromSnapshot(data: string): Array<Packet> {
+        logDebug(`JsonData received from snapshot: ${data}`);
         let jsonData = this.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
