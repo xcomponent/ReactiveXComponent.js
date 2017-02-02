@@ -1,6 +1,6 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
-import { Header, Event, Data, convertToWebsocketInputFormat } from "./clientMessages";
+import { Header, Event, Data, convertToWebsocketInputFormat } from "./xcomponentMessages";
 
 
 

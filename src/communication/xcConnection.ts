@@ -1,9 +1,9 @@
 import { SessionFactory, Session } from "./xcSession";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
-import { Model } from "../communication/serverMessages";
+import { Model } from "../communication/xcomponentMessages";
 let log = require("loglevel");
-import { logDebug } from "../loggerConfiguration";
+import { isDebugEnabled } from "../loggerConfiguration";
 
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void): void;
@@ -31,8 +31,10 @@ export class DefaultConnection implements Connection {
             });
         };
         let errorListener = (err: Error) => {
-            logDebug("getModel request failed");
-            logDebug(err);
+            if (isDebugEnabled()) {
+                log.debug("getModel request failed");
+                log.debug(err);
+            }
         };
         session.init(openListener, errorListener);
     }
@@ -46,8 +48,10 @@ export class DefaultConnection implements Connection {
             });
         };
         let errorListener = (err: Error) => {
-            logDebug("Error while getting Apis List");
-            logDebug(err);
+            if (isDebugEnabled()) {
+                log.debug("Error while getting Apis List");
+                log.debug(err);
+            }
         };
         session.init(openListener, errorListener);
     };

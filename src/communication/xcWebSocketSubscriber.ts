@@ -6,11 +6,11 @@ import pako = require("pako");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
-import { Packet, StateMachineRef, Component, Model, DeserializedData } from "./serverMessages";
-import { CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat } from "./clientMessages";
+import { Packet, StateMachineRef, Component, Model, DeserializedData, CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat } from "./xcomponentMessages";
+import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 let log = require("loglevel");
-import { logDebug } from "../loggerConfiguration";
+import { isDebugEnabled } from "../loggerConfiguration";
 
 export interface Subscriber {
     privateTopics: Array<String>;
@@ -309,7 +309,9 @@ export class DefaultSubscriber implements Subscriber {
 
 
     private getJsonDataFromEvent(data: string): Packet {
-        logDebug(`JsonData received from event: ${data}`);
+        if (isDebugEnabled()) {
+            log.debug(`JsonData received from event: ${data}`);
+        }
         let jsonData = this.getJsonData(data);
         let componentCode = jsonData.Header.ComponentCode.Fields[0];
         let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
@@ -332,7 +334,9 @@ export class DefaultSubscriber implements Subscriber {
     };
 
     private getJsonDataFromSnapshot(data: string): Array<Packet> {
-        logDebug(`JsonData received from snapshot: ${data}`);
+        if (isDebugEnabled()) {
+            log.debug(`JsonData received from snapshot: ${data}`);
+        }
         let jsonData = this.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;

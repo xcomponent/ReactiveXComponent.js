@@ -1,5 +1,5 @@
 let log = require("loglevel");
-import { LogLevel, logDebug } from "../loggerConfiguration";
+import { isDebugEnabled } from "../loggerConfiguration";
 import { FSharpFormat } from "../configuration/FSharpConfiguration";
 
 export interface Header {
@@ -44,12 +44,47 @@ export interface CommandData {
 
 export let convertToWebsocketInputFormat = (data: Data): string => {
     let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
-    logDebug(`Message send: ${input}`);
+    if (isDebugEnabled()) {
+        log.debug(`Message send: ${input}`);
+    }
     return input;
 };
 
 export let convertCommandDataToWebsocketInputFormat = (commandData: CommandData): string => {
     let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
-    logDebug(`Message send: ${input}`);
+    if (isDebugEnabled()) {
+        log.debug(`Message send: ${input}`);
+    }
     return input;
 };
+
+export interface StateMachineRef {
+    StateMachineId: number;
+    AgentId: number;
+    StateMachineCode: number;
+    ComponentCode: number;
+    StateName: string;
+    send(messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
+};
+
+export interface Packet {
+    stateMachineRef: StateMachineRef;
+    jsonMessage: any;
+}
+
+export interface Component {
+    name: string;
+    content: string;
+}
+
+export interface Model {
+    projectName: string;
+    components: Array<Component>;
+    composition: string;
+}
+
+export interface DeserializedData {
+    command: string;
+    topic: string;
+    stringData: string;
+}

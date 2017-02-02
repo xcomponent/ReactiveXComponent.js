@@ -1,6 +1,6 @@
 import { Connection, DefaultConnection } from "./communication/xcConnection";
 import { Session } from "./communication/xcSession";
-import { Model } from "./communication/serverMessages";
+import { Model } from "./communication/xcomponentMessages";
 let log = require("loglevel");
 import { LogLevel } from "./loggerConfiguration";
 
