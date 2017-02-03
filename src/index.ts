@@ -1,8 +1,7 @@
 import xcomponentapi from "./xcomponentAPI";
-import { LogLevel, isDebugEnabled } from "./loggerConfiguration";
+import { isDebugEnabled } from "./loggerConfiguration";
+let log = require("loglevel");
 
-export let xcLogLevel = LogLevel;
-
-export let xcIsDebugEnabled = isDebugEnabled;
+export let xcLogLevel = log.levels;
 
 export default new xcomponentapi();

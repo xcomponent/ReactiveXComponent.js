@@ -136,8 +136,8 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserialize(rawMessage.data))
             .filter((data: DeserializedData) => data.command === Commands[Commands.snapshot] && data.topic === replyTopic)
             .subscribe((data: DeserializedData) => {
+                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
-                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData));
             });
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
@@ -174,7 +174,7 @@ export class DefaultSubscriber implements Subscriber {
         let filteredObservable = this.observableMsg
             .map((rawMessage: MessageEvent) => thisSubscriber.deserialize(rawMessage.data))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
-            .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData))
+            .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
             .filter((jsonData: any) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
         return filteredObservable;
     };
@@ -308,9 +308,9 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    private getJsonDataFromEvent(data: string): Packet {
+    private getJsonDataFromEvent(data: string, topic: string): Packet {
         if (isDebugEnabled()) {
-            log.debug(`JsonData received from event: ${data}`);
+            log.debug(`JsonData received from event: ${topic} ${data}`);
         }
         let jsonData = this.getJsonData(data);
         let componentCode = jsonData.Header.ComponentCode.Fields[0];
@@ -333,9 +333,9 @@ export class DefaultSubscriber implements Subscriber {
         };
     };
 
-    private getJsonDataFromSnapshot(data: string): Array<Packet> {
+    private getJsonDataFromSnapshot(data: string, topic: string): Array<Packet> {
         if (isDebugEnabled()) {
-            log.debug(`JsonData received from snapshot: ${data}`);
+            log.debug(`JsonData received from snapshot: ${topic} ${data}`);
         }
         let jsonData = this.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;

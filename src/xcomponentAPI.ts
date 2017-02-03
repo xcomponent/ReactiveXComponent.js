@@ -2,7 +2,6 @@ import { Connection, DefaultConnection } from "./communication/xcConnection";
 import { Session } from "./communication/xcSession";
 import { Model } from "./communication/xcomponentMessages";
 let log = require("loglevel");
-import { LogLevel } from "./loggerConfiguration";
 
 class XComponentAPI {
     private connection: Connection;
@@ -11,31 +10,34 @@ class XComponentAPI {
         this.connection = new DefaultConnection();
     }
 
-    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: Model) => void) {
+    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: Model) => void): void {
         this.connection.getModel(xcApiName, serverUrl, ((model: Model) => {
             connectionListener(this.connection, model);
         }).bind(this));
     }
 
-    getXcApiList(serverUrl: string, connectionListener: (connection: Connection, apis: Array<String>) => void) {
+    getXcApiList(serverUrl: string, connectionListener: (connection: Connection, apis: Array<String>) => void): void {
         log.setDefaultLevel(log.levels.INFO);
         this.connection.getXcApiList(serverUrl, ((apis: Array<String>) => {
             connectionListener(this.connection, apis);
         }).bind(this));
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void) {
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void {
         this.connection.createSession(xcApiFileName, serverUrl, createSessionListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void) {
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void {
         this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener);
     };
 
-    setLogLevel(logLevel: LogLevel) {
-        log.setLevel(log.levels[LogLevel[logLevel]]);
+    setLogLevel(logLevel: number): void {
+        log.setLevel(logLevel);
     }
 
+    getLogLevel(): string {
+        return Object.keys(log.levels)[log.getLevel()];
+    }
 }
 
 
