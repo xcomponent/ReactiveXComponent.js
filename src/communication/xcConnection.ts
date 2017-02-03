@@ -31,10 +31,8 @@ export class DefaultConnection implements Connection {
             });
         };
         let errorListener = (err: Error) => {
-            if (isDebugEnabled()) {
-                log.debug("getModel request failed");
-                log.debug(err);
-            }
+            log.debug("getModel request failed");
+            log.debug(err);
         };
         session.init(openListener, errorListener);
     }
@@ -48,10 +46,8 @@ export class DefaultConnection implements Connection {
             });
         };
         let errorListener = (err: Error) => {
-            if (isDebugEnabled()) {
-                log.debug("Error while getting Apis List");
-                log.debug(err);
-            }
+            log.debug("Error while getting Apis List");
+            log.debug(err);
         };
         session.init(openListener, errorListener);
     };
