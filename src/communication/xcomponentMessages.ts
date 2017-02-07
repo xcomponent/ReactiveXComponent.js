@@ -74,7 +74,8 @@ export interface Packet {
 
 export interface Component {
     name: string;
-    content: string;
+    componentModel: string;
+    graphicalModel: string;
 }
 
 export interface Model {

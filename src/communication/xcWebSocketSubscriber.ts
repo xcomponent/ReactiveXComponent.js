@@ -369,11 +369,12 @@ export class DefaultSubscriber implements Subscriber {
     private getJsonDataFromGetModelRequest(stringData: string): Model {
         let jsonData = this.getJsonData(stringData);
         let components = [];
-        let zippedComponents = jsonData.ModelContent.Components;
-        for (let i = 0; i < zippedComponents.length; i++) {
+        let componentGraphical = jsonData.ModelContent.ComponentGraphical;
+        for (let name in componentGraphical) {
             components.push({
-                name: zippedComponents[i].Name,
-                content: this.decodeServerMessage(zippedComponents[i].Content)
+                name: name,
+                componentModel: this.decodeServerMessage(componentGraphical[name].Component),
+                graphicalModel: this.decodeServerMessage(componentGraphical[name].Graphical)
             });
         }
         return {
