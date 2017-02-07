@@ -74,11 +74,11 @@ export interface Packet {
 
 export interface Component {
     name: string;
-    componentModel: string;
-    graphicalModel: string;
+    model: string;
+    graphical: string;
 }
 
-export interface Model {
+export interface CompositionModel {
     projectName: string;
     components: Array<Component>;
     composition: string;

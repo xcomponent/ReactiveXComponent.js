@@ -1,6 +1,6 @@
 import { Connection, DefaultConnection } from "./communication/xcConnection";
 import { Session } from "./communication/xcSession";
-import { Model } from "./communication/xcomponentMessages";
+import { CompositionModel } from "./communication/xcomponentMessages";
 let log = require("loglevel");
 
 class XComponentAPI {
@@ -10,8 +10,8 @@ class XComponentAPI {
         this.connection = new DefaultConnection();
     }
 
-    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: Model) => void): void {
-        this.connection.getModel(xcApiName, serverUrl, ((model: Model) => {
+    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: CompositionModel) => void): void {
+        this.connection.getModel(xcApiName, serverUrl, ((model: CompositionModel) => {
             connectionListener(this.connection, model);
         }).bind(this));
     }

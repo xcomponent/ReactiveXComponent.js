@@ -1,12 +1,12 @@
 import { SessionFactory, Session } from "./xcSession";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
-import { Model } from "../communication/xcomponentMessages";
+import { CompositionModel } from "../communication/xcomponentMessages";
 let log = require("loglevel");
 import { isDebugEnabled } from "../loggerConfiguration";
 
 export interface Connection {
-    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void): void;
+    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: CompositionModel) => void): void;
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void;
     createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void;
     createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void;
@@ -22,10 +22,10 @@ export class DefaultConnection implements Connection {
         this.apis = {};
     }
 
-    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: Model) => void) {
+    getModel(xcApiName: string, serverUrl: string, getModelListener: (model: CompositionModel) => void) {
         let session = SessionFactory(serverUrl, null, null);
         let openListener = (_: Event) => {
-            session.privateSubscriber.getModel(xcApiName, (model: Model) => {
+            session.privateSubscriber.getModel(xcApiName, (model: CompositionModel) => {
                 getModelListener(model);
                 session.close();
             });

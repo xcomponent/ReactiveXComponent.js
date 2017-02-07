@@ -6,7 +6,7 @@ import pako = require("pako");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
-import { Packet, StateMachineRef, Component, Model, DeserializedData, CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat } from "./xcomponentMessages";
+import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 let log = require("loglevel");
@@ -16,7 +16,7 @@ export interface Subscriber {
     privateTopics: Array<String>;
     replyPublisher: Publisher;
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
-    getModel(xcApiName: string, getModelListener: (model: Model) => void): void;
+    getModel(xcApiName: string, getModelListener: (model: CompositionModel) => void): void;
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
     getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
@@ -74,7 +74,7 @@ export class DefaultSubscriber implements Subscriber {
         }, heartbeatIntervalSeconds * 1000);
     }
 
-    getModel(xcApiName: string, getModelListener: (model: Model) => void): void {
+    getModel(xcApiName: string, getModelListener: (model: CompositionModel) => void): void {
         let thisSubscriber = this;
         let command = Commands[Commands.getModel];
         this.observableMsg
@@ -366,15 +366,16 @@ export class DefaultSubscriber implements Subscriber {
         return snapshotItems;
     };
 
-    private getJsonDataFromGetModelRequest(stringData: string): Model {
+    private getJsonDataFromGetModelRequest(stringData: string): CompositionModel {
         let jsonData = this.getJsonData(stringData);
         let components = [];
-        let componentGraphical = jsonData.ModelContent.ComponentGraphical;
-        for (let name in componentGraphical) {
+        let componentGraphical = jsonData.ModelContent.Components;
+        for (let i = 0; i < jsonData.ModelContent.Components.length; i++) {
+            let component = jsonData.ModelContent.Components[i];
             components.push({
-                name: name,
-                componentModel: this.decodeServerMessage(componentGraphical[name].Component),
-                graphicalModel: this.decodeServerMessage(componentGraphical[name].Graphical)
+                name: component.Name,
+                model: this.decodeServerMessage(component.Model),
+                graphical: this.decodeServerMessage(component.Graphical)
             });
         }
         return {
