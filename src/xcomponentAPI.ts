@@ -10,9 +10,9 @@ class XComponentAPI {
         this.connection = new DefaultConnection();
     }
 
-    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, model: CompositionModel) => void): void {
-        this.connection.getModel(xcApiName, serverUrl, ((model: CompositionModel) => {
-            connectionListener(this.connection, model);
+    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, compositionModel: CompositionModel) => void): void {
+        this.connection.getModel(xcApiName, serverUrl, ((compositionModel: CompositionModel) => {
+            connectionListener(this.connection, compositionModel);
         }).bind(this));
     }
 

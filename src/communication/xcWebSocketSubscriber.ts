@@ -16,7 +16,7 @@ export interface Subscriber {
     privateTopics: Array<String>;
     replyPublisher: Publisher;
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
-    getModel(xcApiName: string, getModelListener: (model: CompositionModel) => void): void;
+    getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void;
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
     getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
@@ -74,7 +74,7 @@ export class DefaultSubscriber implements Subscriber {
         }, heartbeatIntervalSeconds * 1000);
     }
 
-    getModel(xcApiName: string, getModelListener: (model: CompositionModel) => void): void {
+    getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void {
         let thisSubscriber = this;
         let command = Commands[Commands.getModel];
         this.observableMsg
@@ -82,8 +82,8 @@ export class DefaultSubscriber implements Subscriber {
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("Model " + xcApiName + " received successfully");
-                let model = thisSubscriber.getJsonDataFromGetModelRequest(data.stringData);
-                getModelListener(model);
+                let compositionModel = thisSubscriber.getJsonDataFromGetModelRequest(data.stringData);
+                getModelListener(compositionModel);
             });
         let commandData = {
             Command: command,
