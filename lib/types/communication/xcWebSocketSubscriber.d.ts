@@ -1,0 +1,63 @@
+/// <reference types="node" />
+import { ApiConfiguration } from "../configuration/apiConfiguration";
+import { Publisher } from "./xcWebSocketPublisher";
+import Guid from "../guid";
+import { CompositionModel } from "./xcomponentMessages";
+export interface Subscriber {
+    privateTopics: Array<String>;
+    replyPublisher: Publisher;
+    getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
+    getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void;
+    getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
+    getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
+    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
+    getStateMachineUpdates(componentName: string, stateMachineName: string): any;
+    canSubscribe(componentName: string, stateMachineName: string): boolean;
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void;
+    sendSubscribeRequestToTopic(topic: string, kind: number): void;
+    sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
+    unsubscribe(componentName: string, stateMachineName: string): void;
+    dispose(): void;
+}
+export declare class DefaultSubscriber implements Subscriber {
+    private webSocket;
+    private configuration;
+    private guid;
+    private subscribedStateMachines;
+    private observableMsg;
+    private observableSubscribers;
+    privateTopics: Array<String>;
+    replyPublisher: Publisher;
+    constructor(webSocket: WebSocket, configuration: ApiConfiguration, replyPublisher: Publisher, guid: Guid, privateTopics: Array<String>);
+    getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
+    getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void;
+    getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
+    getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
+    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
+    private getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
+    private prepareStateMachineUpdates(componentName, stateMachineName);
+    private isSameComponent(jsonData, componentCode);
+    private isSameStateMachine(jsonData, stateMachineCode);
+    getStateMachineUpdates(componentName: string, stateMachineName: string): any;
+    canSubscribe(componentName: string, stateMachineName: string): boolean;
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void;
+    private sendSubscribeRequest(componentName, stateMachineName);
+    sendSubscribeRequestToTopic(topic: string, kind: number): void;
+    sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
+    private getDataToSend(topic, kind);
+    unsubscribe(componentName: string, stateMachineName: string): void;
+    private isSubscribed(subscribedStateMachines, componentName, stateMachineName);
+    dispose(): void;
+    private addSubscribedStateMachines(componentName, stateMachineName);
+    private removeSubscribedStateMachines(componentName, stateMachineName);
+    private getJsonDataFromEvent(data, topic);
+    private getJsonDataFromSnapshot(data, topic);
+    private getJsonDataFromGetModelRequest(stringData);
+    private decodeServerMessage(b64Data);
+    private getJsonDataFromXcApiRequest(data);
+    private getJsonDataFromGetXcApiListRequest(data);
+    private getJsonData(data);
+    private deserialize(data);
+    private deserializeWithoutTopic(data);
+    private getHeaderWithIncomingType();
+}
