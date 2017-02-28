@@ -2,10 +2,9 @@ node_modules/
 coverage/
 test_output/
 test_out/
+dist/
 .DS_Store
 *.tgz
-dist/
-lib/
 junit.xml
 settings.json
 *.orig
