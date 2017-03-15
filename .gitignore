@@ -3,6 +3,7 @@ coverage/
 test_output/
 test_out/
 dist/
+lib/
 .DS_Store
 *.tgz
 junit.xml
