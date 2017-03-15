@@ -68,6 +68,7 @@
     "@types/xmldom": "^0.1.28",
     "atob": "^2.0.3",
     "es6-shim": "^0.35.2",
+    "loglevel": "^1.4.1",
     "pako": "^1.0.3",
     "rx": "^4.1.0",
     "typescript-collections": "^1.2.3",

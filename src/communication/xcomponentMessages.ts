@@ -1,3 +1,5 @@
+let log = require("loglevel");
+import { isDebugEnabled } from "../loggerConfiguration";
 import { FSharpFormat } from "../configuration/FSharpConfiguration";
 
 export interface Header {
@@ -10,31 +12,49 @@ export interface Header {
     AgentId: FSharpFormat<Number>;
     EventCode: number;
     IncomingType: number;
-}
+};
 
 export interface Event {
     Header: Header;
     JsonMessage: string;
-}
+};
 
 export interface Data {
     RoutingKey: string;
     ComponentCode: number;
     Event: Event;
-}
+};
+
+export interface NameData {
+    Name: string;
+};
+
+export interface EmptyData { }
+
+export interface TopicData {
+    Header: Header;
+    JsonMessage: string;
+};
 
 export interface CommandData {
     Command: string;
-    JsonMessage: string;
-}
+    Data: NameData | EmptyData | TopicData;
+};
+
 
 export let convertToWebsocketInputFormat = (data: Data): string => {
-    let input = data.RoutingKey + " " + data.ComponentCode + " " + JSON.stringify(data.Event);
+    let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
+    if (isDebugEnabled()) {
+        log.debug(`Message send: ${input}`);
+    }
     return input;
 };
 
-export let convertCommandDataToWebsocketInputFormat = (data: CommandData): string => {
-    let input = data.Command + " " + data.JsonMessage;
+export let convertCommandDataToWebsocketInputFormat = (commandData: CommandData): string => {
+    let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
+    if (isDebugEnabled()) {
+        log.debug(`Message send: ${input}`);
+    }
     return input;
 };
 
@@ -54,10 +74,11 @@ export interface Packet {
 
 export interface Component {
     name: string;
-    content: string;
+    model: string;
+    graphical: string;
 }
 
-export interface Model {
+export interface CompositionModel {
     projectName: string;
     components: Array<Component>;
     composition: string;

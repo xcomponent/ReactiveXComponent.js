@@ -5,6 +5,7 @@ import { DefaultSubscriber, Subscriber } from "./xcWebSocketSubscriber";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
+let log = require("loglevel");
 
 export interface Session {
     privateSubscriber: Subscriber;
@@ -96,7 +97,7 @@ export class DefaultSession implements Session {
             this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
             this.heartbeatTimer = this.privateSubscriber.getHeartbeatTimer(this.heartbeatIntervalSeconds);
             openListener(e);
-            console.log("connection started on " + this.serverUrl + ".");
+            log.info("connection started on " + this.serverUrl + ".");
         }).bind(this);
 
         this.webSocket.onerror = function (e: Event) {
@@ -105,8 +106,8 @@ export class DefaultSession implements Session {
         };
 
         this.webSocket.onclose = function (e: CloseEvent) {
-            console.log("connection on " + thisSession.serverUrl + " closed.");
-            console.log(e);
+            log.info("connection on " + thisSession.serverUrl + " closed.");
+            log.info(e);
             if (!e.wasClean) {
                 throw new Error("unexpected connection close with code " + e.code);
             }
