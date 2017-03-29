@@ -53,7 +53,7 @@ export class DefaultSession implements Session {
         this.publishers = [this.replyPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
-        this.heartbeatIntervalSeconds = 120;
+        this.heartbeatIntervalSeconds = 10;
     }
 
     setPrivateTopic(privateTopic: string): void {
