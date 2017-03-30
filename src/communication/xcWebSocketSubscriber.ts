@@ -416,11 +416,16 @@ export class DefaultSubscriber implements Subscriber {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
     }
 
+    private getPosition(str: string, subString: string, index: number): number {
+        return str.split(subString, index).join(subString).length;
+    }
+
     private deserialize(data: string): DeserializedData {
         let s = data.split(" ");
         let command = s.splice(0, 1)[0];
         let topic = s.splice(0, 1)[0];
-        let stringData = s.join("");
+        let stringData = s.join(" ");
+        console.error(stringData);
         return {
             command: command,
             topic: topic,
@@ -431,7 +436,8 @@ export class DefaultSubscriber implements Subscriber {
     private deserializeWithoutTopic(data: string): DeserializedData {
         let s = data.split(" ");
         let command = s.splice(0, 1)[0];
-        let stringData = s.join("");
+        let stringData = s.join(" ");
+        console.error(stringData);
         return {
             command: command,
             topic: undefined,
