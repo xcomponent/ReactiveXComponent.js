@@ -425,7 +425,6 @@ export class DefaultSubscriber implements Subscriber {
         let command = s.splice(0, 1)[0];
         let topic = s.splice(0, 1)[0];
         let stringData = s.join(" ");
-        console.error(stringData);
         return {
             command: command,
             topic: topic,
@@ -437,7 +436,6 @@ export class DefaultSubscriber implements Subscriber {
         let s = data.split(" ");
         let command = s.splice(0, 1)[0];
         let stringData = s.join(" ");
-        console.error(stringData);
         return {
             command: command,
             topic: undefined,
