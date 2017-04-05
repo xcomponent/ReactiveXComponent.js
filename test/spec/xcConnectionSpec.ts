@@ -36,7 +36,7 @@ describe("Test xcConnection module", function () {
             let sessionListener = function (error, session) {
                 expect(error).toBe(null);
                 expect(session).not.toBe(null);
-                done();
+                mockServer.stop(done);
             };
 
             connection.createSession(xcApiFileName, serverUrl, sessionListener);
