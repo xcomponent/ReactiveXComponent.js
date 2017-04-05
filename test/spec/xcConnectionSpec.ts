@@ -22,8 +22,8 @@ describe("Test xcConnection module", function () {
             let serverUrl = "wss://wrongServerUrl";
 
             let sessionListener = function (error, session) {
-                 expect(error).not.toBe(null);
-                 expect(session).toBe(null);
+                expect(error).not.toBe(null);
+                expect(session).toBe(null);
                 done();
             };
             connection.createSession("xcApiFileName", serverUrl, sessionListener);
@@ -36,7 +36,7 @@ describe("Test xcConnection module", function () {
             let sessionListener = function (error, session) {
                 expect(error).toBe(null);
                 expect(session).not.toBe(null);
-                done();
+                mockServer.stop(done);
             };
 
             connection.createSession(xcApiFileName, serverUrl, sessionListener);
@@ -50,6 +50,27 @@ describe("Test xcConnection module", function () {
                                             </deployment>`;
                     let content = encodeServerMessage(getApiResponse);
                     let data = { ApiFound: true, ApiName: xcApiFileName, Content: content };
+                    server.send("getXcApi " + JSON.stringify(data));
+                });
+            });
+        });
+
+        it("should provide meaningful error message when the Api is unknown", function (done) {
+            let serverUrl = "wss://serverUrl";
+            let mockServer = new Server(serverUrl);
+            let xcApiFileName = "unknownApi";
+
+            let sessionListener = function (error, session) {
+                // it refers explicitly to the unknown Api on the error message, not to some random crash
+                expect(error.message).toMatch(xcApiFileName);
+                mockServer.stop(done);
+            };
+
+            connection.createSession(xcApiFileName, serverUrl, sessionListener);
+            
+            mockServer.on("connection", function (server) {
+                server.on("message", function (message) {
+                    let data = { ApiFound: false, ApiName: xcApiFileName };
                     server.send("getXcApi " + JSON.stringify(data));
                 });
             });

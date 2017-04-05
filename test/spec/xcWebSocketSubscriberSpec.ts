@@ -164,4 +164,31 @@ describe("Test xcWebSocketSubscriber module", function () {
 
     });
 
+    describe("Test getXcApi method", function () {
+        let subscriber, mockServer, mockWebSocket;
+        beforeEach(function () {
+            let serverUrl = "wss://" + (new Guid()).create();
+            mockServer = Mock.createMockServer(serverUrl);
+            mockWebSocket = Mock.createMockWebSocket(serverUrl);
+            subscriber = new DefaultSubscriber(mockWebSocket, null, null, null, null);
+        });
+
+        it("returns null when Api is not found", function (done) {
+            mockWebSocket.onopen = function (e) {
+                let apiName = "unknownApi";
+                subscriber.getXcApi(apiName, function (xcApi) {
+                    expect(xcApi).toBe(null);
+                    mockServer.stop(done);
+                });
+            };
+
+            mockServer.on("connection", function (server) {
+                server.on("message", function (message) {
+                    server.send(Mock.getXcApiNotFoundResponse);
+                });
+            });
+
+        });
+
+    });
 });

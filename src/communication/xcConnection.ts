@@ -66,14 +66,18 @@ export class DefaultConnection implements Connection {
         let getXcApiRequest = (xcApiFileName: string, createSessionListener: (error: Error, session: Session) => void) => {
             if (thisConnection.apis[xcApiFileName] === undefined) {
                 session.privateSubscriber.getXcApi(xcApiFileName, (xcApi: string) => {
-                    const parser = new DefaultApiConfigurationParser();
-                    const configurationPromise = parser.parse(xcApi);
-                    configurationPromise.then(configuration => {
-                        thisConnection.apis[xcApiFileName] = configuration;
-                        session.configuration = configuration;
-                        session.replyPublisher.configuration = configuration;
-                        createSessionListener(null, session);
-                    }).catch(e => createSessionListener(e, null));
+                    if (xcApi != null) {
+                        const parser = new DefaultApiConfigurationParser();
+                        const configurationPromise = parser.parse(xcApi);
+                        configurationPromise.then(configuration => {
+                            thisConnection.apis[xcApiFileName] = configuration;
+                            session.configuration = configuration;
+                            session.replyPublisher.configuration = configuration;
+                            createSessionListener(null, session);
+                        }).catch(e => createSessionListener(e, null));
+                    } else {
+                        createSessionListener(new Error(`Unknown Api: ${xcApiFileName}`), null);
+                    }
                 });
             } else {
                 session.configuration = thisConnection.apis[xcApiFileName];
