@@ -5,7 +5,7 @@ let Rx = require("rx");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
-import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, getHeaderWithIncomingType, Deserializer } from "./xcomponentMessages";
+import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 let log = require("loglevel");
@@ -37,6 +37,7 @@ export class DefaultSubscriber implements Subscriber {
     private observableMsg: any;
     private observableSubscribers: Array<any>;
     private deserializer: Deserializer;
+    private serializer: Serializer;
 
     public privateTopics: Array<String>;
     public replyPublisher: Publisher;
@@ -54,6 +55,7 @@ export class DefaultSubscriber implements Subscriber {
         this.privateTopics = privateTopics;
 
         this.deserializer = new Deserializer();
+        this.serializer = new Serializer();
     }
 
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer {
@@ -69,7 +71,7 @@ export class DefaultSubscriber implements Subscriber {
             Command: command,
             Data: {}
         };
-        let input = convertCommandDataToWebsocketInputFormat(commandData);
+        let input = thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         return setInterval(() => {
             thisSubscriber.webSocket.send(input);
             log.info("Heartbeat sent");
@@ -91,7 +93,7 @@ export class DefaultSubscriber implements Subscriber {
             Command: command,
             Data: { "Name": xcApiName }
         };
-        let input = convertCommandDataToWebsocketInputFormat(commandData);
+        let input = thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
     }
 
@@ -109,7 +111,7 @@ export class DefaultSubscriber implements Subscriber {
             Command: command,
             Data: {}
         };
-        this.webSocket.send(convertCommandDataToWebsocketInputFormat(commandData));
+        this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
     };
 
 
@@ -127,7 +129,7 @@ export class DefaultSubscriber implements Subscriber {
             Command: command,
             Data: { Name: xcApiFileName }
         };
-        this.webSocket.send(convertCommandDataToWebsocketInputFormat(commandData));
+        this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
     };
 
 
@@ -143,7 +145,7 @@ export class DefaultSubscriber implements Subscriber {
             });
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
-        this.webSocket.send(convertToWebsocketInputFormat(dataToSendSnapshot));
+        this.webSocket.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
     };
 
 
@@ -234,7 +236,7 @@ export class DefaultSubscriber implements Subscriber {
             Command: Commands[Commands.subscribe],
             Data: data
         };
-        let input = convertCommandDataToWebsocketInputFormat(commandData);
+        let input = this.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
     };
 
@@ -244,7 +246,7 @@ export class DefaultSubscriber implements Subscriber {
             Command: Commands[Commands.unsubscribe],
             Data: data
         };
-        let input = convertCommandDataToWebsocketInputFormat(commandData);
+        let input = this.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
     };
 
@@ -271,7 +273,7 @@ export class DefaultSubscriber implements Subscriber {
                 Command: Commands[Commands.unsubscribe],
                 Data: data
             };
-            this.webSocket.send(convertCommandDataToWebsocketInputFormat(commandData));
+            this.webSocket.send(this.serializer.convertCommandDataToWebsocketInputFormat(commandData));
             this.removeSubscribedStateMachines(componentName, stateMachineName);
         }
     };

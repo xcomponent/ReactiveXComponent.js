@@ -88,21 +88,25 @@ export let getHeaderWithIncomingType = (): Header => {
         IncomingType: 0
     };
 };
-export let convertToWebsocketInputFormat = (data: Data): string => {
-    let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
-    if (isDebugEnabled()) {
-        log.debug(`Message send: ${input}`);
-    }
-    return input;
-};
 
-export let convertCommandDataToWebsocketInputFormat = (commandData: CommandData): string => {
-    let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
-    if (isDebugEnabled()) {
-        log.debug(`Message send: ${input}`);
-    }
-    return input;
-};
+export class Serializer {
+    public convertToWebsocketInputFormat(data: Data): string {
+        let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
+        if (isDebugEnabled()) {
+            log.debug(`Message send: ${input}`);
+        }
+        return input;
+    };
+
+    public convertCommandDataToWebsocketInputFormat(commandData: CommandData): string {
+        let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
+        if (isDebugEnabled()) {
+            log.debug(`Message send: ${input}`);
+        }
+        return input;
+    };
+
+}
 
 export class Deserializer {
     public getJsonDataFromGetModelRequest(stringData: string): CompositionModel {
