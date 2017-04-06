@@ -29,13 +29,13 @@ export class DefaultSession implements Session {
     private serverUrl: string;
     private sessionData: string;
     private guid: Guid;
+    private privateTopic: string;
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
+    private privateTopics: Array<String>;
     private heartbeatTimer: NodeJS.Timer;
     private heartbeatIntervalSeconds: number;
 
-    public privateTopics: Array<String>;
-    public privateTopic: string;
     public privateSubscriber: Subscriber;
     public replyPublisher: Publisher;
     public configuration: ApiConfiguration;
@@ -71,7 +71,7 @@ export class DefaultSession implements Session {
     };
 
     addPrivateTopic(privateTopic: string): void {
-        if (privateTopic && this.privateTopics.indexOf(privateTopic) > -1) {
+        if (privateTopic) {
             const kindPrivate = Kinds.Private;
             this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             this.privateTopics.push(privateTopic);
