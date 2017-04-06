@@ -52,26 +52,10 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return Number(component.attributes.id);
     }
 
-    containsComponent(componentName: string): boolean {
-        const component = this.findComponent(component => component.attributes.name === componentName);
-        return component ? true : false;
-    }
-
     getStateMachineCode(componentName: string, stateMachineName: string): number {
         const component = this.findComponentByName(componentName);
         const stateMachine = this.findStateMachineByName(component, stateMachineName);
         return Number(stateMachine.attributes.id);
-    }
-
-    containsStateMachine(componentName: string, stateMachineName: string): boolean {
-        try {
-            const component = this.findComponentByName(componentName);
-            this.findStateMachineByName(component, stateMachineName);
-
-            return true;
-        } catch (e) {
-            return false;
-        }
     }
 
     private findStateMachineByName(component: Component, stateMachineName: string): StateMachine {
@@ -123,6 +107,27 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return component.stateMachines[0].stateMachine.find(predicate);
     }
 
+    containsComponent(componentName: string): boolean {
+        const component = this.findComponent(component => component.attributes.name === componentName);
+        return component ? true : false;
+    }
+
+    containsStateMachine(componentName: string, stateMachineName: string): boolean {
+        const component = this.findComponent(component => component.attributes.name === componentName);
+        if (component) {
+            return component.stateMachines[0].stateMachine.find(stm => stm.attributes.name === stateMachineName) != null;
+        }
+        return false;
+    }
+
+    containsPublisher(componentCode: number, stateMachineCode: number, messageType: string): boolean {
+        return this.getPublisher(componentCode, stateMachineCode, messageType) !== undefined;
+    }
+
+    containsSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): boolean {
+        return this.getSubscriber(componentCode, stateMachineCode, type) !== undefined;
+    }
+
     getPublisherDetails(componentCode: number, stateMachineCode: number, messageType: string): PublisherDetails {
         const publisher = this.getPublisher(componentCode, stateMachineCode, messageType);
 
@@ -143,10 +148,6 @@ export class DefaultApiConfiguration implements ApiConfiguration {
                 && pub.attributes.event === messageType);
     }
 
-    containsPublisher(componentCode: number, stateMachineCode: number, messageType: string): boolean {
-        return this.getPublisher(componentCode, stateMachineCode, messageType) !== undefined;
-    }
-
     getSubscriberTopic(componentCode: number, stateMachineCode: number, type: SubscriberEventType): string {
         const subscriber = this.getSubscriber(componentCode, stateMachineCode, type);
 
@@ -155,10 +156,6 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         }
 
         return subscriber.topic[0].value;
-    }
-
-    containsSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): boolean {
-        return this.getSubscriber(componentCode, stateMachineCode, type) !== undefined;
     }
 
     private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): ApiCommunication {
