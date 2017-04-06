@@ -25,7 +25,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                     expect(data.stateMachineRef.StateName).toEqual(Mock.correctReceivedData.stateMachineRef.StateName);
                     expect(data.stateMachineRef.send).toEqual(jasmine.any(Function));
                     expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
-                    done();
+                    mockServer.stop(done);
                 };
                 // subscribe send a message (subscribe request)
                 subscriber.subscribe("component", "stateMachine", stateMachineUpdateListener);
@@ -125,7 +125,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             });
             mockWebSocket.onopen = function (e) {
                 let snapshotListener = function (items) {
-                    done();
+                    mockServer.stop(done);
                 };
                 subscriber.getSnapshot("component", "stateMachine", snapshotListener);
             };
@@ -150,7 +150,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                     expect(model.projectName).not.toBe(null);
                     expect(model.components).not.toBe(null);
                     expect(model.composition).not.toBe(null);
-                    done();
+                    mockServer.stop(done);
                 });
             };
 
