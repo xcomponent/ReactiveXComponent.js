@@ -2,11 +2,10 @@ import { javascriptHelper } from "../javascriptHelper";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 let Rx = require("rx");
-import pako = require("pako");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
-import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat } from "./xcomponentMessages";
+import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, convertCommandDataToWebsocketInputFormat, convertToWebsocketInputFormat, getHeaderWithIncomingType, Deserializer } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 let log = require("loglevel");
@@ -37,6 +36,7 @@ export class DefaultSubscriber implements Subscriber {
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private observableMsg: any;
     private observableSubscribers: Array<any>;
+    private deserializer: Deserializer;
 
     public privateTopics: Array<String>;
     public replyPublisher: Publisher;
@@ -52,13 +52,15 @@ export class DefaultSubscriber implements Subscriber {
         this.observableSubscribers = [];
         this.guid = guid;
         this.privateTopics = privateTopics;
+
+        this.deserializer = new Deserializer();
     }
 
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer {
         let thisSubscriber = this;
         let command = Commands[Commands.hb];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("Heartbeat received successfully");
@@ -78,11 +80,11 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.getModel];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("Model " + xcApiName + " received successfully");
-                let compositionModel = thisSubscriber.getJsonDataFromGetModelRequest(data.stringData);
+                let compositionModel = thisSubscriber.deserializer.getJsonDataFromGetModelRequest(data.stringData);
                 getModelListener(compositionModel);
             });
         let commandData = {
@@ -97,11 +99,11 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.getXcApiList];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("ApiList received successfully");
-                getXcApiListListener(thisSubscriber.getJsonDataFromGetXcApiListRequest(data.stringData));
+                getXcApiListListener(thisSubscriber.deserializer.getJsonDataFromGetXcApiListRequest(data.stringData));
             });
         let commandData = {
             Command: command,
@@ -115,11 +117,11 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.getXcApi];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info(xcApiFileName + " " + "received successfully");
-                getXcApiListener(thisSubscriber.getJsonDataFromXcApiRequest(data.stringData));
+                getXcApiListener(thisSubscriber.deserializer.getJsonDataFromXcApiRequest(data.stringData));
             });
         let commandData = {
             Command: command,
@@ -133,7 +135,7 @@ export class DefaultSubscriber implements Subscriber {
         let replyTopic = this.guid.create();
         let thisSubscriber = this;
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserialize(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data))
             .filter((data: DeserializedData) => data.command === Commands[Commands.snapshot] && data.topic === replyTopic)
             .subscribe((data: DeserializedData) => {
                 getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
@@ -159,7 +161,7 @@ export class DefaultSubscriber implements Subscriber {
             RoutingKey: topic,
             ComponentCode: componentCode,
             Event: {
-                "Header": this.getHeaderWithIncomingType(),
+                "Header": getHeaderWithIncomingType(),
                 "JsonMessage": JSON.stringify(jsonMessage)
             }
         };
@@ -172,7 +174,7 @@ export class DefaultSubscriber implements Subscriber {
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
         let filteredObservable = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserialize(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
             .filter((jsonData: any) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
@@ -248,7 +250,7 @@ export class DefaultSubscriber implements Subscriber {
 
     private getDataToSend(topic: string, kind: number): Event {
         return {
-            "Header": this.getHeaderWithIncomingType(),
+            "Header": getHeaderWithIncomingType(),
             "JsonMessage": JSON.stringify({
                 "Topic": {
                     "Key": topic,
@@ -307,41 +309,15 @@ export class DefaultSubscriber implements Subscriber {
             .splice(index, 1);
     };
 
-
-    private getJsonDataFromEvent(data: string, topic: string): Packet {
-        if (isDebugEnabled()) {
-            log.debug(`JsonData received from event: ${topic} ${data}`);
-        }
-        let jsonData = this.getJsonData(data);
-        let componentCode = jsonData.Header.ComponentCode.Fields[0];
-        let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
-        let stateCode = jsonData.Header.StateCode.Fields[0];
-        let thisSubscriber = this;
-        let stateMachineRef = {
-            "StateMachineId": jsonData.Header.StateMachineId.Fields[0],
-            "AgentId": jsonData.Header.AgentId.Fields[0],
-            "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
-            "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
-            "StateName": thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
-            "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
-                thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-            }
-        };
-        return {
-            stateMachineRef: stateMachineRef,
-            jsonMessage: JSON.parse(jsonData.JsonMessage)
-        };
-    };
-
-    private getJsonDataFromSnapshot(data: string, topic: string): Array<Packet> {
+    public getJsonDataFromSnapshot(data: string, topic: string): Array<Packet> {
         if (isDebugEnabled()) {
             log.debug(`JsonData received from snapshot: ${topic} ${data}`);
         }
-        let jsonData = this.getJsonData(data);
+        let jsonData = this.deserializer.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
         try {
-            items = JSON.parse(this.decodeServerMessage(b64Data));
+            items = JSON.parse(this.deserializer.decodeServerMessage(b64Data));
         } catch (e) {
             items = b64Data;
         }
@@ -366,96 +342,29 @@ export class DefaultSubscriber implements Subscriber {
         return snapshotItems;
     };
 
-    private getJsonDataFromGetModelRequest(stringData: string): CompositionModel {
-        let jsonData = this.getJsonData(stringData);
-        let components = [];
-        let componentGraphical = jsonData.ModelContent.Components;
-        for (let i = 0; i < jsonData.ModelContent.Components.length; i++) {
-            let component = jsonData.ModelContent.Components[i];
-            components.push({
-                name: component.Name,
-                model: this.decodeServerMessage(component.Model),
-                graphical: this.decodeServerMessage(component.Graphical)
-            });
+    public getJsonDataFromEvent(data: string, topic: string): Packet {
+        if (isDebugEnabled()) {
+            log.debug(`JsonData received from event: ${topic} ${data}`);
         }
-        return {
-            projectName: jsonData.ModelContent.ProjectName,
-            components: components,
-            composition: this.decodeServerMessage(jsonData.ModelContent.Composition)
+        let jsonData = this.deserializer.getJsonData(data);
+        let componentCode = jsonData.Header.ComponentCode.Fields[0];
+        let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
+        let stateCode = jsonData.Header.StateCode.Fields[0];
+        let thisSubscriber = this;
+        let stateMachineRef = {
+            "StateMachineId": jsonData.Header.StateMachineId.Fields[0],
+            "AgentId": jsonData.Header.AgentId.Fields[0],
+            "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
+            "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
+            "StateName": thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
+            "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
+                thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+            }
         };
-    }
-
-    private decodeServerMessage(b64Data: string): string {
-        let atob = javascriptHelper().atob;
-        let charData = atob(b64Data).split("").map((x: string) => {
-            return x.charCodeAt(0);
-        });
-        let binData = new Uint8Array(charData);
-        let data = pako.inflate(binData).filter((x) => {
-            return x !== 0;
-        });
-        let finalData = new Uint16Array(data);
-        let strData = "";
-        for (let i = 0; i < finalData.length; i++) {
-            strData += String.fromCharCode(finalData[i]);
-        }
-        return strData;
+        return {
+            stateMachineRef: stateMachineRef,
+            jsonMessage: JSON.parse(jsonData.JsonMessage)
+        };
     };
-
-    private getJsonDataFromXcApiRequest(data: string): string {
-        let jsonData = this.getJsonData(data);
-        return jsonData.ApiFound ? this.decodeServerMessage(jsonData.Content) : null;
-    };
-
-    private getJsonDataFromGetXcApiListRequest(data: string): Array<String> {
-        let jsonData = this.getJsonData(data);
-        return jsonData.Apis;
-    };
-
-    private getJsonData(data: string): any {
-        return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
-    }
-
-    private getPosition(str: string, subString: string, index: number): number {
-        return str.split(subString, index).join(subString).length;
-    }
-
-    private deserialize(data: string): DeserializedData {
-        let s = data.split(" ");
-        let command = s.splice(0, 1)[0];
-        let topic = s.splice(0, 1)[0];
-        let stringData = s.join(" ");
-        return {
-            command: command,
-            topic: topic,
-            stringData: stringData
-        };
-    }
-
-    private deserializeWithoutTopic(data: string): DeserializedData {
-        let s = data.split(" ");
-        let command = s.splice(0, 1)[0];
-        let stringData = s.join(" ");
-        return {
-            command: command,
-            topic: undefined,
-            stringData: stringData
-        };
-    }
-
-
-    private getHeaderWithIncomingType(): Header {
-        return {
-            StateMachineCode: undefined,
-            ComponentCode: undefined,
-            MessageType: undefined,
-            PublishTopic: undefined,
-            SessionData: undefined,
-            StateMachineId: undefined,
-            AgentId: undefined,
-            EventCode: undefined,
-            IncomingType: 0
-        };
-    }
 
 }
