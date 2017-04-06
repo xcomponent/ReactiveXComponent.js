@@ -61,7 +61,7 @@ var config = {
       }
     ]
   },
-  externals: [nodeExternals()]
+  externals: process.env.NODE_ENV === "production" ? [nodeExternals()] : []
 };
 
 module.exports = config;
