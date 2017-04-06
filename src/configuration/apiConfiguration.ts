@@ -54,32 +54,63 @@ export class DefaultApiConfiguration implements ApiConfiguration {
 
     containsComponent(componentName: string): boolean {
         const component = this.findComponent(component => component.attributes.name === componentName);
-
         return component ? true : false;
     }
 
     getStateMachineCode(componentName: string, stateMachineName: string): number {
         const component = this.findComponentByName(componentName);
-        const stateMachine = this.findStateMachine(component, stm => stm.attributes.name === stateMachineName);
-        if (!stateMachine) {
-            throw new Error(`StateMachine '${stateMachineName}' not found`);
-        }
+        const stateMachine = this.findStateMachineByName(component, stateMachineName);
         return Number(stateMachine.attributes.id);
     }
 
     containsStateMachine(componentName: string, stateMachineName: string): boolean {
-        const component = this.findComponent(component => component.attributes.name === componentName);
+        try {
+            const component = this.findComponentByName(componentName);
+            this.findStateMachineByName(component, stateMachineName);
 
-        if (!component) return false;
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
 
+    private findStateMachineByName(component: Component, stateMachineName: string): StateMachine {
         const stateMachine = this.findStateMachine(component, stm => stm.attributes.name === stateMachineName);
-        return stateMachine ? true : false;
+        if (!stateMachine) {
+            throw new Error(`StateMachine '${stateMachineName}' not found`);
+        }
+        return stateMachine;
+    }
+
+    private findStateMachineByCode(component: Component, stateMachineCode: number): StateMachine {
+        const stateMachine = this.findStateMachine(component, stm => Number(stm.attributes.id) === stateMachineCode);
+        if (!stateMachine) {
+            throw new Error(`StateMachine '${stateMachineCode}' not found`);
+        }
+        return stateMachine;
+    }
+
+    private findStateByCode(stateMachine: StateMachine, stateCode: number): State {
+        const state = stateMachine.states[0].State
+            .find((state) => Number(state.attributes.id) === stateCode);
+        if (!state) {
+            throw new Error(`State '${stateCode}' not found`);
+        }
+        return state;
     }
 
     private findComponentByName(componentName: string): Component {
         const component = this.findComponent(component => component.attributes.name === componentName);
         if (!component) {
             throw new Error(`Component '${componentName}' not found`);
+        }
+        return component;
+    }
+
+    private findComponentByCode(componentCode: number): Component {
+        const component = this.findComponent(component => Number(component.attributes.id) === componentCode);
+        if (!component) {
+            throw new Error(`Component '${componentCode}' not found`);
         }
         return component;
     }
@@ -149,22 +180,9 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     getStateName(componentCode: number, stateMachineCode: number, stateCode: number): string {
-        const component = this.findComponent(component => Number(component.attributes.id) === componentCode);
-        if (!component) {
-            throw new Error(`Component '${componentCode}' not found`);
-        }
-
-        const stateMachine = this.findStateMachine(component, stm => Number(stm.attributes.id) === stateMachineCode);
-        if (!stateMachine) {
-            throw new Error(`StateMachine '${stateMachineCode}' not found`);
-        }
-
-        const state = stateMachine.states[0].State
-            .find((state) => Number(state.attributes.id) === stateCode);
-
-        if (!state) {
-            throw new Error(`State '${stateCode}' not found`);
-        }
+        const component = this.findComponentByCode(componentCode);
+        const stateMachine = this.findStateMachineByCode(component, stateMachineCode);
+        const state = this.findStateByCode(stateMachine, stateCode);
 
         return state.attributes.name;
     }
