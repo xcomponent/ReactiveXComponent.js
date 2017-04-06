@@ -1,6 +1,6 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
-import { Header, Event, Data, convertToWebsocketInputFormat } from "./xcomponentMessages";
+import { Header, Event, Data, Serializer } from "./xcomponentMessages";
 
 
 
@@ -21,16 +21,19 @@ export class DefaultPublisher implements Publisher {
     public privateTopic: string;
     public sessionData: string;
 
+    private serializer: Serializer;
+
     constructor(webSocket: WebSocket, configuration: ApiConfiguration, privateTopic: string, sessionData: string) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.privateTopic = privateTopic;
         this.sessionData = sessionData;
+        this.serializer = new Serializer();
     }
 
     send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-        let webSocketInput = convertToWebsocketInputFormat(data);
+        let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
     };
 
@@ -70,7 +73,7 @@ export class DefaultPublisher implements Publisher {
 
     sendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-        let webSocketInput = convertToWebsocketInputFormat(data);
+        let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
     };
 
