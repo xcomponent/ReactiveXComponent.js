@@ -404,7 +404,7 @@ export class DefaultSubscriber implements Subscriber {
 
     private getJsonDataFromXcApiRequest(data: string): string {
         let jsonData = this.getJsonData(data);
-        return this.decodeServerMessage(jsonData.Content);
+        return jsonData.ApiFound ? this.decodeServerMessage(jsonData.Content) : null;
     };
 
     private getJsonDataFromGetXcApiListRequest(data: string): Array<String> {
