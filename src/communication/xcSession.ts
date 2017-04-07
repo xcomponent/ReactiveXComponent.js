@@ -1,11 +1,12 @@
 import { javascriptHelper } from "../javascriptHelper";
-import Guid from "../guid";
 import { Publisher, DefaultPublisher } from "./xcWebSocketPublisher";
 import { DefaultSubscriber, Subscriber } from "./xcWebSocketSubscriber";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
+
 let log = require("loglevel");
+let uuid = require("uuid/v4");
 
 export interface Session {
     privateSubscriber: Subscriber;
@@ -28,7 +29,6 @@ export class DefaultSession implements Session {
 
     private serverUrl: string;
     private sessionData: string;
-    private guid: Guid;
     private privateTopic: string;
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
@@ -45,10 +45,9 @@ export class DefaultSession implements Session {
         this.serverUrl = serverUrl;
         this.webSocket = webSocket;
         this.configuration = configuration;
-        this.guid = new Guid();
-        this.privateTopic = this.guid.create();
+        this.privateTopic = uuid();
         this.sessionData = sessionData;
-        this.privateSubscriber = new DefaultSubscriber(this.webSocket, null, null, null, null);
+        this.privateSubscriber = new DefaultSubscriber(this.webSocket, null, null, null);
         this.replyPublisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this.publishers = [this.replyPublisher];
         this.subscribers = [];
@@ -121,7 +120,7 @@ export class DefaultSession implements Session {
     };
 
     createSubscriber(): Subscriber {
-        const subscriber = new DefaultSubscriber(this.webSocket, this.configuration, this.replyPublisher, this.guid, this.privateTopics);
+        const subscriber = new DefaultSubscriber(this.webSocket, this.configuration, this.replyPublisher, this.privateTopics);
         this.subscribers.push(subscriber);
         return subscriber;
     };

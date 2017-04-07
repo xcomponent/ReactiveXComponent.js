@@ -1,15 +1,16 @@
 import { javascriptHelper } from "../javascriptHelper";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
-let Rx = require("rx");
 
 import { Publisher } from "./xcWebSocketPublisher";
-import Guid from "../guid";
 import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
-let log = require("loglevel");
 import { isDebugEnabled } from "../loggerConfiguration";
+
+let Rx = require("rx");
+let log = require("loglevel");
+let uuid = require("uuid/v4");
 
 export interface Subscriber {
     privateTopics: Array<String>;
@@ -32,7 +33,6 @@ export class DefaultSubscriber implements Subscriber {
 
     private webSocket: WebSocket;
     private configuration: ApiConfiguration;
-    private guid: Guid;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private observableMsg: any;
     private observableSubscribers: Array<any>;
@@ -42,7 +42,7 @@ export class DefaultSubscriber implements Subscriber {
     public privateTopics: Array<String>;
     public replyPublisher: Publisher;
 
-    constructor(webSocket: WebSocket, configuration: ApiConfiguration, replyPublisher: Publisher, guid: Guid, privateTopics: Array<String>) {
+    constructor(webSocket: WebSocket, configuration: ApiConfiguration, replyPublisher: Publisher, privateTopics: Array<String>) {
         this.webSocket = webSocket;
         this.configuration = configuration;
         this.replyPublisher = replyPublisher;
@@ -51,7 +51,6 @@ export class DefaultSubscriber implements Subscriber {
             .Observable
             .fromEvent(this.webSocket, "message");
         this.observableSubscribers = [];
-        this.guid = guid;
         this.privateTopics = privateTopics;
 
         this.deserializer = new Deserializer();
@@ -134,7 +133,7 @@ export class DefaultSubscriber implements Subscriber {
 
 
     getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void {
-        let replyTopic = this.guid.create();
+        let replyTopic = uuid();
         let thisSubscriber = this;
         this.observableMsg
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data))
