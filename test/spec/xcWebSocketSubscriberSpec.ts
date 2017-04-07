@@ -1,8 +1,10 @@
 import { DefaultSubscriber, Subscriber } from "../../src/communication/xcWebSocketSubscriber";
+import { Deserializer, Serializer } from "../../src/communication/xcomponentMessages";
 import Rx = require("rx");
-import Guid from "../../src/guid";
 import Mock from "./mock/mockSubscriberDependencies";
 import { EventEmitter } from "events";
+
+let uuid = require("uuid/v4");
 
 describe("Test xcWebSocketSubscriber module", function () {
 
@@ -10,10 +12,10 @@ describe("Test xcWebSocketSubscriber module", function () {
     describe("Test subscribe method", function () {
         let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
-            let serverUrl = "wss://" + (new Guid()).create();
+            let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
+            subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, undefined, undefined);
         });
 
         it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
@@ -54,7 +56,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             stateMachineName = "stateMachineName";
         beforeEach(function () {
             mockWebSocket = Mock.createWebSocket();
-            subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
+            subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, undefined, undefined);
         });
 
         it("unsubscribe to a subscribed state machine", function () {
@@ -73,7 +75,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             return new Promise((resolve, reject) => {
                 let mockWebSocket: any = new EventEmitter();
                 mockWebSocket.send = jest.fn();
-                const subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, undefined, undefined, undefined);
+                const subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, undefined, undefined);
 
                 let observable = subscriber.getStateMachineUpdates("componentName", "stateMachineName");
 
@@ -96,30 +98,58 @@ describe("Test xcWebSocketSubscriber module", function () {
     describe("Test getSnapshot method", function () {
         let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
-            let serverUrl = "wss://" + (new Guid()).create();
+            let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, null, Mock.guid, Mock.privateTopics);
+            subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, null, [Mock.privateTopic]);
         });
 
         it("send snapshot request, snapshotListener callback should be executed when a response is received", function (done) {
+            let deserializer = new Deserializer();
+
             mockServer.on("connection", function (server) {
                 let n = 0;
+                let topic: string = undefined;
+
                 server.on("message", function (message) {
                     switch (n) {
-                        case 0:
-                            expect(message).toEqual(Mock.snapshotSubscribeRequest);
+                        case 0: {
+                            const deserializedMessage = deserializer.deserializeWithoutTopic(message);
+                            const jsonData = deserializer.getJsonData(deserializedMessage.stringData);
+                            const jsonMessage = JSON.parse(jsonData.JsonMessage);
+
+                            topic = jsonMessage.Topic.Key;
+
+                            expect(deserializedMessage.command).toBe("subscribe");
+                            expect(jsonData.Header.IncomingType).toBe(0);
+                            expect(jsonMessage.Topic.Key).not.toBeUndefined();
+                            expect(jsonMessage.Topic.kind).toBe(1);
+
                             n++;
                             break;
-                        case 1:
+                        }
+                        case 1: {
                             n++;
-                            expect(message).toEqual(Mock.correctSnapshotRequest);
-                            server.send(Mock.snapshotResponse);
+
+                            expect(message.startsWith(`${Mock.snapshotTopic} ${Mock.componentCode}`)).toBeTruthy();
+
+                            const jsonData = deserializer.getJsonData(message);
+                            const jsonMessage = JSON.parse(jsonData.JsonMessage);
+
+                            expect(jsonData.Header.IncomingType).toBe(0);
+                            expect(jsonMessage.StateMachineCode).toBe(Mock.stateMachineCode);
+                            expect(jsonMessage.ComponentCode).toBe(Mock.componentCode);
+                            expect(jsonMessage.ReplyTopic.Fields[0]).toBe(topic);
+                            expect(jsonMessage.PrivateTopic.Fields[0][0]).toBe(Mock.privateTopic);
+
+                            server.send(`snapshot ${topic} ${JSON.stringify(Mock.snapshotResponseData)}`);
                             break;
-                        case 2:
-                            expect(message).toEqual(Mock.snapshotUnsubscribeRequest);
+                        }
+                        case 2: {
+                            expect(message.startsWith("unsubscribe")).toBeTruthy();
                             n++;
                             break;
+                        }
                     }
                 });
             });
@@ -137,10 +167,10 @@ describe("Test xcWebSocketSubscriber module", function () {
     describe("Test getModel method", function () {
         let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
-            let serverUrl = "wss://" + (new Guid()).create();
+            let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            subscriber = new DefaultSubscriber(mockWebSocket, null, null, null, null);
+            subscriber = new DefaultSubscriber(mockWebSocket, null, null, null);
         });
 
         it("send getModel request, getModelListener callback should be executed when a response is received", function (done) {
@@ -167,10 +197,10 @@ describe("Test xcWebSocketSubscriber module", function () {
     describe("Test getXcApi method", function () {
         let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
-            let serverUrl = "wss://" + (new Guid()).create();
+            let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            subscriber = new DefaultSubscriber(mockWebSocket, null, null, null, null);
+            subscriber = new DefaultSubscriber(mockWebSocket, null, null, null);
         });
 
         it("returns null when Api is not found", function (done) {
