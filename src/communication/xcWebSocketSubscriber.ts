@@ -1,7 +1,7 @@
 import { javascriptHelper } from "../javascriptHelper";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
-let Rx = require("rx");
+let Rx = require("rxjs");
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
