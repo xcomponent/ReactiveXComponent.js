@@ -1,7 +1,7 @@
 import { javascriptHelper } from "../javascriptHelper";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
-let Rx = require("rxjs");
+import { Observable } from "rxjs/Rx";
 
 import { Publisher } from "./xcWebSocketPublisher";
 import Guid from "../guid";
@@ -34,7 +34,7 @@ export class DefaultSubscriber implements Subscriber {
     private configuration: ApiConfiguration;
     private guid: Guid;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
-    private observableMsg: any;
+    private observableMsg: Observable<MessageEvent>;
     private observableSubscribers: Array<any>;
     private deserializer: Deserializer;
     private serializer: Serializer;
@@ -47,9 +47,7 @@ export class DefaultSubscriber implements Subscriber {
         this.configuration = configuration;
         this.replyPublisher = replyPublisher;
         this.subscribedStateMachines = {};
-        this.observableMsg = Rx
-            .Observable
-            .fromEvent(this.webSocket, "message");
+        this.observableMsg = Observable.fromEvent(this.webSocket, "message");
         this.observableSubscribers = [];
         this.guid = guid;
         this.privateTopics = privateTopics;
