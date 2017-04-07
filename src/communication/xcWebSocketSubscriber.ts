@@ -1,6 +1,7 @@
 import { javascriptHelper } from "../javascriptHelper";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
+import { Observable } from "rxjs/Rx";
 
 import { Publisher } from "./xcWebSocketPublisher";
 import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer } from "./xcomponentMessages";
@@ -8,7 +9,6 @@ import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { isDebugEnabled } from "../loggerConfiguration";
 
-let Rx = require("rx");
 let log = require("loglevel");
 let uuid = require("uuid/v4");
 
@@ -34,7 +34,7 @@ export class DefaultSubscriber implements Subscriber {
     private webSocket: WebSocket;
     private configuration: ApiConfiguration;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
-    private observableMsg: any;
+    private observableMsg: Observable<MessageEvent>;
     private observableSubscribers: Array<any>;
     private deserializer: Deserializer;
     private serializer: Serializer;
@@ -47,9 +47,7 @@ export class DefaultSubscriber implements Subscriber {
         this.configuration = configuration;
         this.replyPublisher = replyPublisher;
         this.subscribedStateMachines = {};
-        this.observableMsg = Rx
-            .Observable
-            .fromEvent(this.webSocket, "message");
+        this.observableMsg = Observable.fromEvent(this.webSocket, "message");
         this.observableSubscribers = [];
         this.privateTopics = privateTopics;
 
