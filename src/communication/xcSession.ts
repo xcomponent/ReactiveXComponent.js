@@ -32,7 +32,7 @@ export class DefaultSession implements Session {
     private privateTopic: string;
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
-    private privateTopics: Array<String>;
+    private privateTopics: Array<string>;
     private heartbeatTimer: NodeJS.Timer;
     private heartbeatIntervalSeconds: number;
 
@@ -70,7 +70,7 @@ export class DefaultSession implements Session {
     };
 
     addPrivateTopic(privateTopic: string): void {
-        if (privateTopic) {
+        if (privateTopic && this.privateTopics.indexOf(privateTopic) == -1) {
             const kindPrivate = Kinds.Private;
             this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             this.privateTopics.push(privateTopic);
@@ -87,6 +87,14 @@ export class DefaultSession implements Session {
         this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.privateTopics = this.privateTopics;
         }, this);
+    };
+
+    get DefaultPrivateTopic(): string {
+        return this.privateTopic;
+    };
+
+    get PrivateTopics(): string[] {
+        return this.privateTopics;
     };
 
     init(openListener: (e: Event) => void, errorListener: (err: Error) => void): void {
