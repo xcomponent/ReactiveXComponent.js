@@ -59,6 +59,19 @@ describe("Test xcSession module", function () {
             session.addPrivateTopic(undefined);
             expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
         });
+
+        it("Should add and set correctly the given private topics", () => {
+            const serverUrl = "wss:\\serverUrl";
+            let mockWebSocket = new WebSocket(serverUrl);
+            const session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            const privateTopic = "privateTopic";
+            const anotherPrivateTopic = "anotherPrivateTopic";
+            session.setPrivateTopic(privateTopic);
+            expect(session.getDefaultPrivateTopic()).toEqual(privateTopic);
+            session.addPrivateTopic(anotherPrivateTopic);
+            expect(session.getPrivateTopics()).toEqual([privateTopic, anotherPrivateTopic]);            
+        });
+
     });
 
 });
