@@ -70,7 +70,7 @@ export class DefaultSession implements Session {
     };
 
     addPrivateTopic(privateTopic: string): void {
-        if (privateTopic && this.privateTopics.indexOf(privateTopic) == -1) {
+        if (privateTopic && this.privateTopics.indexOf(privateTopic) === -1) {
             const kindPrivate = Kinds.Private;
             this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             this.privateTopics.push(privateTopic);
