@@ -13,6 +13,8 @@ export interface Session {
     replyPublisher: Publisher;
     configuration: ApiConfiguration;
     webSocket: WebSocket;
+    getDefaultPrivateTopic(): string;
+    getPrivateTopics(): string[];
     setPrivateTopic(privateTopic: string): void;
     addPrivateTopic(privateTopic: string): void;
     removePrivateTopic(privateTopic: string): void;
@@ -89,11 +91,11 @@ export class DefaultSession implements Session {
         }, this);
     };
 
-    get DefaultPrivateTopic(): string {
+    getDefaultPrivateTopic(): string {
         return this.privateTopic;
     };
 
-    get PrivateTopics(): string[] {
+    getPrivateTopics(): string[] {
         return this.privateTopics;
     };
 
