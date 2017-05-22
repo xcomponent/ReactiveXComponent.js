@@ -1,12 +1,10 @@
 {
     "compilerOptions": {
         "sourceMap": true,
-        "allowJs": false,
-        "noImplicitAny": true,
+        "allowJs": true,
+        "noImplicitAny": false,
         "module": "commonjs",
-        "target": "es5",
-        "declaration": true,
-        "declarationDir": "types"
+        "target": "es5"
     },
     "include": [
         "./**/*"

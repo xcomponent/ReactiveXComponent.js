@@ -1,8 +1,8 @@
 let log = require("loglevel");
-import { javascriptHelper } from "../javascriptHelper";
 import { isDebugEnabled } from "../loggerConfiguration";
 import { FSharpFormat } from "../configuration/FSharpConfiguration";
-import pako = require("pako");
+import * as pako from "pako";
+import * as atob from "atob";
 
 export interface Header {
     StateMachineCode: FSharpFormat<Number>;
@@ -129,7 +129,6 @@ export class Deserializer {
     }
 
     public decodeServerMessage(b64Data: string): string {
-        let atob = javascriptHelper().atob;
         let charData = atob(b64Data).split("").map((x: string) => {
             return x.charCodeAt(0);
         });

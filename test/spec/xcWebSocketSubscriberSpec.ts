@@ -8,6 +8,9 @@ let uuid = require("uuid/v4");
 
 describe("Test xcWebSocketSubscriber module", function () {
 
+    beforeEach(function () {
+        (<any>window).isTestEnvironnement = true;
+    });
 
     describe("Test subscribe method", function () {
         let subscriber, mockServer, mockWebSocket;

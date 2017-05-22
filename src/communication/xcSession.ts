@@ -1,4 +1,4 @@
-import { javascriptHelper } from "../javascriptHelper";
+import javascriptHelper from "../javascriptHelper";
 import { Publisher, DefaultPublisher } from "./xcWebSocketPublisher";
 import { DefaultSubscriber, Subscriber } from "./xcWebSocketSubscriber";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
@@ -116,8 +116,7 @@ export class DefaultSession implements Session {
 
         this.webSocket.onclose = function (e: CloseEvent) {
             log.info("connection on " + thisSession.serverUrl + " closed.");
-            log.info(e);
-            if (!e.wasClean) {
+            if (e.wasClean === false) {
                 throw new Error("unexpected connection close with code " + e.code);
             }
         };
@@ -173,6 +172,7 @@ export class DefaultSession implements Session {
 }
 
 export const SessionFactory = function (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session {
+    const WebSocket: any = javascriptHelper().WebSocket;
     const webSocket = new WebSocket(serverUrl);
     const session = new DefaultSession(serverUrl, webSocket, configuration, sessionData);
     return session;
