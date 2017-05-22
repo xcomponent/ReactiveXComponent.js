@@ -75,7 +75,6 @@
     "typescript-collections": "^1.2.3",
     "utf-8-validate": "^3.0.1",
     "uuid": "^3.0.1",
-    "websocket": "^1.0.24",
     "ws": "^3.0.0",
     "xml2js": "^0.4.17"
   },
