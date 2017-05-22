@@ -135,4 +135,4 @@ var configServer = {
 };
 
 
-module.exports = [configClient];
+module.exports = [configServer, configClient];
