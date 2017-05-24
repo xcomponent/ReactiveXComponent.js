@@ -116,9 +116,6 @@ export class DefaultSession implements Session {
 
         this.webSocket.onclose = function (e: CloseEvent) {
             log.info("connection on " + thisSession.serverUrl + " closed.");
-            if (e.wasClean === false) {
-                throw new Error("unexpected connection close with code " + e.code);
-            }
         };
     };
 
@@ -149,6 +146,7 @@ export class DefaultSession implements Session {
 
     disposeSubscriber(subscriber: Subscriber): void {
         this.removeElement(this.subscribers, subscriber);
+        subscriber.dispose();
     };
 
     dispose(): void {

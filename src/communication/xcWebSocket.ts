@@ -1,6 +1,6 @@
 import * as  WebSocket from "ws";
 
-export default class xcWebSocket implements WebSocket {
+export default class WebSocketClient implements WebSocket {
 
     binaryType: string;
     bufferedAmount: number;

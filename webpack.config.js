@@ -24,9 +24,7 @@ var configClient = {
     ]
   },
   node: {
-    fs: "empty",
-    net: "empty",
-    tls: "empty"
+    fs: "empty"
   },
   plugins: process.env.NODE_ENV === "production" ? [
     new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
@@ -58,16 +56,22 @@ var configClient = {
     exprContextRegExp: /$^/,
     exprContextCritical: false,
     wrappedContextCritical: true,
-    rules: [{
-      test: /\.(jsx|js)$/,
-      use: [{
-        loader: "babel-loader"
+    rules: [
+      {
+        test: /\.ts$/,
+        enforce: "pre",
+        loader: "tslint-loader",
+        options: {
+          typeCheck: false,
+          configFile: false,
+          failOnHint: true
+        }
+      },
+      {
+        test: /\.(tsx|ts)$/,
+        loader: "ts-loader",
+        exclude: "/node_modules/"
       }]
-    }, {
-      test: /\.(tsx|ts)$/,
-      loader: "ts-loader",
-      exclude: "/node_modules/"
-    }]
   },
   externals: process.env.NODE_ENV === "production" ? [nodeExternals()] : []
 };
@@ -120,16 +124,22 @@ var configServer = {
     exprContextRegExp: /$^/,
     exprContextCritical: false,
     wrappedContextCritical: true,
-    rules: [{
-      test: /\.(jsx|js)$/,
-      use: [{
-        loader: "babel-loader"
+    rules: [
+      {
+        test: /\.ts$/,
+        enforce: "pre",
+        loader: "tslint-loader",
+        options: {
+          typeCheck: false,
+          configFile: false,
+          failOnHint: true
+        }
+      },
+      {
+        test: /\.(tsx|ts)$/,
+        loader: "ts-loader",
+        exclude: "/node_modules/"
       }]
-    }, {
-      test: /\.(tsx|ts)$/,
-      loader: "ts-loader",
-      exclude: "/node_modules/"
-    }]
   },
   externals: process.env.NODE_ENV === "production" ? [nodeExternals()] : []
 };
