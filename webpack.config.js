@@ -24,7 +24,9 @@ var configClient = {
     ]
   },
   node: {
-    fs: "empty"
+    fs: "empty",
+    net: "empty",
+    tls: "empty"
   },
   plugins: process.env.NODE_ENV === "production" ? [
     new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
@@ -68,6 +70,11 @@ var configClient = {
         }
       },
       {
+        test: /\.(jsx|js)$/,
+        use: [{
+          loader: "babel-loader"
+        }]
+      }, {
         test: /\.(tsx|ts)$/,
         loader: "ts-loader",
         exclude: "/node_modules/"
@@ -134,6 +141,12 @@ var configServer = {
           configFile: false,
           failOnHint: true
         }
+      },
+      {
+        test: /\.(jsx|js)$/,
+        use: [{
+          loader: "babel-loader"
+        }]
       },
       {
         test: /\.(tsx|ts)$/,

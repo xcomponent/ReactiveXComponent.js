@@ -67,6 +67,7 @@
     "@types/xml2js": "0.0.32",
     "@types/xmldom": "^0.1.28",
     "atob": "^2.0.3",
+    "babel-loader": "^7.0.0",
     "bufferutil": "^3.0.0",
     "es6-shim": "^0.35.2",
     "loglevel": "^1.4.1",
