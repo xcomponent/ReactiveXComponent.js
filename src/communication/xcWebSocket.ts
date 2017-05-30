@@ -1,4 +1,4 @@
-import * as  WebSocket from "ws";
+const WebSocket = require("ws");
 
 export default class WebSocketClient implements WebSocket {
 
@@ -17,16 +17,17 @@ export default class WebSocketClient implements WebSocket {
 
     constructor(url: string) {
         this.client = new WebSocket(url, [], {
-            rejectUnauthorized: false
+            rejectUnauthorized: false,
+            perMessageDeflate: false
         });
         this.url = url;
         this.client.on("open", ((event: Event) => {
             this.readyState = this.OPEN;
             this.onopen(event);
         }).bind(this));
-        this.client.on("close", ((closeEvent: CloseEvent) => {
+        this.client.on("close", ((c, r) => {
             this.readyState = this.CLOSED;
-            this.onclose(closeEvent);
+            this.onclose(c);
         }).bind(this));
         this.client.on("error", ((event: Event) => {
             this.onerror(event);
@@ -39,6 +40,7 @@ export default class WebSocketClient implements WebSocket {
     onopen: (event: Event) => void;
 
     close(code?: number, reason?: string): void {
+        this.readyState = this.CLOSING;
         this.client.close();
     }
 

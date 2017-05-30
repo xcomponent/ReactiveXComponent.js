@@ -1,12 +1,15 @@
-import xcomponentapi from "./xcomponentAPI";
-import { isDebugEnabled } from "./loggerConfiguration";
+import xcomponentAPI from "./xcomponentAPI";
 import * as xcMessages from "./communication/xcomponentMessages";
+import * as Connection from "./communication/xcConnection";
+import * as Session from "./communication/xcSession";
+import * as Publisher from "./communication/xcWebSocketPublisher";
+import * as Subscriber from "./communication/xcWebSocketSubscriber";
+import * as LogLevels from "./loggerConfiguration";
 
-export { LogLevels } from "./loggerConfiguration";
-export { Connection } from "./communication/xcConnection";
-export { Session } from "./communication/xcSession";
-export { Publisher } from "./communication/xcWebSocketPublisher";
-export { Subscriber } from "./communication/xcWebSocketSubscriber";
+export { Connection };
+export { LogLevels };
+export { Session };
+export { Publisher };
+export { Subscriber };
 export { xcMessages };
-
-export default new xcomponentapi();
+export default new xcomponentAPI();

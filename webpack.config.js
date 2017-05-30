@@ -7,7 +7,7 @@ var BUILD_DIR = path.resolve(__dirname, "lib");
 var APP_DIR = path.resolve(__dirname, "src");
 
 var configClient = {
-  entry: ["es6-shim", APP_DIR + "/index.ts"],
+  entry: ["babel-polyfill", APP_DIR + "/index.ts"],
   devtool: "cheap-module-source-map",
   output: {
     path: BUILD_DIR,
@@ -60,6 +60,11 @@ var configClient = {
     wrappedContextCritical: true,
     rules: [
       {
+        test: /\.(jsx|js)$/,
+        use: ["babel-loader"],
+        exclude: "/node_modules/"
+      },
+      {
         test: /\.ts$/,
         enforce: "pre",
         loader: "tslint-loader",
@@ -70,11 +75,6 @@ var configClient = {
         }
       },
       {
-        test: /\.(jsx|js)$/,
-        use: [{
-          loader: "babel-loader"
-        }]
-      }, {
         test: /\.(tsx|ts)$/,
         loader: "ts-loader",
         exclude: "/node_modules/"
@@ -84,7 +84,7 @@ var configClient = {
 };
 
 var configServer = {
-  entry: ["es6-shim", APP_DIR + "/index.ts"],
+  entry: ["babel-polyfill", APP_DIR + "/index.ts"],
   devtool: "cheap-module-source-map",
   target: "node",
   output: {
@@ -133,6 +133,11 @@ var configServer = {
     wrappedContextCritical: true,
     rules: [
       {
+        test: /\.(jsx|js)$/,
+        use: ["babel-loader"],
+        exclude: "/node_modules/"
+      },
+      {
         test: /\.ts$/,
         enforce: "pre",
         loader: "tslint-loader",
@@ -141,12 +146,6 @@ var configServer = {
           configFile: false,
           failOnHint: true
         }
-      },
-      {
-        test: /\.(jsx|js)$/,
-        use: [{
-          loader: "babel-loader"
-        }]
       },
       {
         test: /\.(tsx|ts)$/,

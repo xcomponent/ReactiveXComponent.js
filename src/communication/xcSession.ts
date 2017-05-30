@@ -112,10 +112,12 @@ export class DefaultSession implements Session {
         this.webSocket.onerror = function (e: Event) {
             const messageError = "Error on " + thisSession.serverUrl + ".";
             errorListener(new Error(messageError));
+            console.log(e);
         };
 
         this.webSocket.onclose = function (e: CloseEvent) {
             log.info("connection on " + thisSession.serverUrl + " closed.");
+            console.log(e);
         };
     };
 
