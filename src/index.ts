@@ -4,10 +4,10 @@ import * as Connection from "./communication/xcConnection";
 import * as Session from "./communication/xcSession";
 import * as Publisher from "./communication/xcWebSocketPublisher";
 import * as Subscriber from "./communication/xcWebSocketSubscriber";
-import * as LogLevels from "./loggerConfiguration";
+import * as xcLogLevels from "./loggerConfiguration";
 
 export { Connection };
-export { LogLevels };
+export { xcLogLevels };
 export { Session };
 export { Publisher };
 export { Subscriber };

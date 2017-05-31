@@ -53,17 +53,7 @@ var configClient = {
       })
     ],
   module: {
-    unknownContextRegExp: /$^/,
-    unknownContextCritical: false,
-    exprContextRegExp: /$^/,
-    exprContextCritical: false,
-    wrappedContextCritical: true,
     rules: [
-      {
-        test: /\.(jsx|js)$/,
-        use: ["babel-loader"],
-        exclude: "/node_modules/"
-      },
       {
         test: /\.ts$/,
         enforce: "pre",
@@ -80,7 +70,14 @@ var configClient = {
         exclude: "/node_modules/"
       }]
   },
-  externals: process.env.NODE_ENV === "production" ? [nodeExternals()] : []
+  externals: [
+    (context, request, callback) => {
+      if (/^ws$/.test(request)) {
+        return callback(null, "commonjs" + request);
+      }
+      callback();
+    }
+  ]
 };
 
 var configServer = {
@@ -126,17 +123,7 @@ var configServer = {
       })
     ],
   module: {
-    unknownContextRegExp: /$^/,
-    unknownContextCritical: false,
-    exprContextRegExp: /$^/,
-    exprContextCritical: false,
-    wrappedContextCritical: true,
     rules: [
-      {
-        test: /\.(jsx|js)$/,
-        use: ["babel-loader"],
-        exclude: "/node_modules/"
-      },
       {
         test: /\.ts$/,
         enforce: "pre",
@@ -153,7 +140,7 @@ var configServer = {
         exclude: "/node_modules/"
       }]
   },
-  externals: process.env.NODE_ENV === "production" ? [nodeExternals()] : []
+  externals: [nodeExternals()]
 };
 
 
