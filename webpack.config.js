@@ -1,14 +1,81 @@
-var webpack = require("webpack");
-var path = require("path");
-var CleanWebpackPlugin = require("clean-webpack-plugin");
-var nodeExternals = require("webpack-node-externals");
+const webpack = require("webpack");
+const path = require("path");
+const CleanWebpackPlugin = require("clean-webpack-plugin");
+const nodeExternals = require("webpack-node-externals");
+const BUILD_DIR = path.resolve(__dirname, "lib");
+const APP_DIR = path.resolve(__dirname, "src");
 
-var BUILD_DIR = path.resolve(__dirname, "lib");
-var APP_DIR = path.resolve(__dirname, "src");
+const entry = ["babel-polyfill", APP_DIR + "/index.ts"];
+const devtool = "cheap-module-source-map";
+const resolve = {
+  extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+  modules: [
+    "node_modules",
+    "src",
+  ]
+};
+const plugins = process.env.NODE_ENV === "production" ? [
+  new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
+    root: __dirname,
+    verbose: true,
+    dry: false,
+    exclude: []
+  }),
+  new webpack.DefinePlugin({
+    "process.env": {
+      "NODE_ENV": JSON.stringify("production")
+    }
+  }),
+  new webpack.optimize.UglifyJsPlugin({
+    sourceMap: true,
+    minimize: true
+  })
+] : [
+    new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
+      root: __dirname,
+      verbose: true,
+      dry: false,
+      exclude: []
+    })
+  ];
+const moduleConfig = {
+  rules: [
+    {
+      test: /\.ts$/,
+      enforce: "pre",
+      loader: "tslint-loader",
+      options: {
+        typeCheck: false,
+        configFile: false,
+        failOnHint: true
+      }
+    },
+    {
+      test: /\.(tsx|ts)$/,
+      loader: "ts-loader",
+      exclude: "/node_modules/"
+    }]
+};
 
-var configClient = {
-  entry: ["babel-polyfill", APP_DIR + "/index.ts"],
-  devtool: "cheap-module-source-map",
+const configClientAll = {
+  entry: entry,
+  devtool: devtool,
+  output: {
+    path: BUILD_DIR,
+    filename: "xcomponentapi.all.js",
+    publicPath: "/",
+    libraryTarget: "umd",
+    library: "xcomponentapi",
+  },
+  resolve: resolve,
+  plugins: plugins,
+  module: moduleConfig
+};
+
+const configClient = {
+  entry: entry,
+  devtool: devtool,
+  target: "web",
   output: {
     path: BUILD_DIR,
     filename: "xcomponentapi.js",
@@ -16,73 +83,15 @@ var configClient = {
     libraryTarget: "umd",
     library: "xcomponentapi",
   },
-  resolve: {
-    extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
-    modules: [
-      "node_modules",
-      "src",
-    ]
-  },
-  node: {
-    fs: "empty",
-    net: "empty",
-    tls: "empty"
-  },
-  plugins: process.env.NODE_ENV === "production" ? [
-    new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
-      root: __dirname,
-      verbose: true,
-      dry: false,
-      exclude: []
-    }),
-    new webpack.DefinePlugin({
-      "process.env": {
-        "NODE_ENV": JSON.stringify("production")
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      minimize: true
-    })
-  ] : [
-      new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
-        root: __dirname,
-        verbose: true,
-        dry: false,
-        exclude: []
-      })
-    ],
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        enforce: "pre",
-        loader: "tslint-loader",
-        options: {
-          typeCheck: false,
-          configFile: false,
-          failOnHint: true
-        }
-      },
-      {
-        test: /\.(tsx|ts)$/,
-        loader: "ts-loader",
-        exclude: "/node_modules/"
-      }]
-  },
-  externals: [
-    (context, request, callback) => {
-      if (/^ws$/.test(request)) {
-        return callback(null, "commonjs" + request);
-      }
-      callback();
-    }
-  ]
+  resolve: resolve,
+  plugins: plugins,
+  module: moduleConfig,
+  externals: [nodeExternals()]
 };
 
-var configServer = {
-  entry: ["babel-polyfill", APP_DIR + "/index.ts"],
-  devtool: "cheap-module-source-map",
+const configServer = {
+  entry: entry,
+  devtool: devtool,
   target: "node",
   output: {
     path: BUILD_DIR,
@@ -91,57 +100,10 @@ var configServer = {
     libraryTarget: "umd",
     library: "xcomponentapi",
   },
-  resolve: {
-    extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
-    modules: [
-      "node_modules",
-      "src",
-    ]
-  },
-  plugins: process.env.NODE_ENV === "production" ? [
-    new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
-      root: __dirname,
-      verbose: true,
-      dry: false,
-      exclude: []
-    }),
-    new webpack.DefinePlugin({
-      "process.env": {
-        "NODE_ENV": JSON.stringify("production")
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      minimize: true
-    })
-  ] : [
-      new CleanWebpackPlugin([BUILD_DIR, "test_output", "coverage"], {
-        root: __dirname,
-        verbose: true,
-        dry: false,
-        exclude: []
-      })
-    ],
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        enforce: "pre",
-        loader: "tslint-loader",
-        options: {
-          typeCheck: false,
-          configFile: false,
-          failOnHint: true
-        }
-      },
-      {
-        test: /\.(tsx|ts)$/,
-        loader: "ts-loader",
-        exclude: "/node_modules/"
-      }]
-  },
+  resolve: resolve,
+  plugins: plugins,
+  module: moduleConfig,
   externals: [nodeExternals()]
 };
 
-
-module.exports = [configServer, configClient];
+module.exports = [configClientAll, configClient, configServer];

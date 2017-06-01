@@ -1,5 +1,5 @@
 import * as definition from "definition";
-import WebSocketClient from "./communication/xcWebSocket";
+const W3CWebSocket = require("websocket").w3cwebsocket;
 
 export interface JavascriptHelper {
     WebSocket: WebSocket;
@@ -8,9 +8,16 @@ export interface JavascriptHelper {
 const javascriptHelper = (): JavascriptHelper => {
     const isNodeEnvironnement = (typeof process === "object" && process + "" === "[object process]");
     const isTestEnvironnement = typeof window !== "undefined" && (<any>window).isTestEnvironnement;
-    return {
-        WebSocket: (isNodeEnvironnement) ? ((isTestEnvironnement) ? window.WebSocket : <any>WebSocketClient) : window.WebSocket
-    };
+    if (isTestEnvironnement || !isNodeEnvironnement) {
+        return {
+            WebSocket: window.WebSocket
+        };
+    } else {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        return {
+            WebSocket: W3CWebSocket
+        };
+    }
 };
 
 export default javascriptHelper;

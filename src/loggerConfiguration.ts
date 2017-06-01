@@ -9,7 +9,7 @@ export interface ILogLevels {
     INFO: number;
 };
 
-export const LogLevels: ILogLevels = {
+export const xcLogLevels: ILogLevels = {
     DEBUG: log.levels.DEBUG,
     INFO: log.levels.INFO
 };
