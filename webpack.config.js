@@ -57,7 +57,7 @@ const moduleConfig = {
     }]
 };
 
-const configClientAll = {
+const configAll = {
   entry: entry,
   devtool: devtool,
   output: {
@@ -72,10 +72,10 @@ const configClientAll = {
   module: moduleConfig
 };
 
-const configClient = {
+const config = {
   entry: entry,
   devtool: devtool,
-  target: "web",
+  target: "node",
   output: {
     path: BUILD_DIR,
     filename: "xcomponentapi.js",
@@ -89,21 +89,4 @@ const configClient = {
   externals: [nodeExternals()]
 };
 
-const configServer = {
-  entry: entry,
-  devtool: devtool,
-  target: "node",
-  output: {
-    path: BUILD_DIR,
-    filename: "xcomponentapi.node.js",
-    publicPath: "/",
-    libraryTarget: "umd",
-    library: "xcomponentapi",
-  },
-  resolve: resolve,
-  plugins: plugins,
-  module: moduleConfig,
-  externals: [nodeExternals()]
-};
-
-module.exports = [configClientAll, configClient, configServer];
+module.exports = [configAll, config];

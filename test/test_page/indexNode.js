@@ -1,4 +1,4 @@
-var xcomponentapi = require("../../lib/xcomponentapi.node.js").default;
+var xcomponentapi = require("../../lib/xcomponentapi.js").default;
 
 var serverUrl = "wss://localhost:443";
 var xcApiName = "WorldHelloApi.xcApi";

@@ -6,14 +6,13 @@ export interface JavascriptHelper {
 }
 
 const javascriptHelper = (): JavascriptHelper => {
-    const isNodeEnvironnement = (typeof process === "object" && process + "" === "[object process]");
     const isTestEnvironnement = typeof window !== "undefined" && (<any>window).isTestEnvironnement;
-    if (isTestEnvironnement || !isNodeEnvironnement) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    if (isTestEnvironnement) {
         return {
             WebSocket: window.WebSocket
         };
     } else {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         return {
             WebSocket: W3CWebSocket
         };
