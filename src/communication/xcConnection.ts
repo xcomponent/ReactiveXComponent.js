@@ -6,8 +6,8 @@ let log = require("loglevel");
 import { isDebugEnabled } from "../loggerConfiguration";
 
 export interface Connection {
-    getModel(xcApiName: string, serverUrl: string, getModelListener: (compositionModel: CompositionModel) => void): void;
-    getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void;
+    getModel(xcApiName: string, serverUrl: string, getModelListener: (error: Error, compositionModel: CompositionModel) => void): void;
+    getXcApiList(serverUrl: string, getXcApiListListener: (error: Error, apis: Array<String>) => void): void;
     createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean, reconnectionIntervalSeconds: number): void;
     createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean, reconnectionIntervalSeconds: number): void;
 }
@@ -17,15 +17,16 @@ export class DefaultConnection implements Connection {
     constructor() {
     }
 
-    getModel(xcApiName: string, serverUrl: string, getModelListener: (compositionModel: CompositionModel) => void) {
+    getModel(xcApiName: string, serverUrl: string, getModelListener: (error: Error, compositionModel: CompositionModel) => void) {
         let session = SessionFactory(serverUrl, null, null);
         let openListener = (_: Event) => {
             session.privateSubscriber.getModel(xcApiName, (compositionModel: CompositionModel) => {
-                getModelListener(compositionModel);
+                getModelListener(null, compositionModel);
                 session.close();
             });
         };
         let errorListener = (err: Error) => {
+            getModelListener(err, null);
             log.debug("getModel request failed");
             log.debug(err);
         };
@@ -34,15 +35,16 @@ export class DefaultConnection implements Connection {
         session.init(openListener, errorListener, closeListener);
     }
 
-    getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void {
+    getXcApiList(serverUrl: string, getXcApiListListener: (error: Error, apis: Array<String>) => void): void {
         let session = SessionFactory(serverUrl, null, null);
         let openListener = (_: Event) => {
             session.privateSubscriber.getXcApiList((apis: Array<String>) => {
-                getXcApiListListener(apis);
+                getXcApiListListener(null, apis);
                 session.close();
             });
         };
         let errorListener = (err: Error) => {
+            getXcApiListListener(err, null);
             log.debug("Error while getting Apis List");
             log.debug(err);
         };
