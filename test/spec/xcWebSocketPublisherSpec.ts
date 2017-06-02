@@ -1,7 +1,11 @@
-import {DefaultPublisher} from "../../src/communication/xcWebSocketPublisher";
+import { DefaultPublisher } from "../../src/communication/xcWebSocketPublisher";
 import Mock from "./mock/mockPublisherDependencies";
 
 describe("Test xcWebSocketPublisher module", function () {
+
+    beforeEach(function () {
+        (<any>window).isTestEnvironnement = true;
+    });
 
     describe("Test send method", function () {
         var publisher;

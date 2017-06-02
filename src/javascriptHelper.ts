@@ -1,13 +1,22 @@
 import * as definition from "definition";
+const W3CWebSocket = require("websocket").w3cwebsocket;
 
 export interface JavascriptHelper {
     WebSocket: WebSocket;
-    atob: any;
 }
 
 const javascriptHelper = (): JavascriptHelper => {
-    return { WebSocket: window.WebSocket, atob: window.atob };
+    const isTestEnvironnement = typeof window !== "undefined" && (<any>window).isTestEnvironnement;
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    if (isTestEnvironnement) {
+        return {
+            WebSocket: window.WebSocket
+        };
+    } else {
+        return {
+            WebSocket: W3CWebSocket
+        };
+    }
 };
 
-export { javascriptHelper };
-
+export default javascriptHelper;

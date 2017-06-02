@@ -1,4 +1,3 @@
-import { javascriptHelper } from "../javascriptHelper";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 import { Observable } from "rxjs/Rx";
@@ -59,7 +58,7 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.hb];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("Heartbeat received successfully");
@@ -79,7 +78,7 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.getModel];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("Model " + xcApiName + " received successfully");
@@ -98,7 +97,7 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.getXcApiList];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info("ApiList received successfully");
@@ -116,7 +115,7 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         let command = Commands[Commands.getXcApi];
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
                 log.info(xcApiFileName + " " + "received successfully");
@@ -134,11 +133,11 @@ export class DefaultSubscriber implements Subscriber {
         let replyTopic = uuid();
         let thisSubscriber = this;
         this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === Commands[Commands.snapshot] && data.topic === replyTopic)
             .subscribe((data: DeserializedData) => {
-                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
+                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
             });
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
@@ -173,7 +172,7 @@ export class DefaultSubscriber implements Subscriber {
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
         let filteredObservable = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data))
+            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
             .filter((jsonData: any) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));

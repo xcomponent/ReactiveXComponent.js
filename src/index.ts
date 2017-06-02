@@ -2,7 +2,7 @@ import xcomponentapi from "./xcomponentAPI";
 import { isDebugEnabled } from "./loggerConfiguration";
 import * as xcMessages from "./communication/xcomponentMessages";
 
-export { LogLevels } from "./loggerConfiguration";
+export { xcLogLevels } from "./loggerConfiguration";
 export { Connection } from "./communication/xcConnection";
 export { Session } from "./communication/xcSession";
 export { Publisher } from "./communication/xcWebSocketPublisher";
