@@ -1,4 +1,4 @@
-import { javascriptHelper } from "../javascriptHelper";
+import javascriptHelper from "../javascriptHelper";
 import { Publisher, DefaultPublisher } from "./xcWebSocketPublisher";
 import { DefaultSubscriber, Subscriber } from "./xcWebSocketSubscriber";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
@@ -116,6 +116,7 @@ export class DefaultSession implements Session {
         this.webSocket.onerror = (e: Event) => {
             const messageError = "Error on " + thisSession.serverUrl + ".";
             errorListener(new Error(messageError));
+            console.log(e);
         };
 
         this.webSocket.onclose = ((e: CloseEvent) => {
@@ -154,6 +155,7 @@ export class DefaultSession implements Session {
 
     disposeSubscriber(subscriber: Subscriber): void {
         this.removeElement(this.subscribers, subscriber);
+        subscriber.dispose();
     };
 
     dispose(): void {

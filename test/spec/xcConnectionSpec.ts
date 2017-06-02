@@ -14,6 +14,7 @@ describe("Test xcConnection module", function () {
 
     beforeEach(function () {
         (<any>window).WebSocket = WebSocket;
+        (<any>window).isTestEnvironnement = true;
         connection = new DefaultConnection();
     });
 
@@ -38,7 +39,6 @@ describe("Test xcConnection module", function () {
                 expect(session).not.toBe(null);
                 mockServer.stop(done);
             };
-
             connection.createSession(xcApiFileName, serverUrl, sessionListener);
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
