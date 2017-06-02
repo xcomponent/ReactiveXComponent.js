@@ -8,18 +8,13 @@ import { isDebugEnabled } from "../loggerConfiguration";
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (compositionModel: CompositionModel) => void): void;
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void;
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void;
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean, reconnectionIntervalSeconds: number): void;
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean, reconnectionIntervalSeconds: number): void;
 }
 
 export class DefaultConnection implements Connection {
 
-    private apis: {
-        [xcApiFileName: string]: ApiConfiguration
-    };
-
     constructor() {
-        this.apis = {};
     }
 
     getModel(xcApiName: string, serverUrl: string, getModelListener: (compositionModel: CompositionModel) => void) {
@@ -34,7 +29,9 @@ export class DefaultConnection implements Connection {
             log.debug("getModel request failed");
             log.debug(err);
         };
-        session.init(openListener, errorListener);
+        let closeListener = (_: CloseEvent) => {
+        };
+        session.init(openListener, errorListener, closeListener);
     }
 
     getXcApiList(serverUrl: string, getXcApiListListener: (apis: Array<String>) => void): void {
@@ -49,41 +46,36 @@ export class DefaultConnection implements Connection {
             log.debug("Error while getting Apis List");
             log.debug(err);
         };
-        session.init(openListener, errorListener);
+        let closeListener = (_: CloseEvent) => {
+        };
+        session.init(openListener, errorListener, closeListener);
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void {
-        this.init(xcApiFileName, serverUrl, null, createSessionListener);
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
+        this.init(xcApiFileName, serverUrl, null, createSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void {
-        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
+        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
     };
 
-    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void): void {
+    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let thisConnection = this;
         let getXcApiRequest = (xcApiFileName: string, createSessionListener: (error: Error, session: Session) => void) => {
-            if (thisConnection.apis[xcApiFileName] === undefined) {
-                session.privateSubscriber.getXcApi(xcApiFileName, (xcApi: string) => {
-                    if (xcApi != null) {
-                        const parser = new DefaultApiConfigurationParser();
-                        const configurationPromise = parser.parse(xcApi);
-                        configurationPromise.then(configuration => {
-                            thisConnection.apis[xcApiFileName] = configuration;
-                            session.configuration = configuration;
-                            session.replyPublisher.configuration = configuration;
-                            createSessionListener(null, session);
-                        }).catch(e => createSessionListener(e, null));
-                    } else {
-                        createSessionListener(new Error(`Unknown Api: ${xcApiFileName}`), null);
-                    }
-                });
-            } else {
-                session.configuration = thisConnection.apis[xcApiFileName];
-                session.replyPublisher.configuration = thisConnection.apis[xcApiFileName];
-                createSessionListener(null, session);
-            }
+            session.privateSubscriber.getXcApi(xcApiFileName, (xcApi: string) => {
+                if (xcApi != null) {
+                    const parser = new DefaultApiConfigurationParser();
+                    const configurationPromise = parser.parse(xcApi);
+                    configurationPromise.then(configuration => {
+                        session.configuration = configuration;
+                        session.replyPublisher.configuration = configuration;
+                        createSessionListener(null, session);
+                    }).catch(e => createSessionListener(e, null));
+                } else {
+                    createSessionListener(new Error(`Unknown Api: ${xcApiFileName}`), null);
+                }
+            });
         };
         let openListener = (_: Event) => {
             getXcApiRequest(xcApiFileName, createSessionListener);
@@ -91,6 +83,14 @@ export class DefaultConnection implements Connection {
         let errorListener = (err: Error) => {
             createSessionListener(err, null);
         };
-        session.init(openListener, errorListener);
+        let closeListener = (_: CloseEvent) => {
+            if (!session.closedByUser && reconnectionAfterError) {
+                setTimeout(() => {
+                    log.info(`Reconnecting to ${serverUrl}`);
+                    thisConnection.init(xcApiFileName, serverUrl, sessionData, createSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
+                }, reconnectionIntervalSeconds * 1000);
+            }
+        };
+        session.init(openListener, errorListener, closeListener);
     }
 }
