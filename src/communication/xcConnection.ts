@@ -80,7 +80,7 @@ export class DefaultConnection implements Connection {
             });
         };
         let openListener = (_: Event) => {
-            console.error("openListener");            
+            console.error("openListener");
             getXcApiRequest(xcApiFileName, createSessionListener);
         };
         let errorListener = (err: Error) => {
