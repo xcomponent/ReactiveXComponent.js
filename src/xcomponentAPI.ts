@@ -23,12 +23,12 @@ class XComponentAPI {
         }).bind(this));
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
-        this.connection.createSession(xcApiFileName, serverUrl, createSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener?: (closeEvent: CloseEvent) => void): void {
+        this.connection.createSession(xcApiFileName, serverUrl, createSessionListener, deconnectionErrorListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
-        this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener?: (closeEvent: CloseEvent) => void): void {
+        this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, deconnectionErrorListener);
     };
 
     setLogLevel(logLevel: number): void {

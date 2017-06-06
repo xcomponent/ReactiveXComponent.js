@@ -8,8 +8,8 @@ import { isDebugEnabled } from "../loggerConfiguration";
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (error: Error, compositionModel: CompositionModel) => void): void;
     getXcApiList(serverUrl: string, getXcApiListListener: (error: Error, apis: Array<String>) => void): void;
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean, reconnectionIntervalSeconds: number): void;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean, reconnectionIntervalSeconds: number): void;
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void;
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void;
 }
 
 export class DefaultConnection implements Connection {
@@ -53,15 +53,15 @@ export class DefaultConnection implements Connection {
         session.init(openListener, errorListener, closeListener);
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
-        this.init(xcApiFileName, serverUrl, null, createSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (error: CloseEvent) => void): void {
+        this.init(xcApiFileName, serverUrl, null, createSessionListener, deconnectionErrorListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
-        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
+        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, deconnectionErrorListener);
     };
 
-    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void, reconnectionAfterError: boolean = false, reconnectionIntervalSeconds: number = 10): void {
+    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let thisConnection = this;
         let getXcApiRequest = (xcApiFileName: string, createSessionListener: (error: Error, session: Session) => void) => {
@@ -85,12 +85,9 @@ export class DefaultConnection implements Connection {
         let errorListener = (err: Error) => {
             createSessionListener(err, null);
         };
-        let closeListener = (_: CloseEvent) => {
-            if (!session.closedByUser && reconnectionAfterError) {
-                setTimeout(() => {
-                    log.info(`Reconnecting to ${serverUrl}`);
-                    thisConnection.init(xcApiFileName, serverUrl, sessionData, createSessionListener, reconnectionAfterError, reconnectionIntervalSeconds);
-                }, reconnectionIntervalSeconds * 1000);
+        let closeListener = (closeEvent: CloseEvent) => {
+            if (session.closedByUser === false && deconnectionErrorListener) {
+                deconnectionErrorListener(closeEvent);
             }
         };
         session.init(openListener, errorListener, closeListener);

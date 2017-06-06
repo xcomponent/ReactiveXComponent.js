@@ -58,6 +58,7 @@ export class DefaultSession implements Session {
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
         this.heartbeatIntervalSeconds = 10;
+        this.closedByUser = undefined;
     }
 
     setPrivateTopic(privateTopic: string): void {
