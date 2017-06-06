@@ -53,7 +53,7 @@ export class DefaultConnection implements Connection {
         session.init(openListener, errorListener, closeListener);
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (error: CloseEvent) => void): void {
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
         this.init(xcApiFileName, serverUrl, null, createSessionListener, deconnectionErrorListener);
     };
 
@@ -80,12 +80,15 @@ export class DefaultConnection implements Connection {
             });
         };
         let openListener = (_: Event) => {
+            console.error("openListener");            
             getXcApiRequest(xcApiFileName, createSessionListener);
         };
         let errorListener = (err: Error) => {
+            console.error("errorListener");
             createSessionListener(err, null);
         };
         let closeListener = (closeEvent: CloseEvent) => {
+            console.error("closeListener");
             if (session.closedByUser === false && deconnectionErrorListener) {
                 deconnectionErrorListener(closeEvent);
             }
