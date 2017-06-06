@@ -80,15 +80,12 @@ export class DefaultConnection implements Connection {
             });
         };
         let openListener = (_: Event) => {
-            console.error("openListener");
             getXcApiRequest(xcApiFileName, createSessionListener);
         };
         let errorListener = (err: Error) => {
-            console.error("errorListener");
             createSessionListener(err, null);
         };
         let closeListener = (closeEvent: CloseEvent) => {
-            console.error("closeListener");
             if (session.closedByUser === false && deconnectionErrorListener) {
                 deconnectionErrorListener(closeEvent);
             }
