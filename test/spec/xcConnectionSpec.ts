@@ -43,11 +43,11 @@ describe("Test xcConnection module", function () {
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
                     const getApiResponse = `<deployment>  
-                                                <clientAPICommunication>   
-                                                </clientAPICommunication>
-                                                <codesConverter>   
-                                                </codesConverter>
-                                            </deployment>`;
+                                                    <clientAPICommunication>   
+                                                    </clientAPICommunication>
+                                                    <codesConverter>   
+                                                    </codesConverter>
+                                                </deployment>`;
                     let content = encodeServerMessage(getApiResponse);
                     let data = { ApiFound: true, ApiName: xcApiFileName, Content: content };
                     server.send("getXcApi " + JSON.stringify(data));
@@ -67,7 +67,7 @@ describe("Test xcConnection module", function () {
             };
 
             connection.createSession(xcApiFileName, serverUrl, sessionListener);
-            
+
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
                     let data = { ApiFound: false, ApiName: xcApiFileName };
@@ -75,6 +75,38 @@ describe("Test xcConnection module", function () {
                 });
             });
         });
+
+        it("when server stops after running in the first place, deconnectionErrorListener should be called", (done) => {
+            let serverUrl = "wss://serverUrl";
+            let mockServer = new Server(serverUrl);
+            let xcApiFileName = "xcApiFileName";
+
+            let sessionListener = (error, session) => {
+                mockServer.close();
+            };
+
+            let deconnectionErrorListener = (closeEvent) => {
+                done();
+            };
+
+            connection.createSession(xcApiFileName, serverUrl, sessionListener, deconnectionErrorListener);
+
+            mockServer.on("connection", (server) => {
+                server.on("message", (message) => {
+                    const getApiResponse = `<deployment>  
+                                                    <clientAPICommunication>   
+                                                    </clientAPICommunication>
+                                                    <codesConverter>   
+                                                    </codesConverter>
+                                                </deployment>`;
+                    let content = encodeServerMessage(getApiResponse);
+                    let data = { ApiFound: true, ApiName: xcApiFileName, Content: content };
+                    server.send("getXcApi " + JSON.stringify(data));
+                });
+            });
+
+        });
+
     });
 
 });

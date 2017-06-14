@@ -10,25 +10,25 @@ class XComponentAPI {
         this.connection = new DefaultConnection();
     }
 
-    getModel(xcApiName: string, serverUrl: string, connectionListener: (connection: Connection, compositionModel: CompositionModel) => void): void {
-        this.connection.getModel(xcApiName, serverUrl, ((compositionModel: CompositionModel) => {
-            connectionListener(this.connection, compositionModel);
+    getModel(xcApiName: string, serverUrl: string, connectionListener: (error: Error, compositionModel: CompositionModel) => void): void {
+        this.connection.getModel(xcApiName, serverUrl, ((error: Error, compositionModel: CompositionModel) => {
+            connectionListener(error, compositionModel);
         }).bind(this));
     }
 
-    getXcApiList(serverUrl: string, connectionListener: (connection: Connection, apis: Array<String>) => void): void {
+    getXcApiList(serverUrl: string, connectionListener: (error: Error, apis: Array<String>) => void): void {
         log.setDefaultLevel(log.levels.INFO);
-        this.connection.getXcApiList(serverUrl, ((apis: Array<String>) => {
-            connectionListener(this.connection, apis);
+        this.connection.getXcApiList(serverUrl, ((error: Error, apis: Array<String>) => {
+            connectionListener(error, apis);
         }).bind(this));
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void): void {
-        this.connection.createSession(xcApiFileName, serverUrl, createSessionListener);
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener?: (closeEvent: CloseEvent) => void): void {
+        this.connection.createSession(xcApiFileName, serverUrl, createSessionListener, deconnectionErrorListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void): void {
-        this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener?: (closeEvent: CloseEvent) => void): void {
+        this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, deconnectionErrorListener);
     };
 
     setLogLevel(logLevel: number): void {
