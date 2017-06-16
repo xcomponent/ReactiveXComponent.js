@@ -1,5 +1,6 @@
 [![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
 [![npm](https://img.shields.io/npm/v/reactivexcomponent.js.svg)](https://www.npmjs.com/package/reactivexcomponent.js)
+[![npm](https://img.shields.io/npm/dt/reactivexcomponent.js.svg)](https://www.npmjs.com/package/reactivexcomponent.js)
 
 ## Reactive XComponent API
 Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
