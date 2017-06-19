@@ -5,20 +5,15 @@ sudo: false
 branches:
   only:
   - master
-
 os:
 - linux
-
 install:
 - npm install
 - npm run build
-
 script:
 - npm test --silent
-
 notifications:
   slack:
-    rooms:
-      secure: iyIei0lVjumjNzqpsvgxkJZ04NugAvLLO6BdKQTaR+dwZxY/32gVMrtgex9TkS/V8BVOsovmQ/rNBTlphwE35L8kgMfnXEmCBYBz/0gxl/40GfHXrstMk5ZajwF9z+Cx1quoLP52eS2hECxvupSBUDdY69WcksF0netphvTzdGfx2CUbU0065+nSclraNaX6+h2VgE2JbTV4BjRawkGGsv/AgtzHNUFPZDdcDs7WgTa16WHjhwuyJiiQgmTmrazpepM8rnl0CUGgK6SaZN4NeZ6bbpf+63VVaobWVRIbTTfjwVmy7BBFaweo3DDSi3KA9hkjYkTBK4e4te/tQAD5xnyLab9GdO1GYH2GZol+9nHRYqKJp8aQ1uF9YET3MX1rrk3lW+DBLJAmbA3Tayr/eKWOh/RKxutsdf3J1ZV/JsRzwF0p1oPZBG1ueleWsEMpPqj0x3RRdbPdEohIONOJlVvWzYqmjrLTxl3VDh4kzQ1CVIqdc8prMzaKQuPGhSNsl9r6DKSYpqVJese72+ugcvS+S/wTB2QZhDMacah9xpFB2H+xapPWIavTjB/uR+/L7eOITzx9qN6CEkRTCxSz/Z4TB/wtCcjAO0WisHm6/5UwfNCdT/rUMchaCFHUnAE/cLnGncD9VqmIm5DGFbdZRI0aIo/M1kxYQhFJjfxnXEU=
-      on_success: change
-      on_failure: always
+    secure: hKTMOBgJ0iX6UKEPFPgoch1Z9UQ4JZZnJZSu7BCIyncvrOaUcotpfhYl94gtbWRRjvOqzxF9tGoTOQzTKR78BsotvavjGU3eV6+3jIMWu8Ld4WMInoo7hfNbzJ5RyPEnLlh4+lK5Gs4PjRElRtglo3I2k0dU7bfcZE1EgSANW1+qbCmuZneDnpTsQYq0KJE7Ql1LL4vd8nj1rQa2cy0E3Vi3Tz38wrmQDpMMlcMfzMX4BNlR+Ru7hcpp7py6n6Sg9TxXdN5nEPATkrc1fFNMBtdHuNY06g2BhzHdZdcz9TWOmuQhi5A2/4rjpbT+w4owSw3OBj0C0moG7v02FtAz2P021T9I+rL6XW9maw8jRXaSAO64/BuZ2MuDRqftQuv7bBIR+MN2eI5e9gNzyAR7QkYitIumHocGQdK6Fv6ztKcLKq19ErttNJ+kb2oNu8h7VOXahm7ZX9g8bkaMUJ18Vl03lwvJACYBXDh/zBpqp96GUSZPl1sa3JVjA1ehGIjdlUuV7Q6GKZnmEv537KhnONpaRvERi/MbuhJN0YrFiLbw7hiTO+wsNk4h6o6rALX79MV/dDk1SQOCZ0OwQtRyXGlrzCkAPzDHIgBbtGDjGnlOu9zpzaiBN7H6BO4ZfGyZJaa+CV5ljpRgHHiVC0zohz+x1SzeM+0lkh61Kb69BrM=
+    on_success: change
+    on_failure: always
