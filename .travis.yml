@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+- '8'
+sudo: false
+branches:
+  only:
+    - master
+os:
+- linux
+
+install:
+- npm install
+- npm run build
+
+script:
+  - npm test --silent
+  
+notifications:
+  slack:
+    secure: uVHsmJpDoJM8IBTdof0q+cYlD2eQhLpg3ZG3OT0u298HCkQALewD1vdsKaHgnAQUyd1v7f6GeT5k6ezNIH94klJaLoDrFM9vMNxHxZz2uefCGclQgXsGKCnZqlRv+mWNrK47F4saYtLrXz0Pb2aEOeujuf8YiP3iTOUMXft0XNR45d/1O5ZSmfTADD0RxN4cPG2POWlSB6CNDVTvN2Qd28DtLOJxcAH3OTK+5FkZRQ+feGwN+FTiV/EgRCIZipR+YeC+fPNvRfgGwILCre9+GJ4L8QbHFsXh+mlL039kbUPYCpLBvaQVFMtexo2TgZqX9TRga3QU9ZzHzT3isxWiBQTCxicLGFynW1hBOaQeocd9xezfenLdPJ8+NX04yY5e3hzV/OaIYCaGtlLhk4juJ6JeJEQDe54YoEZETiNRJ5wYUjGqbZcRYd3Yl9hwuZg4Udy0yxQ6kXYQ0pgKh5R6XsVbd4gBFFBrQYLjpQ/pv8PutfpTiqsUPXM8Kj/zxqtZotLdBEKoTFPvfMFs3FR6d+sU5MPEJjB0h31xFkdKaPLh2xNn0wuZDxI3EFc5H/qz/NULSnziVXsXOF01QsJawt3VgZGfpRKbJB3tZpJUozrsDjIsXk//JJJz2EzUgq66oU3YYqJ279WEjy6gRj3F2QupSD7y8gZ1c9+NvJIZ+18=
+    on_success: change
+    on_failure: always
