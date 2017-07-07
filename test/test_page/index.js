@@ -12,12 +12,12 @@ var sessionListener = (error, session) => {
 var reconnect = () => {
     var timeBeforeReconnection = 2;
     setTimeout(() => {
-        xcomponentapi.default.createSession(xcApiName, serverUrl, sessionListener, deconnectionErrorListener);
+        xcomponentapi.default.createSession(xcApiName, serverUrl, sessionListener, disconnectionErrorListener);
     }, timeBeforeReconnection * 1000);
 };
 
-var deconnectionErrorListener = () => {
+var disconnectionErrorListener = () => {
     reconnect();
 };
 
-xcomponentapi.default.createSession(xcApiName, serverUrl, sessionListener, deconnectionErrorListener);
+xcomponentapi.default.createSession(xcApiName, serverUrl, sessionListener, disconnectionErrorListener);

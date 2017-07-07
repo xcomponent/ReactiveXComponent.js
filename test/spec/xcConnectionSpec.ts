@@ -76,7 +76,7 @@ describe("Test xcConnection module", function () {
             });
         });
 
-        it("when server stops after running in the first place, deconnectionErrorListener should be called", (done) => {
+        it("when server stops after running in the first place, disconnectionErrorListener should be called", (done) => {
             let serverUrl = "wss://serverUrl";
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "xcApiFileName";
@@ -85,11 +85,11 @@ describe("Test xcConnection module", function () {
                 mockServer.close();
             };
 
-            let deconnectionErrorListener = (closeEvent) => {
+            let disconnectionErrorListener = (closeEvent) => {
                 done();
             };
 
-            connection.createSession(xcApiFileName, serverUrl, sessionListener, deconnectionErrorListener);
+            connection.createSession(xcApiFileName, serverUrl, sessionListener, disconnectionErrorListener);
 
             mockServer.on("connection", (server) => {
                 server.on("message", (message) => {
