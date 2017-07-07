@@ -8,8 +8,8 @@ import { isDebugEnabled } from "../loggerConfiguration";
 export interface Connection {
     getModel(xcApiName: string, serverUrl: string, getModelListener: (error: Error, compositionModel: CompositionModel) => void): void;
     getXcApiList(serverUrl: string, getXcApiListListener: (error: Error, apis: Array<String>) => void): void;
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void;
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, disconnectionErrorListener: (closeEvent: CloseEvent) => void): void;
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, disconnectionErrorListener: (closeEvent: CloseEvent) => void): void;
 }
 
 export class DefaultConnection implements Connection {
@@ -53,15 +53,15 @@ export class DefaultConnection implements Connection {
         session.init(openListener, errorListener, closeListener);
     };
 
-    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
-        this.init(xcApiFileName, serverUrl, null, createSessionListener, deconnectionErrorListener);
+    createSession(xcApiFileName: string, serverUrl: string, createSessionListener: (error: Error, session: Session) => void, disconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
+        this.init(xcApiFileName, serverUrl, null, createSessionListener, disconnectionErrorListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
-        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, deconnectionErrorListener);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, createAuthenticatedSessionListener: (error: Error, session: Session) => void, disconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
+        this.init(xcApiFileName, serverUrl, sessionData, createAuthenticatedSessionListener, disconnectionErrorListener);
     };
 
-    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void, deconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
+    private init(xcApiFileName: string, serverUrl: string, sessionData: string, createSessionListener: (error: Error, session: Session) => void, disconnectionErrorListener: (closeEvent: CloseEvent) => void): void {
         let session = SessionFactory(serverUrl, null, sessionData);
         let thisConnection = this;
         let getXcApiRequest = (xcApiFileName: string, createSessionListener: (error: Error, session: Session) => void) => {
@@ -86,8 +86,8 @@ export class DefaultConnection implements Connection {
             createSessionListener(err, null);
         };
         let closeListener = (closeEvent: CloseEvent) => {
-            if (session.closedByUser === false && deconnectionErrorListener) {
-                deconnectionErrorListener(closeEvent);
+            if (session.closedByUser === false && disconnectionErrorListener) {
+                disconnectionErrorListener(closeEvent);
             }
         };
         session.init(openListener, errorListener, closeListener);
