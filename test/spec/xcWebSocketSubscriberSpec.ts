@@ -114,7 +114,6 @@ describe("Test xcWebSocketSubscriber module", function () {
                 let topic: string = undefined;
 
                 server.on("message", function (message) {
-                    console.log(n);
                     switch (n) {
                         case 0: {
                             const deserializedMessage = deserializer.deserializeWithoutTopic(message);

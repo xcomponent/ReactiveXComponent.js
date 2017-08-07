@@ -37,6 +37,7 @@ export class DefaultSubscriber implements Subscriber {
     private observableSubscribers: Array<any>;
     private deserializer: Deserializer;
     private serializer: Serializer;
+    private timeout: string;
 
     public privateTopics: Array<String>;
     public replyPublisher: Publisher;
@@ -49,9 +50,9 @@ export class DefaultSubscriber implements Subscriber {
         this.observableMsg = Observable.fromEvent(this.webSocket, "message");
         this.observableSubscribers = [];
         this.privateTopics = privateTopics;
-
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
+        this.timeout = "00:00:10";
     }
 
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer {
@@ -150,7 +151,7 @@ export class DefaultSubscriber implements Subscriber {
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let topic = this.configuration.getSnapshotTopic(componentCode);
         let jsonMessage = {
-            Timeout: "00:00:10",
+            Timeout: this.timeout,
             CallerPrivateTopic: this.privateTopics,
             ReplyTopic: replyTopic
         };
