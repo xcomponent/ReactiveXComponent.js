@@ -52,17 +52,16 @@ export class DefaultPublisher implements Publisher {
         };
     }
 
-    private getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic: string, stateMachineId: number = undefined, agentId: number = undefined): Header {
+    private getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic: string, stateMachineId: number = undefined): Header {
         return {
-            "StateMachineId": getFSharpFormat(stateMachineId),
-            "AgentId": getFSharpFormat(agentId),
-            "StateMachineCode": getFSharpFormat(stateMachineCode),
-            "ComponentCode": getFSharpFormat(componentCode),
+            "StateMachineId": stateMachineId,
+            "StateMachineCode": stateMachineCode,
+            "ComponentCode": componentCode,
             "EventCode": this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType).eventCode,
-            "IncomingType": 0,
-            "MessageType": getFSharpFormat(messageType),
-            "PublishTopic": (!visibilityPrivate) ? undefined : getFSharpFormat((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopic),
-            "SessionData": getFSharpFormat(this.sessionData)
+            "IncomingEventType": 0,
+            "MessageType": messageType,
+            "PublishTopic": (!visibilityPrivate) ? undefined : ((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopic),
+            "SessionData": this.sessionData
         };
     };
 
@@ -80,7 +79,7 @@ export class DefaultPublisher implements Publisher {
     private getDataToSendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
-        let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic, stateMachineRef.StateMachineId, stateMachineRef.AgentId);
+        let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic, stateMachineRef.StateMachineId);
         let routingKey = this.getRoutingKey(componentCode, stateMachineCode, messageType);
         return {
             "RoutingKey": routingKey,

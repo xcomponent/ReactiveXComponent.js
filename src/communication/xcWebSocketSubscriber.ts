@@ -134,7 +134,7 @@ export class DefaultSubscriber implements Subscriber {
         let thisSubscriber = this;
         this.observableMsg
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
-            .filter((data: DeserializedData) => data.command === Commands[Commands.snapshot] && data.topic === replyTopic)
+            .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
             .subscribe((data: DeserializedData) => {
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
                 getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
@@ -150,17 +150,19 @@ export class DefaultSubscriber implements Subscriber {
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let topic = this.configuration.getSnapshotTopic(componentCode);
         let jsonMessage = {
-            "StateMachineCode": stateMachineCode,
-            "ComponentCode": componentCode,
-            "ReplyTopic": getFSharpFormat(replyTopic),
-            "PrivateTopic": getFSharpFormat(this.privateTopics),
+            Timeout: "00:00:10",
+            CallerPrivateTopic: this.privateTopics,
+            ReplyTopic: replyTopic
         };
+        let header = getHeaderWithIncomingType();
+        header.ComponentCode = componentCode;
+        header.StateMachineCode = stateMachineCode;
         let dataToSendSnapshot = {
             RoutingKey: topic,
             ComponentCode: componentCode,
             Event: {
-                "Header": getHeaderWithIncomingType(),
-                "JsonMessage": JSON.stringify(jsonMessage)
+                Header: header,
+                JsonMessage: JSON.stringify(jsonMessage)
             }
         };
         return dataToSendSnapshot;
@@ -324,7 +326,6 @@ export class DefaultSubscriber implements Subscriber {
         for (let i = 0; i < items.length; i++) {
             let stateMachineRef = {
                 "StateMachineId": parseInt(items[i].StateMachineId),
-                "AgentId": parseInt(items[i].AgentId),
                 "StateMachineCode": parseInt(items[i].StateMachineCode),
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisSubscriber.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
@@ -345,15 +346,14 @@ export class DefaultSubscriber implements Subscriber {
             log.debug(`JsonData received from event: ${topic} ${data}`);
         }
         let jsonData = this.deserializer.getJsonData(data);
-        let componentCode = jsonData.Header.ComponentCode.Fields[0];
-        let stateMachineCode = jsonData.Header.StateMachineCode.Fields[0];
-        let stateCode = jsonData.Header.StateCode.Fields[0];
+        let componentCode = jsonData.Header.ComponentCode;
+        let stateMachineCode = jsonData.Header.StateMachineCode;
+        let stateCode = jsonData.Header.StateCode;
         let thisSubscriber = this;
         let stateMachineRef = {
-            "StateMachineId": jsonData.Header.StateMachineId.Fields[0],
-            "AgentId": jsonData.Header.AgentId.Fields[0],
-            "StateMachineCode": jsonData.Header.StateMachineCode.Fields[0],
-            "ComponentCode": jsonData.Header.ComponentCode.Fields[0],
+            "StateMachineId": jsonData.Header.StateMachineId,
+            "StateMachineCode": jsonData.Header.StateMachineCode,
+            "ComponentCode": jsonData.Header.ComponentCode,
             "StateName": thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
             "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
                 thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);

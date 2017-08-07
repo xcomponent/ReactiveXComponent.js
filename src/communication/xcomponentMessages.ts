@@ -5,15 +5,14 @@ import * as pako from "pako";
 import * as atob from "atob";
 
 export interface Header {
-    StateMachineCode: FSharpFormat<Number>;
-    ComponentCode: FSharpFormat<Number>;
-    MessageType: FSharpFormat<String>;
-    PublishTopic: FSharpFormat<String>;
-    SessionData: FSharpFormat<String>;
-    StateMachineId: FSharpFormat<Number>;
-    AgentId: FSharpFormat<Number>;
+    StateMachineCode: number;
+    ComponentCode: number;
+    MessageType: string;
+    PublishTopic: string;
+    SessionData: string;
+    StateMachineId: number;
     EventCode: number;
-    IncomingType: number;
+    IncomingEventType: number;
 };
 
 export interface Event {
@@ -45,7 +44,6 @@ export interface CommandData {
 
 export interface StateMachineRef {
     StateMachineId: number;
-    AgentId: number;
     StateMachineCode: number;
     ComponentCode: number;
     StateName: string;
@@ -83,9 +81,8 @@ export let getHeaderWithIncomingType = (): Header => {
         PublishTopic: undefined,
         SessionData: undefined,
         StateMachineId: undefined,
-        AgentId: undefined,
         EventCode: undefined,
-        IncomingType: 0
+        IncomingEventType: 0
     };
 };
 

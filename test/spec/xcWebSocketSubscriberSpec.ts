@@ -26,7 +26,6 @@ describe("Test xcWebSocketSubscriber module", function () {
                 let stateMachineUpdateListener = function (data) {
                     expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                     expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
-                    expect(data.stateMachineRef.AgentId).toEqual(Mock.correctReceivedData.stateMachineRef.AgentId);
                     expect(data.stateMachineRef.StateName).toEqual(Mock.correctReceivedData.stateMachineRef.StateName);
                     expect(data.stateMachineRef.send).toEqual(jasmine.any(Function));
                     expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
@@ -115,6 +114,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                 let topic: string = undefined;
 
                 server.on("message", function (message) {
+                    console.log(n);
                     switch (n) {
                         case 0: {
                             const deserializedMessage = deserializer.deserializeWithoutTopic(message);
@@ -124,7 +124,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                             topic = jsonMessage.Topic.Key;
 
                             expect(deserializedMessage.command).toBe("subscribe");
-                            expect(jsonData.Header.IncomingType).toBe(0);
+                            expect(jsonData.Header.IncomingEventType).toBe(0);
                             expect(jsonMessage.Topic.Key).not.toBeUndefined();
                             expect(jsonMessage.Topic.kind).toBe(1);
 
@@ -138,13 +138,11 @@ describe("Test xcWebSocketSubscriber module", function () {
 
                             const jsonData = deserializer.getJsonData(message);
                             const jsonMessage = JSON.parse(jsonData.JsonMessage);
-
-                            expect(jsonData.Header.IncomingType).toBe(0);
-                            expect(jsonMessage.StateMachineCode).toBe(Mock.stateMachineCode);
-                            expect(jsonMessage.ComponentCode).toBe(Mock.componentCode);
-                            expect(jsonMessage.ReplyTopic.Fields[0]).toBe(topic);
-                            expect(jsonMessage.PrivateTopic.Fields[0][0]).toBe(Mock.privateTopic);
-
+                            expect(jsonData.Header.IncomingEventType).toBe(0);
+                            expect(jsonData.Header.StateMachineCode).toBe(Mock.stateMachineCode);
+                            expect(jsonData.Header.ComponentCode).toBe(Mock.componentCode);
+                            expect(jsonMessage.ReplyTopic).toBe(topic);
+                            expect(jsonMessage.CallerPrivateTopic[0]).toBe(Mock.privateTopic);
                             server.send(`snapshot ${topic} ${JSON.stringify(Mock.snapshotResponseData)}`);
                             break;
                         }

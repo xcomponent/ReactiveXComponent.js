@@ -14,13 +14,13 @@ guid.create.and.callFake(function () {
 
 function getHeader(visibility) {
     let header = {
-        "StateMachineCode": { "Case": "Some", "Fields": [stateMachineCode] },
-        "ComponentCode": { "Case": "Some", "Fields": [componentCode] },
+        "StateMachineCode": stateMachineCode,
+        "ComponentCode": componentCode,
         "EventCode": eventCode,
-        "IncomingType": 0,
-        "MessageType": { "Case": "Some", "Fields": [messageType] },
-        "PublishTopic": (!visibility) ? undefined : { "Case": "Some", "Fields": [guid.create()] },
-        "SessionData": { "Case": "Some", "Fields": [sessionData] }
+        "IncomingEventType": 0,
+        "MessageType": messageType,
+        "PublishTopic": (!visibility) ? undefined : guid.create(),
+        "SessionData": sessionData
     };
     return header;
 }
@@ -42,34 +42,32 @@ let correctData = getCorrectData(false);
 
 function getCorretWebsocketInputFormat(visibility) {
     let correctData = getCorrectData(visibility);
-    let correctWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode.Fields[0]
+    let correctWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode
         + " " + JSON.stringify(correctData.event);
     return correctWebsocketInputFormat;
 }
 
 let stateMachineRef = {
     "StateMachineId": 1,
-    "AgentId": 2,
     "StateMachineCode": stateMachineCode,
     "ComponentCode": componentCode,
 };
 let correctDataForSMRef = {
     event: {
         "Header": {
-            "StateMachineId": { "Case": "Some", "Fields": [stateMachineRef.StateMachineId] },
-            "AgentId": { "Case": "Some", "Fields": [stateMachineRef.AgentId] },
-            "StateMachineCode": { "Case": "Some", "Fields": [stateMachineRef.StateMachineCode] },
-            "ComponentCode": { "Case": "Some", "Fields": [stateMachineRef.ComponentCode] },
+            "StateMachineId": stateMachineRef.StateMachineId,
+            "StateMachineCode": stateMachineRef.StateMachineCode,
+            "ComponentCode": stateMachineRef.ComponentCode,
             "EventCode": eventCode,
-            "IncomingType": 0,
-            "MessageType": { "Case": "Some", "Fields": [messageType] },
-            "SessionData": { "Case": "Some", "Fields": [sessionData] }
+            "IncomingEventType": 0,
+            "MessageType": messageType,
+            "SessionData": sessionData
         },
         "JsonMessage": JSON.stringify(jsonMessage)
     },
     routingKey: routingKey
 };
-let corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " " + correctDataForSMRef.event.Header.ComponentCode.Fields[0]
+let corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " " + correctDataForSMRef.event.Header.ComponentCode
     + " " + JSON.stringify(correctDataForSMRef.event);
 
 
