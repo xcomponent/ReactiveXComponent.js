@@ -13,7 +13,7 @@ describe("Test xcWebSocketPublisher module", function () {
             publisher = new DefaultPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
         });
 
-        it("sould send a message to the given stateMachine and component", function () {
+        it("should send a message to the given stateMachine and component", function () {
             publisher.send("componentName", "stateMachineName", Mock.messageType, Mock.jsonMessage);
             expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
             expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.getCorretWebsocketInputFormat(false));
