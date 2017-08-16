@@ -33,7 +33,7 @@ Example of XComponent API usage
         var stateMachineName = "HelloWorldManager";
         var stateMachineResponse = "HelloWorldResponse";
 
-        var visibility = true;
+        var visibilityPrivate = true;
 
         //sessionListener : callback executed when a session is open
         var sessionListener = function (error, session) {
@@ -73,7 +73,7 @@ Example of XComponent API usage
             //check if publisher of stateMachineName is exposed by xcApi
             if (publisher.canPublish(componentName, stateMachineName, messageType1)) {
                 //visibility parameter is optional. It is false by default.
-                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1, visibility);
+                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1, visibilityPrivate);
             } 
 
         }
