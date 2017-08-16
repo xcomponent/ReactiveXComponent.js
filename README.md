@@ -62,16 +62,16 @@ Example of XComponent API usage
             //Snapshot is used as follow
             subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
                 //items is an array of instances of stateMachineResponse
-                console.log(items[0].PublicMember);
+                console.log(items[0].jsonMessage);
                 //each item contains a send method to send an event with a context
-                items[0].send(messageType, jsonMessage);
+                items[0].stateMachineRef.send(messageType, jsonMessage);
             });
 
             //create a publisher to send an event
             var publisher = session.createPublisher(); 
 
             //check if publisher of stateMachineName is exposed by xcApi
-            if (publisher.canPublish(componentName, stateMachineName)) {
+            if (publisher.canPublish(componentName, stateMachineName, messageType1)) {
                 //visibility parameter is optional. It is false by default.
                 publisher.send(componentName, stateMachineName, messageType1, jsonMessage1, visibility);
             } 
