@@ -284,9 +284,7 @@ export class DefaultSubscriber implements Subscriber {
 
     dispose(): void {
         for (let i = 0; i < this.observableSubscribers.length; i++) {
-            this
-                .observableSubscribers[i]
-                .dispose();
+            this.observableSubscribers[i].dispose();
         }
         this.observableSubscribers = [];
     };
