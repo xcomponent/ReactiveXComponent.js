@@ -4,6 +4,8 @@ import { FSharpFormat } from "../configuration/FSharpConfiguration";
 import * as pako from "pako";
 import * as atob from "atob";
 
+export const fatalErrorState = "FatalError";
+
 export interface Header {
     StateMachineCode: number;
     ComponentCode: number;
@@ -43,6 +45,7 @@ export interface CommandData {
 };
 
 export interface StateMachineRef {
+    ErrorMessage?: string;
     StateMachineId: number;
     StateMachineCode: number;
     ComponentCode: number;
