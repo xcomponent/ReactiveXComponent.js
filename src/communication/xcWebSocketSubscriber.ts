@@ -324,6 +324,7 @@ export class DefaultSubscriber implements Subscriber {
         for (let i = 0; i < items.length; i++) {
             let stateMachineRef = {
                 "StateMachineId": parseInt(items[i].StateMachineId),
+                "WorkerId": parseInt(items[i].WorkerId),
                 "StateMachineCode": parseInt(items[i].StateMachineCode),
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisSubscriber.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
@@ -351,6 +352,7 @@ export class DefaultSubscriber implements Subscriber {
         let stateMachineRef = {
             "ErrorMessage": jsonData.Header.ErrorMessage,
             "StateMachineId": jsonData.Header.StateMachineId,
+            "WorkerId": jsonData.Header.WorkerId,
             "StateMachineCode": jsonData.Header.StateMachineCode,
             "ComponentCode": jsonData.Header.ComponentCode,
             "StateName": (jsonData.Header.ErrorMessage) ? fatalErrorState : thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),

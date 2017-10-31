@@ -13,6 +13,7 @@ export interface Header {
     PublishTopic: string;
     SessionData: string;
     StateMachineId: number;
+    WorkerId: number;
     EventCode: number;
     IncomingEventType: number;
 };
@@ -84,6 +85,7 @@ export let getHeaderWithIncomingType = (): Header => {
         PublishTopic: undefined,
         SessionData: undefined,
         StateMachineId: undefined,
+        WorkerId: undefined,
         EventCode: undefined,
         IncomingEventType: 0
     };
