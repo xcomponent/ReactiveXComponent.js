@@ -4,6 +4,8 @@ import { FSharpFormat } from "../configuration/FSharpConfiguration";
 import * as pako from "pako";
 import * as atob from "atob";
 
+export const fatalErrorState = "FatalError";
+
 export interface Header {
     StateMachineCode: number;
     ComponentCode: number;
@@ -11,6 +13,7 @@ export interface Header {
     PublishTopic: string;
     SessionData: string;
     StateMachineId: number;
+    WorkerId: number;
     EventCode: number;
     IncomingEventType: number;
 };
@@ -43,6 +46,7 @@ export interface CommandData {
 };
 
 export interface StateMachineRef {
+    ErrorMessage?: string;
     StateMachineId: number;
     StateMachineCode: number;
     ComponentCode: number;
@@ -81,6 +85,7 @@ export let getHeaderWithIncomingType = (): Header => {
         PublishTopic: undefined,
         SessionData: undefined,
         StateMachineId: undefined,
+        WorkerId: undefined,
         EventCode: undefined,
         IncomingEventType: 0
     };

@@ -3,7 +3,7 @@ import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfi
 import { Observable } from "rxjs/Rx";
 
 import { Publisher } from "./xcWebSocketPublisher";
-import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer } from "./xcomponentMessages";
+import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { isDebugEnabled } from "../loggerConfiguration";
@@ -298,7 +298,6 @@ export class DefaultSubscriber implements Subscriber {
                 .push(stateMachineName);
         }
     };
-
     private removeSubscribedStateMachines(componentName: string, stateMachineName: string): void {
         let index = this
             .subscribedStateMachines[componentName]
@@ -325,6 +324,7 @@ export class DefaultSubscriber implements Subscriber {
         for (let i = 0; i < items.length; i++) {
             let stateMachineRef = {
                 "StateMachineId": parseInt(items[i].StateMachineId),
+                "WorkerId": parseInt(items[i].WorkerId),
                 "StateMachineCode": parseInt(items[i].StateMachineCode),
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisSubscriber.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
@@ -350,10 +350,12 @@ export class DefaultSubscriber implements Subscriber {
         let stateCode = jsonData.Header.StateCode;
         let thisSubscriber = this;
         let stateMachineRef = {
+            "ErrorMessage": jsonData.Header.ErrorMessage,
             "StateMachineId": jsonData.Header.StateMachineId,
+            "WorkerId": jsonData.Header.WorkerId,
             "StateMachineCode": jsonData.Header.StateMachineCode,
             "ComponentCode": jsonData.Header.ComponentCode,
-            "StateName": thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
+            "StateName": (jsonData.Header.ErrorMessage) ? fatalErrorState : thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
             "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
                 thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
             }

@@ -52,8 +52,9 @@ export class DefaultPublisher implements Publisher {
         };
     }
 
-    private getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic: string, stateMachineId: number = undefined): Header {
+    private getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic: string, stateMachineId: number = undefined, workerId: number = undefined): Header {
         return {
+            "WorkerId": workerId,
             "StateMachineId": stateMachineId,
             "StateMachineCode": stateMachineCode,
             "ComponentCode": componentCode,
@@ -79,7 +80,7 @@ export class DefaultPublisher implements Publisher {
     private getDataToSendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
-        let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic, stateMachineRef.StateMachineId);
+        let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic, stateMachineRef.StateMachineId, stateMachineRef.WorkerId);
         let routingKey = this.getRoutingKey(componentCode, stateMachineCode, messageType);
         return {
             "RoutingKey": routingKey,
