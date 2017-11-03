@@ -46,6 +46,7 @@ export interface CommandData {
 };
 
 export interface StateMachineRef {
+    WorkerId: number;
     ErrorMessage?: string;
     StateMachineId: number;
     StateMachineCode: number;
