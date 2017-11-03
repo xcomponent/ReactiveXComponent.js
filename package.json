@@ -1,6 +1,6 @@
 {
   "name": "reactivexcomponent.js",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Javascript reactive client API for XComponent",
   "directories": {
     "test": "test",
