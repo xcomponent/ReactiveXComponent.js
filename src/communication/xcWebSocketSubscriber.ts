@@ -19,7 +19,7 @@ export interface Subscriber {
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
     getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
-    getStateMachineUpdates(componentName: string, stateMachineName: string): any;
+    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<any>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void;
     sendSubscribeRequestToTopic(topic: string, kind: number): void;
@@ -194,7 +194,7 @@ export class DefaultSubscriber implements Subscriber {
     }
 
 
-    getStateMachineUpdates(componentName: string, stateMachineName: string): any {
+    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<any> {
         let filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
         this.sendSubscribeRequest(componentName, stateMachineName);
         return filteredObservable;
