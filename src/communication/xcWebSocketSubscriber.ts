@@ -19,9 +19,9 @@ export interface Subscriber {
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
     getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
-    getStateMachineUpdates(componentName: string, stateMachineName: string): any;
+    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;
-    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void;
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void;
     sendSubscribeRequestToTopic(topic: string, kind: number): void;
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
     unsubscribe(componentName: string, stateMachineName: string): void;
@@ -170,7 +170,7 @@ export class DefaultSubscriber implements Subscriber {
     }
 
 
-    private prepareStateMachineUpdates(componentName: string, stateMachineName: string): any {
+    private prepareStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet> {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
@@ -178,7 +178,7 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
-            .filter((jsonData: any) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
+            .filter((jsonData: Packet) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
         return filteredObservable;
     };
 
@@ -194,7 +194,7 @@ export class DefaultSubscriber implements Subscriber {
     }
 
 
-    getStateMachineUpdates(componentName: string, stateMachineName: string): any {
+    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet> {
         let filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
         this.sendSubscribeRequest(componentName, stateMachineName);
         return filteredObservable;
@@ -208,10 +208,10 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: any) => void): void {
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void {
         let observableSubscriber = this
             .prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe((jsonData: any) => stateMachineUpdateListener(jsonData));
+            .subscribe((jsonData: Packet) => stateMachineUpdateListener(jsonData));
         this
             .observableSubscribers
             .push(observableSubscriber);
