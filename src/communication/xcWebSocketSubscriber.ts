@@ -18,10 +18,12 @@ export interface Subscriber {
     getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void;
     getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
-    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void;
+    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Packet>) => void): void;
+    getSnapshotPromise(componentName: string, stateMachineName: string): Promise<Array<Packet>>;
     getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void;
+    subscribePromise(componentName: string, stateMachineName: string): Promise<Packet>;
     sendSubscribeRequestToTopic(topic: string, kind: number): void;
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
     unsubscribe(componentName: string, stateMachineName: string): void;
@@ -130,7 +132,7 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Object>) => void): void {
+    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Packet>) => void): void {
         let replyTopic = uuid();
         let thisSubscriber = this;
         this.observableMsg
@@ -145,6 +147,13 @@ export class DefaultSubscriber implements Subscriber {
         this.webSocket.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
     };
 
+    getSnapshotPromise(componentName: string, stateMachineName: string): Promise<Array<Packet>> {
+        return new Promise((resolve, reject) => {
+            this.getSnapshot(componentName, stateMachineName, (items: Array<Packet>) => {
+                resolve(items);
+            });
+        });
+    };
 
     private getDataToSendSnapshot(componentName: string, stateMachineName: string, replyTopic: string): Data {
         const componentCode = this.configuration.getComponentCode(componentName);
@@ -216,6 +225,14 @@ export class DefaultSubscriber implements Subscriber {
             .observableSubscribers
             .push(observableSubscriber);
         this.sendSubscribeRequest(componentName, stateMachineName);
+    };
+
+    subscribePromise(componentName: string, stateMachineName: string): Promise<Packet> {
+        return new Promise((resolve, reject) => {
+            this.subscribe(componentName, stateMachineName, (data: Packet) => {
+                resolve(data);
+            });
+        });
     };
 
     private sendSubscribeRequest(componentName: string, stateMachineName: string): void {

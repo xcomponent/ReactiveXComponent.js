@@ -49,22 +49,35 @@ Example of XComponent API usage
             //check if subscriber stateMachineResponse of is exposed by xcApi
             if (subscriber.canSubscribe(componentName, stateMachineResponse)) {
                 //stateMachineUpdateListener : callback executed when a message is received by the subscribed stateMachine
-                var stateMachineUpdateListener = function (jsonData) {
+                var stateMachineUpdateListener = (jsonData) => {
                     //jsonMessage property is the public member
                     console.log(jsonData.jsonMessage);
                     //send context using directly stateMachineRef
                     jsonData.stateMachineRef.send(messageType3, jsonMessage3);
                 }       
-                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);         
+                // subscribe using a callback                
+                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);  
+                // subscribe using a Promise
+                subscriber.subscribePromise(componentName, stateMachineResponse).then(jsonData => stateMachineUpdateListener(jsonData));
             }
 
-                
-            //Snapshot is used as follow
-            subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
-                //items is an array of instances of stateMachineResponse
-                console.log(items[0].jsonMessage);
-                //each item contains a send method to send an event with a context
-                items[0].stateMachineRef.send(messageType, jsonMessage);
+            var snapshotListener = (items) => {
+                //items is an array of instances of stateMachineResponse                
+                items.forEach(item => {
+                    console.log(item.jsonMessage);
+                    //each item contains stateMachineRef with a send method to publish an event to an instance                    
+                    item.stateMachineRef.send(messageType, jsonMessage);
+                })
+            };
+
+            //Snapshot with a callback
+            subscriber.getSnapshot(componentName, stateMachineResponse, (items) => {
+                snapshotListener(items);
+            });
+
+            // Snapshot using with a Promise
+            subscriber.getSnapshotPromise(componentName, stateMachineResponse).then(items => {
+                snapshotListener(items);
             });
 
             //create a publisher to send an event
@@ -80,6 +93,9 @@ Example of XComponent API usage
 
         var xcApiName = "HelloWorldApi.xcApi"            
         xcomponentapi.createSession(xcApiName, serverUrl, sessionListener);
+        xcomponentapi.createSessionPromise(xcApiName, serverUrl).then(session => {
+            // use session object as specified before ...
+        });        
 
 ```
 
