@@ -106,7 +106,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             subscriber = new DefaultSubscriber(mockWebSocket, Mock.configuration, null, [Mock.privateTopic]);
         });
 
-        it("send snapshot request, snapshotListener callback should be executed when a response is received", function (done) {
+        it("send snapshot request, promise resolve method should be executed when a response is received", function (done) {
             let deserializer = new Deserializer();
 
             mockServer.on("connection", function (server) {
@@ -154,10 +154,11 @@ describe("Test xcWebSocketSubscriber module", function () {
                 });
             });
             mockWebSocket.onopen = function (e) {
-                let snapshotListener = function (items) {
-                    mockServer.stop(done);
-                };
-                subscriber.getSnapshot("component", "stateMachine", snapshotListener);
+                subscriber.getSnapshot("component", "stateMachine")
+                    .then(items => mockServer.stop(done))
+                    .catch(err => {
+                        console.error(err);
+                    });
             };
         });
 
@@ -176,10 +177,10 @@ describe("Test xcWebSocketSubscriber module", function () {
         it("send getModel request, getModelListener callback should be executed when a response is received", function (done) {
             mockWebSocket.onopen = function (e) {
                 let apiName = "xcApi";
-                subscriber.getModel(apiName, function (model) {
-                    expect(model.projectName).not.toBe(null);
-                    expect(model.components).not.toBe(null);
-                    expect(model.composition).not.toBe(null);
+                subscriber.getCompositionModel(apiName).then((compositionModel) => {
+                    expect(compositionModel.projectName).not.toBe(null);
+                    expect(compositionModel.components).not.toBe(null);
+                    expect(compositionModel.composition).not.toBe(null);
                     mockServer.stop(done);
                 });
             };

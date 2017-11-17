@@ -7,6 +7,7 @@ import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData,
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { isDebugEnabled } from "../loggerConfiguration";
+import { error } from "util";
 
 let log = require("loglevel");
 let uuid = require("uuid/v4");
@@ -15,15 +16,13 @@ export interface Subscriber {
     privateTopics: Array<String>;
     replyPublisher: Publisher;
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
-    getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void;
-    getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void;
+    getCompositionModel(xcApiName: string): Promise<CompositionModel>;
+    getXcApiList(): Promise<Array<String>>;
     getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
-    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Packet>) => void): void;
-    getSnapshotPromise(componentName: string, stateMachineName: string): Promise<Array<Packet>>;
+    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<Packet>>;
     getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void;
-    subscribePromise(componentName: string, stateMachineName: string): Promise<Packet>;
     sendSubscribeRequestToTopic(topic: string, kind: number): void;
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
     unsubscribe(componentName: string, stateMachineName: string): void;
@@ -77,40 +76,44 @@ export class DefaultSubscriber implements Subscriber {
         }, heartbeatIntervalSeconds * 1000);
     }
 
-    getModel(xcApiName: string, getModelListener: (compositionModel: CompositionModel) => void): void {
-        let thisSubscriber = this;
-        let command = Commands[Commands.getModel];
-        this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
-            .filter((data: DeserializedData) => data.command === command)
-            .subscribe((data: DeserializedData) => {
-                log.info("Model " + xcApiName + " received successfully");
-                let compositionModel = thisSubscriber.deserializer.getJsonDataFromGetModelRequest(data.stringData);
-                getModelListener(compositionModel);
-            });
-        let commandData = {
-            Command: command,
-            Data: { "Name": xcApiName }
-        };
-        let input = thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData);
-        this.webSocket.send(input);
+    getCompositionModel(xcApiName: string): Promise<CompositionModel> {
+        return new Promise((resolve, reject) => {
+            let thisSubscriber = this;
+            let command = Commands[Commands.getModel];
+            this.observableMsg
+                .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+                .filter((data: DeserializedData) => data.command === command)
+                .subscribe((data: DeserializedData) => {
+                    log.info("Model " + xcApiName + " received successfully");
+                    let compositionModel = thisSubscriber.deserializer.getJsonDataFromGetModelRequest(data.stringData);
+                    resolve(compositionModel);
+                });
+            let commandData = {
+                Command: command,
+                Data: { "Name": xcApiName }
+            };
+            let input = thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData);
+            this.webSocket.send(input);
+        });
     }
 
-    getXcApiList(getXcApiListListener: (apis: Array<String>) => void): void {
-        let thisSubscriber = this;
-        let command = Commands[Commands.getXcApiList];
-        this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
-            .filter((data: DeserializedData) => data.command === command)
-            .subscribe((data: DeserializedData) => {
-                log.info("ApiList received successfully");
-                getXcApiListListener(thisSubscriber.deserializer.getJsonDataFromGetXcApiListRequest(data.stringData));
-            });
-        let commandData = {
-            Command: command,
-            Data: {}
-        };
-        this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
+    getXcApiList(): Promise<Array<String>> {
+        return new Promise((resolve, reject) => {
+            let thisSubscriber = this;
+            let command = Commands[Commands.getXcApiList];
+            this.observableMsg
+                .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+                .filter((data: DeserializedData) => data.command === command)
+                .subscribe((data: DeserializedData) => {
+                    log.info("ApiList received successfully");
+                    resolve(thisSubscriber.deserializer.getJsonDataFromGetXcApiListRequest(data.stringData));
+                });
+            let commandData = {
+                Command: command,
+                Data: {}
+            };
+            this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
+        });
     };
 
 
@@ -132,26 +135,20 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    getSnapshot(componentName: string, stateMachineName: string, getSnapshotListener: (items: Array<Packet>) => void): void {
-        let replyTopic = uuid();
-        let thisSubscriber = this;
-        this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
-            .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
-            .subscribe((data: DeserializedData) => {
-                thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
-                getSnapshotListener(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
-            });
-        this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
-        let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
-        this.webSocket.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
-    };
-
-    getSnapshotPromise(componentName: string, stateMachineName: string): Promise<Array<Packet>> {
+    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<Packet>> {
         return new Promise((resolve, reject) => {
-            this.getSnapshot(componentName, stateMachineName, (items: Array<Packet>) => {
-                resolve(items);
-            });
+            let replyTopic = uuid();
+            let thisSubscriber = this;
+            this.observableMsg
+                .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
+                .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
+                .subscribe((data: DeserializedData) => {
+                    thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
+                    resolve(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
+                });
+            this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
+            let dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
+            this.webSocket.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
         });
     };
 
@@ -225,14 +222,6 @@ export class DefaultSubscriber implements Subscriber {
             .observableSubscribers
             .push(observableSubscriber);
         this.sendSubscribeRequest(componentName, stateMachineName);
-    };
-
-    subscribePromise(componentName: string, stateMachineName: string): Promise<Packet> {
-        return new Promise((resolve, reject) => {
-            this.subscribe(componentName, stateMachineName, (data: Packet) => {
-                resolve(data);
-            });
-        });
     };
 
     private sendSubscribeRequest(componentName: string, stateMachineName: string): void {

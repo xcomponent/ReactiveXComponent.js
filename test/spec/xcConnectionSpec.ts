@@ -1,6 +1,7 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
 import { Connection, DefaultConnection } from "../../src/communication/xcConnection";
 import pako = require("pako");
+import { log } from "util";
 
 const encodeServerMessage = (strData: string) => {
     let binaryString = pako.deflate(strData, { to: "string" });
@@ -56,7 +57,7 @@ describe("Test xcConnection module", function () {
         });
 
         it("should provide meaningful error message when the Api is unknown", function (done) {
-            let serverUrl = "wss://serverUrl";
+            let serverUrl = "wss://serverUrl1";
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "unknownApi";
 
@@ -77,32 +78,18 @@ describe("Test xcConnection module", function () {
         });
 
         it("when server stops after running in the first place, disconnectionErrorListener should be called", (done) => {
-            let serverUrl = "wss://serverUrl";
+            let serverUrl = "wss://serverUrl2";
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "xcApiFileName";
-
-            let sessionListener = (error, session) => {
-                mockServer.close();
-            };
 
             let disconnectionErrorListener = (closeEvent) => {
                 done();
             };
 
-            connection.createSession(xcApiFileName, serverUrl, sessionListener, disconnectionErrorListener);
+            connection.closeSessionError(serverUrl, disconnectionErrorListener);
 
             mockServer.on("connection", (server) => {
-                server.on("message", (message) => {
-                    const getApiResponse = `<deployment>  
-                                                    <clientAPICommunication>   
-                                                    </clientAPICommunication>
-                                                    <codesConverter>   
-                                                    </codesConverter>
-                                                </deployment>`;
-                    let content = encodeServerMessage(getApiResponse);
-                    let data = { ApiFound: true, ApiName: xcApiFileName, Content: content };
-                    server.send("getXcApi " + JSON.stringify(data));
-                });
+                mockServer.close();
             });
 
         });
