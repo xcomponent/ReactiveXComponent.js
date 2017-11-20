@@ -35,7 +35,6 @@ export class DefaultSubscriber implements Subscriber {
     private configuration: ApiConfiguration;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private observableMsg: Observable<MessageEvent>;
-    private observableSubscribers: Array<any>;
     private deserializer: Deserializer;
     private serializer: Serializer;
     private timeout: string;
@@ -49,7 +48,6 @@ export class DefaultSubscriber implements Subscriber {
         this.replyPublisher = replyPublisher;
         this.subscribedStateMachines = {};
         this.observableMsg = Observable.fromEvent(this.webSocket, "message");
-        this.observableSubscribers = [];
         this.privateTopics = privateTopics;
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
@@ -221,12 +219,10 @@ export class DefaultSubscriber implements Subscriber {
 
 
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void {
-        let observableSubscriber = this
-            .prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe((jsonData: Packet) => stateMachineUpdateListener(jsonData));
-        this
-            .observableSubscribers
-            .push(observableSubscriber);
+        this.prepareStateMachineUpdates(componentName, stateMachineName)
+            .subscribe((jsonData: Packet) => {
+                stateMachineUpdateListener(jsonData);
+            });
         this.sendSubscribeRequest(componentName, stateMachineName);
     };
 
@@ -295,10 +291,6 @@ export class DefaultSubscriber implements Subscriber {
     }
 
     dispose(): void {
-        for (let i = 0; i < this.observableSubscribers.length; i++) {
-            this.observableSubscribers[i].dispose();
-        }
-        this.observableSubscribers = [];
     };
 
     private addSubscribedStateMachines(componentName: string, stateMachineName: string): void {

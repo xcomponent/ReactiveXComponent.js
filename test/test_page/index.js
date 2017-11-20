@@ -2,7 +2,7 @@ const serverUrl = "wss://localhost:443";
 const xcApiName = "HelloWorldApi.xcApi";
 
 xcomponentapi.default
-    .getCompositionModel(xcApiName, serverUrl)
+    .createSession(xcApiName, serverUrl)
     .then(session => {
         console.log("connected");
     })
