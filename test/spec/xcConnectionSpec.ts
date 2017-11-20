@@ -22,25 +22,22 @@ describe("Test xcConnection module", function () {
     describe("Test createSession method", function () {
         it("given an unknown server url, should call the session listener with an error argument", function (done) {
             let serverUrl = "wss://wrongServerUrl";
-
-            let sessionListener = function (error, session) {
-                expect(error).not.toBe(null);
-                expect(session).toBe(null);
-                done();
-            };
-            connection.createSession("xcApiFileName", serverUrl, sessionListener);
+            connection.createSession("xcApiFileName", serverUrl)
+                .catch(error => {
+                    expect(error).not.toBe(null);
+                    done();
+                });
         });
 
         it("should call the sessionListener with the created session as argument", function (done) {
             let serverUrl = "wss://serverUrl";
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "api.xcApi";
-            let sessionListener = function (error, session) {
-                expect(error).toBe(null);
-                expect(session).not.toBe(null);
-                mockServer.stop(done);
-            };
-            connection.createSession(xcApiFileName, serverUrl, sessionListener);
+            connection.createSession(xcApiFileName, serverUrl)
+                .then(session => {
+                    expect(session).not.toBe(null);
+                    mockServer.stop(done);
+                });
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
                     const getApiResponse = `<deployment>  
@@ -61,13 +58,12 @@ describe("Test xcConnection module", function () {
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "unknownApi";
 
-            let sessionListener = function (error, session) {
-                // it refers explicitly to the unknown Api on the error message, not to some random crash
-                expect(error.message).toMatch(xcApiFileName);
-                mockServer.stop(done);
-            };
-
-            connection.createSession(xcApiFileName, serverUrl, sessionListener);
+            connection.createSession(xcApiFileName, serverUrl)
+                .catch(error => {
+                    // it refers explicitly to the unknown Api on the error message, not to some random crash                
+                    expect(error.message).toMatch(xcApiFileName);
+                    mockServer.stop(done);
+                });
 
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
@@ -82,11 +78,10 @@ describe("Test xcConnection module", function () {
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "xcApiFileName";
 
-            let disconnectionErrorListener = (closeEvent) => {
-                done();
-            };
-
-            connection.closeSessionError(serverUrl, disconnectionErrorListener);
+            connection.getUnexpectedCloseSessionError(serverUrl)
+                .then(closeEvent => {
+                    done();
+                });
 
             mockServer.on("connection", (server) => {
                 mockServer.close();

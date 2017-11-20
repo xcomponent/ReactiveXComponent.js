@@ -18,7 +18,7 @@ export interface Subscriber {
     getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
     getCompositionModel(xcApiName: string): Promise<CompositionModel>;
     getXcApiList(): Promise<Array<String>>;
-    getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void;
+    getXcApi(xcApiFileName: string): Promise<string>;
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<Packet>>;
     getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;
@@ -117,21 +117,23 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    getXcApi(xcApiFileName: string, getXcApiListener: (xcApi: string) => void): void {
-        let thisSubscriber = this;
-        let command = Commands[Commands.getXcApi];
-        this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
-            .filter((data: DeserializedData) => data.command === command)
-            .subscribe((data: DeserializedData) => {
-                log.info(xcApiFileName + " " + "received successfully");
-                getXcApiListener(thisSubscriber.deserializer.getJsonDataFromXcApiRequest(data.stringData));
-            });
-        let commandData = {
-            Command: command,
-            Data: { Name: xcApiFileName }
-        };
-        this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
+    getXcApi(xcApiFileName: string): Promise<string> {
+        const thisSubscriber = this;
+        return new Promise((resolve, reject) => {
+            const command = Commands[Commands.getXcApi];
+            this.observableMsg
+                .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+                .filter((data: DeserializedData) => data.command === command)
+                .subscribe((data: DeserializedData) => {
+                    log.info(xcApiFileName + " " + "received successfully");
+                    resolve(thisSubscriber.deserializer.getJsonDataFromXcApiRequest(data.stringData));
+                });
+            const commandData = {
+                Command: command,
+                Data: { Name: xcApiFileName }
+            };
+            this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
+        });
     };
 
 

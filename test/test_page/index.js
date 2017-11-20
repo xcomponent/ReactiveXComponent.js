@@ -12,12 +12,12 @@ xcomponentapi.default
     });
 
     xcomponentapi.default
-    .closeSessionError(serverUrl)
-    .then(closeEvent => {
+    .getUnexpectedCloseSessionError(serverUrl)
+    .then(err => {
         console.log("Imprevisible session close");        
-        console.log(closeEvent);
+        console.error(err);
     })
     .catch(err => {
+        console.error("Initial connection Error");        
         console.error(err);
-        console.error("Initial connection Error");
     });

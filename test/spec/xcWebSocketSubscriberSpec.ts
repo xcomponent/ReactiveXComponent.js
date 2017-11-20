@@ -207,7 +207,8 @@ describe("Test xcWebSocketSubscriber module", function () {
         it("returns null when Api is not found", function (done) {
             mockWebSocket.onopen = function (e) {
                 let apiName = "unknownApi";
-                subscriber.getXcApi(apiName, function (xcApi) {
+                subscriber.getXcApi(apiName)
+                .then(xcApi => {
                     expect(xcApi).toBe(null);
                     mockServer.stop(done);
                 });

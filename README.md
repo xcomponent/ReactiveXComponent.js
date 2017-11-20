@@ -69,10 +69,10 @@ Example of XComponent API usage
         }
 
         // handle imprevisible session close using a Promise
-        xcomponentapi.closeSessionError(serverUrl)
-            .then(closeEvent => {
+        xcomponentapi.getUnexpectedCloseSessionError(serverUrl)
+            .then(err => {
+                console.log(err);                
                 console.log("Imprevisible session close");        
-                console.log(closeEvent);
         })
         .catch(err => {
             console.error(err);
