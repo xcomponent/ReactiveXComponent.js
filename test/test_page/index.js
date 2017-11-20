@@ -2,7 +2,7 @@ const serverUrl = "wss://localhost:443";
 const xcApiName = "HelloWorldApi.xcApi";
 
 xcomponentapi.default
-    .createSession(xcApiName, serverUrl)
+    .getCompositionModel(xcApiName, serverUrl)
     .then(session => {
         console.log("connected");
     })
@@ -11,7 +11,7 @@ xcomponentapi.default
         console.error("Initial connection Error");
     });
 
-    xcomponentapi.default
+xcomponentapi.default
     .getUnexpectedCloseSessionError(serverUrl)
     .then(err => {
         console.log("Imprevisible session close");        

@@ -83,6 +83,7 @@ export class DefaultSubscriber implements Subscriber {
             this.observableMsg
                 .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
                 .filter((data: DeserializedData) => data.command === command)
+                .first()
                 .subscribe((data: DeserializedData) => {
                     log.info("Model " + xcApiName + " received successfully");
                     let compositionModel = thisSubscriber.deserializer.getJsonDataFromGetModelRequest(data.stringData);
@@ -104,6 +105,7 @@ export class DefaultSubscriber implements Subscriber {
             this.observableMsg
                 .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
                 .filter((data: DeserializedData) => data.command === command)
+                .first()
                 .subscribe((data: DeserializedData) => {
                     log.info("ApiList received successfully");
                     resolve(thisSubscriber.deserializer.getJsonDataFromGetXcApiListRequest(data.stringData));
@@ -124,6 +126,7 @@ export class DefaultSubscriber implements Subscriber {
             this.observableMsg
                 .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
                 .filter((data: DeserializedData) => data.command === command)
+                .first()
                 .subscribe((data: DeserializedData) => {
                     log.info(xcApiFileName + " " + "received successfully");
                     resolve(thisSubscriber.deserializer.getJsonDataFromXcApiRequest(data.stringData));
@@ -144,6 +147,7 @@ export class DefaultSubscriber implements Subscriber {
             this.observableMsg
                 .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
                 .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
+                .first()
                 .subscribe((data: DeserializedData) => {
                     thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
                     resolve(thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic));
