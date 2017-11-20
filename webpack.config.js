@@ -5,7 +5,7 @@ const nodeExternals = require("webpack-node-externals");
 const BUILD_DIR = path.resolve(__dirname, "lib");
 const APP_DIR = path.resolve(__dirname, "src");
 
-const entry = ["babel-polyfill", APP_DIR + "/index.ts"];
+const entry = [APP_DIR + "/index.ts"];
 const devtool = "cheap-module-source-map";
 const resolve = {
   extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
