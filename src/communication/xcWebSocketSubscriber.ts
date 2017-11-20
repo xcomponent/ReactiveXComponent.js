@@ -85,7 +85,7 @@ export class DefaultSubscriber implements Subscriber {
                 log.info("Model " + xcApiName + " received successfully");
                 return thisSubscriber.deserializer.getJsonDataFromGetModelRequest(data.stringData);
             })
-            .toPromise()
+            .toPromise();
         const commandData = {
             Command: command,
             Data: { "Name": xcApiName }
