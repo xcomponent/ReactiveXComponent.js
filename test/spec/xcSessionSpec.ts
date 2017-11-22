@@ -69,9 +69,26 @@ describe("Test xcSession module", function () {
             session.setPrivateTopic(privateTopic);
             expect(session.getDefaultPrivateTopic()).toEqual(privateTopic);
             session.addPrivateTopic(anotherPrivateTopic);
-            expect(session.getPrivateTopics()).toEqual([privateTopic, anotherPrivateTopic]);            
+            expect(session.getPrivateTopics()).toEqual([privateTopic, anotherPrivateTopic]);
         });
 
+    });
+
+    describe("Test getUnexpectedCloseSessionError method", function () {
+        it("when server stops after running in the first place, unexpectedCloseSessionErrorListener should be called", (done) => {
+            const serverUrl = "wss://serverUrl2";
+            const mockServer = new Server(serverUrl);
+            const mockWebSocket = new WebSocket(serverUrl);
+            const xcApiFileName = "xcApiFileName";
+            const session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+
+            session.getUnexpectedCloseSessionError((err) => done());
+
+            mockServer.on("connection", (server) => {
+                mockServer.close();
+            });
+
+        });
     });
 
 });

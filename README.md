@@ -68,21 +68,16 @@ Example of XComponent API usage
 
         }
 
-        // handle imprevisible session close using a Promise
-        xcomponentapi.getUnexpectedCloseSessionError(serverUrl)
-            .then(err => {
-                console.log(err);                
-                console.log("Imprevisible session close");        
-        })
-        .catch(err => {
-            console.error(err);
-            console.error("Initial connection Error");
-        });
         
         // create a session using a Promise
         xcomponentapi.createSession(xcApiName, serverUrl)
             .then(session => {
-                console.log("Session created successfully");                        
+                console.log("Session created successfully");
+                // handle imprevisible session close using a Callback
+                session.getUnexpectedCloseSessionError((err) => {
+                    console.error(err)
+                })
+                       
                 sessionListener(session);
             })
             .catch(err => {

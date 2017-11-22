@@ -73,22 +73,6 @@ describe("Test xcConnection module", function () {
             });
         });
 
-        it("when server stops after running in the first place, disconnectionErrorListener should be called", (done) => {
-            let serverUrl = "wss://serverUrl2";
-            let mockServer = new Server(serverUrl);
-            let xcApiFileName = "xcApiFileName";
-
-            connection.getUnexpectedCloseSessionError(serverUrl)
-                .then(closeEvent => {
-                    done();
-                });
-
-            mockServer.on("connection", (server) => {
-                mockServer.close();
-            });
-
-        });
-
     });
 
 });

@@ -9,6 +9,9 @@ let log = require("loglevel");
 let uuid = require("uuid/v4");
 
 export interface Session {
+    serverUrl: string;
+    privateTopic: string;
+    heartbeatIntervalSeconds: number;
     closedByUser: boolean;
     privateSubscriber: Subscriber;
     replyPublisher: Publisher;
@@ -20,8 +23,7 @@ export interface Session {
     setPrivateTopic(privateTopic: string): void;
     addPrivateTopic(privateTopic: string): void;
     removePrivateTopic(privateTopic: string): void;
-    init(): Promise<Event>;
-    getUnexpectedCloseSessionError(): Promise<Error>;
+    getUnexpectedCloseSessionError(unexpectedCloseSessionErrorListener: (err: Error) => void): void;
     createPublisher(): Publisher;
     createSubscriber(): Subscriber;
     disposePublisher(publisher: Publisher): void;
@@ -32,14 +34,13 @@ export interface Session {
 
 export class DefaultSession implements Session {
 
-    private serverUrl: string;
     private sessionData: string;
-    private privateTopic: string;
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
     private privateTopics: Array<string>;
-    private heartbeatIntervalSeconds: number;
-
+    public heartbeatIntervalSeconds: number;
+    public serverUrl: string;
+    public privateTopic: string;
     public closedByUser: boolean;
     public heartbeatTimer: NodeJS.Timer;
     public privateSubscriber: Subscriber;
@@ -104,47 +105,20 @@ export class DefaultSession implements Session {
         return this.privateTopics;
     };
 
-    init(): Promise<Event> {
-        return new Promise((resolve, reject) => {
-            this.webSocket.onopen = ((e: Event) => {
-                this.closedByUser = false;
-                this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
-                this.heartbeatTimer = this.privateSubscriber.getHeartbeatTimer(this.heartbeatIntervalSeconds);
-                log.info("connection started on " + this.serverUrl + ".");
-                resolve(e);
-            }).bind(this);
+    getUnexpectedCloseSessionError(unexpectedCloseSessionErrorListener: (err: Error) => void): void {
+        this.webSocket.onerror = ((err: Event) => {
+            const messageError = "Error on " + this.serverUrl + ".";
+            unexpectedCloseSessionErrorListener(new Error(messageError));
+            console.error(err);
+        }).bind(this);
 
-            this.webSocket.onerror = ((err: Event) => {
-                const messageError = "Error on " + this.serverUrl + ".";
-                reject(new Error(messageError));
-                console.error(err);
-            }).bind(this);
-
-            this.webSocket.onclose = ((closeEvent: CloseEvent) => {
-                log.info("connection on " + this.serverUrl + " closed.");
-                log.info(closeEvent);
-                clearInterval(this.heartbeatTimer);
-                this.dispose();
-            }).bind(this);
-        });
-    }
-
-    getUnexpectedCloseSessionError(): Promise<Error> {
-        return new Promise((resolve, reject) => {
-            this.webSocket.onerror = ((err: Event) => {
-                const messageError = "Error on " + this.serverUrl + ".";
-                reject(new Error(messageError));
-                console.error(err);
-            }).bind(this);
-
-            this.webSocket.onclose = ((closeEvent: CloseEvent) => {
-                clearInterval(this.heartbeatTimer);
-                this.dispose();
-                if (!this.closedByUser) {
-                    resolve(new Error("Unxecpected session close on " + this.serverUrl));
-                }
-            }).bind(this);
-        });
+        this.webSocket.onclose = ((closeEvent: CloseEvent) => {
+            clearInterval(this.heartbeatTimer);
+            this.dispose();
+            if (!this.closedByUser) {
+                unexpectedCloseSessionErrorListener(new Error("Unxecpected session close on " + this.serverUrl));
+            }
+        }).bind(this);
     }
 
     createPublisher(): Publisher {

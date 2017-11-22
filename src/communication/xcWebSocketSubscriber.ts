@@ -3,7 +3,7 @@ import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfi
 import { Observable } from "rxjs/Rx";
 
 import { Publisher } from "./xcWebSocketPublisher";
-import { Packet, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
+import { StateMachineInstance, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { isDebugEnabled } from "../loggerConfiguration";
@@ -19,10 +19,10 @@ export interface Subscriber {
     getCompositionModel(xcApiName: string): Promise<CompositionModel>;
     getXcApiList(): Promise<Array<String>>;
     getXcApi(xcApiFileName: string): Promise<string>;
-    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<Packet>>;
-    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet>;
+    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>>;
+    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;
-    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void;
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: StateMachineInstance) => void): void;
     sendSubscribeRequestToTopic(topic: string, kind: number): void;
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
     unsubscribe(componentName: string, stateMachineName: string): void;
@@ -137,7 +137,7 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<Packet>> {
+    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
         const thisSubscriber = this;
         const promise = this.observableMsg
@@ -179,7 +179,7 @@ export class DefaultSubscriber implements Subscriber {
     }
 
 
-    private prepareStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet> {
+    private prepareStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance> {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
@@ -187,23 +187,23 @@ export class DefaultSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
-            .filter((jsonData: Packet) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
+            .filter((jsonData: StateMachineInstance) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
         return filteredObservable;
     };
 
 
-    private isSameComponent(jsonData: Packet, componentCode: number): boolean {
+    private isSameComponent(jsonData: StateMachineInstance, componentCode: number): boolean {
         let sameComponent = jsonData.stateMachineRef.ComponentCode === componentCode;
         return sameComponent;
     }
 
-    private isSameStateMachine(jsonData: Packet, stateMachineCode: number): boolean {
+    private isSameStateMachine(jsonData: StateMachineInstance, stateMachineCode: number): boolean {
         let sameStateMachine = jsonData.stateMachineRef.StateMachineCode === stateMachineCode;
         return sameStateMachine;
     }
 
 
-    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<Packet> {
+    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance> {
         let filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
         this.sendSubscribeRequest(componentName, stateMachineName);
         return filteredObservable;
@@ -217,9 +217,9 @@ export class DefaultSubscriber implements Subscriber {
     };
 
 
-    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: Packet) => void): void {
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: StateMachineInstance) => void): void {
         this.prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe((jsonData: Packet) => {
+            .subscribe((jsonData: StateMachineInstance) => {
                 stateMachineUpdateListener(jsonData);
             });
         this.sendSubscribeRequest(componentName, stateMachineName);
@@ -310,7 +310,7 @@ export class DefaultSubscriber implements Subscriber {
             .splice(index, 1);
     };
 
-    public getJsonDataFromSnapshot(data: string, topic: string): Array<Packet> {
+    public getJsonDataFromSnapshot(data: string, topic: string): Array<StateMachineInstance> {
         if (isDebugEnabled()) {
             log.debug(`JsonData received from snapshot: ${topic} ${data}`);
         }
@@ -343,7 +343,7 @@ export class DefaultSubscriber implements Subscriber {
         return snapshotItems;
     };
 
-    public getJsonDataFromEvent(data: string, topic: string): Packet {
+    public getJsonDataFromEvent(data: string, topic: string): StateMachineInstance {
         if (isDebugEnabled()) {
             log.debug(`JsonData received from event: ${topic} ${data}`);
         }

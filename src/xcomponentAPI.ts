@@ -20,10 +20,6 @@ class XComponentAPI {
         return this.connection.getXcApiList(serverUrl);
     }
 
-    getUnexpectedCloseSessionError(serverUrl: string): Promise<Error> {
-        return this.connection.getUnexpectedCloseSessionError(serverUrl);
-    }
-
     createSession(xcApiFileName: string, serverUrl: string): Promise<Session> {
         return this.connection.createSession(xcApiFileName, serverUrl);
     }
