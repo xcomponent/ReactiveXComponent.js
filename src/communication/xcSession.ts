@@ -23,7 +23,6 @@ export interface Session {
     setPrivateTopic(privateTopic: string): void;
     addPrivateTopic(privateTopic: string): void;
     removePrivateTopic(privateTopic: string): void;
-    getUnexpectedCloseSessionError(unexpectedCloseSessionErrorListener: (err: Error) => void): void;
     createPublisher(): Publisher;
     createSubscriber(): Subscriber;
     disposePublisher(publisher: Publisher): void;
@@ -104,22 +103,6 @@ export class DefaultSession implements Session {
     getPrivateTopics(): string[] {
         return this.privateTopics;
     };
-
-    getUnexpectedCloseSessionError(unexpectedCloseSessionErrorListener: (err: Error) => void): void {
-        this.webSocket.onerror = ((err: Event) => {
-            const messageError = "Error on " + this.serverUrl + ".";
-            unexpectedCloseSessionErrorListener(new Error(messageError));
-            console.error(err);
-        }).bind(this);
-
-        this.webSocket.onclose = ((closeEvent: CloseEvent) => {
-            clearInterval(this.heartbeatTimer);
-            this.dispose();
-            if (!this.closedByUser) {
-                unexpectedCloseSessionErrorListener(new Error("Unxecpected session close on " + this.serverUrl));
-            }
-        }).bind(this);
-    }
 
     createPublisher(): Publisher {
         const publisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);

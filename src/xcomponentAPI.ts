@@ -20,8 +20,8 @@ class XComponentAPI {
         return this.connection.getXcApiList(serverUrl);
     }
 
-    createSession(xcApiFileName: string, serverUrl: string): Promise<Session> {
-        return this.connection.createSession(xcApiFileName, serverUrl);
+    createSession(xcApiFileName: string, serverUrl: string, errorListener?: (err: Error) => void): Promise<Session> {
+        return this.connection.createSession(xcApiFileName, serverUrl, errorListener);
     }
 
     createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string): Promise<Session> {

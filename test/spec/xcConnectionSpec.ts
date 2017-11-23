@@ -72,7 +72,15 @@ describe("Test xcConnection module", function () {
                 });
             });
         });
-
+        it("when server stops after running in the first place, unexpectedCloseSessionErrorListener should be called", (done) => {
+            const serverUrl = "wss://serverUrl";
+            const mockServer = new Server(serverUrl);
+            const xcApiFileName = "api.xcApi";
+            mockServer.on("connection", (server) => {
+                mockServer.close();
+            });
+            connection.createSession(xcApiFileName, serverUrl, (err) => done());
+        });
     });
 
 });

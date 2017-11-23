@@ -68,16 +68,15 @@ Example of XComponent API usage
 
         }
 
-        
+        const errorListener = (err) => {
+            console.error("Unexpected session close");
+            console.error(err);
+        }
         // create a session using a Promise
-        xcomponentapi.createSession(xcApiName, serverUrl)
+        // errorListener is an optional parameter. it handles imprevisible session close
+        xcomponentapi.createSession(xcApiName, serverUrl, errorListener)
             .then(session => {
                 console.log("Session created successfully");
-                // handle imprevisible session close using a Callback
-                session.getUnexpectedCloseSessionError((err) => {
-                    console.error(err)
-                })
-                       
                 sessionListener(session);
             })
             .catch(err => {

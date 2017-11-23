@@ -5,12 +5,13 @@ import { CompositionModel } from "../communication/xcomponentMessages";
 let log = require("loglevel");
 import { isDebugEnabled } from "../loggerConfiguration";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
+import { error } from "util";
 
 export interface Connection {
     getCompositionModel(xcApiName: string, serverUrl: string): Promise<CompositionModel>;
     getXcApiList(serverUrl: string): Promise<Array<String>>;
-    createSession(xcApiFileName: string, serverUrl: string): Promise<Session>;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string): Promise<Session>;
+    createSession(xcApiFileName: string, serverUrl: string, errotListener?: (err: Error) => void): Promise<Session>;
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, errorListener?: (err: Error) => void): Promise<Session>;
 }
 
 export class DefaultConnection implements Connection {
@@ -42,15 +43,15 @@ export class DefaultConnection implements Connection {
             });
     };
 
-    createSession(xcApiFileName: string, serverUrl: string): Promise<Session> {
-        return this.initConnection(xcApiFileName, serverUrl, null);
+    createSession(xcApiFileName: string, serverUrl: string, errorListener?: (err: Error) => void): Promise<Session> {
+        return this.initConnection(xcApiFileName, serverUrl, null, errorListener);
     };
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string): Promise<Session> {
-        return this.initConnection(xcApiFileName, serverUrl, sessionData);
+    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, errorListener?: (err: Error) => void): Promise<Session> {
+        return this.initConnection(xcApiFileName, serverUrl, sessionData, errorListener);
     };
 
-    private initSession(session: Session): Promise<Event> {
+    private initSession(session: Session, errorListener?: (err: Error) => void): Promise<Event> {
         return new Promise((resolve, reject) => {
             session.webSocket.onopen = (e: Event) => {
                 session.closedByUser = false;
@@ -69,15 +70,18 @@ export class DefaultConnection implements Connection {
             session.webSocket.onclose = (closeEvent: CloseEvent) => {
                 log.info("connection on " + session.serverUrl + " closed.");
                 log.info(closeEvent);
+                if (!session.closedByUser && errorListener) {
+                    errorListener(new Error("Unxecpected session close on " + session.serverUrl));
+                }
                 clearInterval(session.heartbeatTimer);
                 session.dispose();
             };
         });
     }
 
-    private initConnection(xcApiFileName: string, serverUrl: string, sessionData: string): Promise<Session> {
+    private initConnection(xcApiFileName: string, serverUrl: string, sessionData: string, errorListener?: (err: Error) => void): Promise<Session> {
         const session = SessionFactory(serverUrl, null, sessionData);
-        return this.initSession(session)
+        return this.initSession(session, errorListener)
             .then(_ => {
                 return session.privateSubscriber.getXcApi(xcApiFileName);
             })
