@@ -69,7 +69,7 @@ describe("Test xcSession module", function () {
             session.setPrivateTopic(privateTopic);
             expect(session.getDefaultPrivateTopic()).toEqual(privateTopic);
             session.addPrivateTopic(anotherPrivateTopic);
-            expect(session.getPrivateTopics()).toEqual([privateTopic, anotherPrivateTopic]);            
+            expect(session.getPrivateTopics()).toEqual([privateTopic, anotherPrivateTopic]);
         });
 
     });

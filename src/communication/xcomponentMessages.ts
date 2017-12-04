@@ -55,7 +55,7 @@ export interface StateMachineRef {
     send(messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
 };
 
-export interface Packet {
+export interface StateMachineInstance {
     stateMachineRef: StateMachineRef;
     jsonMessage: any;
 }

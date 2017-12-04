@@ -18,68 +18,72 @@ import xcomponentapi from 'reactivexcomponent.js';
 
 Example of XComponent API usage
 ```js
-        var serverUrl = "wss://localhost:443";
+        const serverUrl = "wss://localhost:443";
+        const xcApiName = "HelloWorldApi.xcApi"
 
-        var jsonMessage1 = { "Name": "Test1" };
-        var messageType1 = "XComponent.HelloWorld.UserObject.SayHello";
+        const jsonMessage = { "Name": "Test" };
+        const messageType = "XComponent.HelloWorld.UserObject.SayHello";
 
-        var jsonMessage2 = { "Name": "Test2" };
-        var messageType2 = messageType1;
+        const componentName = "HelloWorld";
+        const stateMachineName = "HelloWorldManager";
+        const stateMachineResponse = "HelloWorldResponse";
 
-        var jsonMessage3 = { "Name": "Test3" };
-        var messageType3 = "XComponent.HelloWorld.UserObject.SayGoodBye";
+        const visibilityPrivate = true;
 
-        var componentName = "HelloWorld";
-        var stateMachineName = "HelloWorldManager";
-        var stateMachineResponse = "HelloWorldResponse";
+        const sessionListener = (session) => {
 
-        var visibilityPrivate = true;
-
-        //sessionListener : callback executed when a session is open
-        var sessionListener = function (error, session) {
-            //check if session is initialized
-            if (error) {
-                console.log(error);
-                return;
-            }
-
-            //create a subscriber to subscribe
-            var subscriber = session.createSubscriber();
+            //Create a subscriber to receive updates and snapshots
+            const subscriber = session.createSubscriber();
             
-            //check if subscriber stateMachineResponse of is exposed by xcApi
+            //Check if subscriber stateMachineResponse of is exposed by xcApi
             if (subscriber.canSubscribe(componentName, stateMachineResponse)) {
                 //stateMachineUpdateListener : callback executed when a message is received by the subscribed stateMachine
-                var stateMachineUpdateListener = function (jsonData) {
+                const stateMachineUpdateListener = (jsonData) => {
                     //jsonMessage property is the public member
                     console.log(jsonData.jsonMessage);
                     //send context using directly stateMachineRef
-                    jsonData.stateMachineRef.send(messageType3, jsonMessage3);
+                    jsonData.stateMachineRef.send(messageType, jsonMessage);
                 }       
-                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);         
+                // subscribe using a callback                
+                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);  
             }
 
-                
-            //Snapshot is used as follow
-            subscriber.getSnapshot(componentName, stateMachineResponse, function (items) {
-                //items is an array of instances of stateMachineResponse
-                console.log(items[0].jsonMessage);
-                //each item contains a send method to send an event with a context
-                items[0].stateMachineRef.send(messageType, jsonMessage);
+            //Snapshot using with a Promise
+            subscriber.getSnapshot(componentName, stateMachineResponse).then(items => {
+                items.forEach(item => {
+                    console.log(item.jsonMessage);
+                    //each item contains stateMachineRef with a send method to publish an event to an instance                    
+                    item.stateMachineRef.send(messageType, jsonMessage);
+                })
             });
 
-            //create a publisher to send an event
-            var publisher = session.createPublisher(); 
+            //Create a publisher to send an event
+            const publisher = session.createPublisher(); 
 
-            //check if publisher of stateMachineName is exposed by xcApi
+            //Check if publisher of stateMachineName is exposed by xcApi
             if (publisher.canPublish(componentName, stateMachineName, messageType1)) {
                 //visibility parameter is optional. It is false by default.
-                publisher.send(componentName, stateMachineName, messageType1, jsonMessage1, visibilityPrivate);
+                publisher.send(componentName, stateMachineName, messageType1, jsonMessage, visibilityPrivate);
             } 
 
         }
 
-        var xcApiName = "HelloWorldApi.xcApi"            
-        xcomponentapi.createSession(xcApiName, serverUrl, sessionListener);
+        const errorListener = (err) => {
+            console.error("Unexpected session close");
+            console.error(err);
+        }
+        // create a session using a Promise
+        // errorListener is an optional parameter. it handles imprevisible session close
+        xcomponentapi.createSession(xcApiName, serverUrl, errorListener)
+            .then(session => {
+                console.log("Session created successfully");
+                sessionListener(session);
+            })
+            .catch(err => {
+                console.error(err);
+                console.error("Initial connection Error");
+            });
+        });        
 
 ```
 

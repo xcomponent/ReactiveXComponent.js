@@ -9,6 +9,9 @@ let log = require("loglevel");
 let uuid = require("uuid/v4");
 
 export interface Session {
+    serverUrl: string;
+    privateTopic: string;
+    heartbeatIntervalSeconds: number;
     closedByUser: boolean;
     privateSubscriber: Subscriber;
     replyPublisher: Publisher;
@@ -20,7 +23,6 @@ export interface Session {
     setPrivateTopic(privateTopic: string): void;
     addPrivateTopic(privateTopic: string): void;
     removePrivateTopic(privateTopic: string): void;
-    init(openListener: (e: Event) => void, errorListener: (err: Error) => void, closeListener: (e: CloseEvent) => void): void;
     createPublisher(): Publisher;
     createSubscriber(): Subscriber;
     disposePublisher(publisher: Publisher): void;
@@ -31,14 +33,13 @@ export interface Session {
 
 export class DefaultSession implements Session {
 
-    private serverUrl: string;
     private sessionData: string;
-    private privateTopic: string;
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
     private privateTopics: Array<string>;
-    private heartbeatIntervalSeconds: number;
-
+    public heartbeatIntervalSeconds: number;
+    public serverUrl: string;
+    public privateTopic: string;
     public closedByUser: boolean;
     public heartbeatTimer: NodeJS.Timer;
     public privateSubscriber: Subscriber;
@@ -58,7 +59,7 @@ export class DefaultSession implements Session {
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
         this.heartbeatIntervalSeconds = 10;
-        this.closedByUser = undefined;
+        this.closedByUser = false;
     }
 
     setPrivateTopic(privateTopic: string): void {
@@ -101,32 +102,6 @@ export class DefaultSession implements Session {
 
     getPrivateTopics(): string[] {
         return this.privateTopics;
-    };
-
-    init(openListener: (e: Event) => void, errorListener: (err: Error) => void, closeListener: (e: CloseEvent) => void): void {
-        const thisSession = this;
-
-        this.webSocket.onopen = ((e: Event) => {
-            this.closedByUser = false;
-            this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
-            this.heartbeatTimer = this.privateSubscriber.getHeartbeatTimer(this.heartbeatIntervalSeconds);
-            openListener(e);
-            log.info("connection started on " + this.serverUrl + ".");
-        }).bind(this);
-
-        this.webSocket.onerror = (e: Event) => {
-            const messageError = "Error on " + thisSession.serverUrl + ".";
-            errorListener(new Error(messageError));
-            console.log(e);
-        };
-
-        this.webSocket.onclose = ((e: CloseEvent) => {
-            log.info("connection on " + thisSession.serverUrl + " closed.");
-            log.info(e);
-            clearInterval(this.heartbeatTimer);
-            this.dispose();
-            closeListener(e);
-        }).bind(this);
     };
 
     createPublisher(): Publisher {

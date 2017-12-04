@@ -1,23 +1,15 @@
-var serverUrl = "wss://localhost:443";
-var xcApiName = "WorldHelloApi.xcApi";
+const serverUrl = "wss://localhost:443";
+const xcApiName = "HelloWorldApi.xcApi";
 
-var sessionListener = (error, session) => {
-    if (error) {
-        console.log(error);
-        reconnect();
-        return;
-    }
-};
-
-var reconnect = () => {
-    var timeBeforeReconnection = 2;
-    setTimeout(() => {
-        xcomponentapi.default.createSession(xcApiName, serverUrl, sessionListener, disconnectionErrorListener);
-    }, timeBeforeReconnection * 1000);
-};
-
-var disconnectionErrorListener = () => {
-    reconnect();
-};
-
-xcomponentapi.default.createSession(xcApiName, serverUrl, sessionListener, disconnectionErrorListener);
+xcomponentapi.default
+    .createSession(xcApiName, serverUrl, (err) => {
+        console.error("Unexecpected session close");
+        console.error(err);
+    })
+    .then(session => {
+        console.log("connected");
+    })
+    .catch(err => {
+        console.error(err);
+        console.error("Initial connection Error");
+    });
