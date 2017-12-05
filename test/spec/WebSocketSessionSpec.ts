@@ -1,7 +1,9 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import { Publisher, DefaultPublisher } from "../../src/communication/xcWebSocketPublisher";
-import { Subscriber, DefaultSubscriber } from "../../src/communication/xcWebSocketSubscriber";
-import { DefaultSession } from "../../src/communication/xcSession";
+import { WebSocketPublisher } from "../../src/communication/WebSocketPublisher";
+import { WebSocketSubscriber } from "../../src/communication/WebSocketSubscriber";
+import { Publisher } from "../../src/interfaces/Publisher";
+import { Subscriber } from "../../src/interfaces/Subscriber";
+import { WebSocketSession } from "../../src/communication/WebSocketSession";
 
 
 describe("Test xcSession module", function () {
@@ -11,12 +13,12 @@ describe("Test xcSession module", function () {
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
         });
 
         it("should return a new instance of Publisher", function () {
             let publisher = session.createPublisher();
-            expect(publisher instanceof DefaultPublisher).toBe(true);
+            expect(publisher instanceof WebSocketPublisher).toBe(true);
         });
 
     });
@@ -26,11 +28,11 @@ describe("Test xcSession module", function () {
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
         });
         it("should return a new instance of Subscriber", function () {
             let subscriber = session.createSubscriber();
-            expect(subscriber instanceof DefaultSubscriber).toBe(true);
+            expect(subscriber instanceof WebSocketSubscriber).toBe(true);
         });
     });
 
@@ -39,7 +41,7 @@ describe("Test xcSession module", function () {
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
         });
         it("should call onclose method when session is closed", function (done) {
             session.webSocket.onclose = function (e) {
@@ -54,7 +56,7 @@ describe("Test xcSession module", function () {
             const serverUrl = "wss:\\serverUrl";
             let mockWebSocket: any = {};
             mockWebSocket.send = jest.fn();
-            const session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            const session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
             session.setPrivateTopic(undefined);
             session.addPrivateTopic(undefined);
             expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
@@ -63,7 +65,7 @@ describe("Test xcSession module", function () {
         it("Should add and set correctly the given private topics", () => {
             const serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            const session = new DefaultSession(serverUrl, mockWebSocket, null, null);
+            const session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
             const privateTopic = "privateTopic";
             const anotherPrivateTopic = "anotherPrivateTopic";
             session.setPrivateTopic(privateTopic);

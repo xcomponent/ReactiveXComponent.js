@@ -5,6 +5,7 @@ import "rxjs/add/operator/map";
 import "rxjs/add/operator/filter";
 import "rxjs/add/operator/first";
 import "rxjs/add/observable/fromEvent";
+import "rxjs/add/operator/toPromise";
 import { Publisher } from "../interfaces/Publisher";
 import {
     StateMachineInstance, StateMachineRef, Component,

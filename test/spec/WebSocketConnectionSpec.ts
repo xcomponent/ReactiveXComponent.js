@@ -1,5 +1,6 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import { Connection, DefaultConnection } from "../../src/communication/xcConnection";
+import { WebSocketConnection } from "../../src/communication/WebSocketConnection";
+import { Connection } from "../../src/interfaces/Connection";
 import pako = require("pako");
 import { log } from "util";
 
@@ -16,7 +17,7 @@ describe("Test xcConnection module", function () {
     beforeEach(function () {
         (<any>window).WebSocket = WebSocket;
         (<any>window).isTestEnvironnement = true;
-        connection = new DefaultConnection();
+        connection = new WebSocketConnection();
     });
 
     describe("Test createSession method", function () {
@@ -60,7 +61,7 @@ describe("Test xcConnection module", function () {
 
             connection.createSession(xcApiFileName, serverUrl)
                 .catch(error => {
-                    // it refers explicitly to the unknown Api on the error message, not to some random crash                
+                    // it refers explicitly to the unknown Api on the error message, not to some random crash
                     expect(error.message).toMatch(xcApiFileName);
                     mockServer.stop(done);
                 });
