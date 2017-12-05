@@ -1,54 +1,30 @@
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 import { Observable } from "rxjs/Rx";
-
-import { Publisher } from "./xcWebSocketPublisher";
-import { StateMachineInstance, StateMachineRef, Component, CompositionModel, DeserializedData, CommandData, Header, Event, Data, getHeaderWithIncomingType, Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
+import { Publisher } from "../interfaces/Publisher";
+import {
+    StateMachineInstance, StateMachineRef, Component,
+    CompositionModel, DeserializedData, CommandData, Header,
+    Event, Data, getHeaderWithIncomingType,
+    Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { isDebugEnabled } from "../loggerConfiguration";
 import { error } from "util";
+import { Subscriber } from "../interfaces/Subscriber";
+import * as log from "loglevel";
+import * as uuid from "uuid/v4";
 
-let log = require("loglevel");
-let uuid = require("uuid/v4");
-
-export interface Subscriber {
-    privateTopics: Array<String>;
-    replyPublisher: Publisher;
-    getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
-    getCompositionModel(xcApiName: string): Promise<CompositionModel>;
-    getXcApiList(): Promise<Array<String>>;
-    getXcApi(xcApiFileName: string): Promise<string>;
-    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>>;
-    getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance>;
-    canSubscribe(componentName: string, stateMachineName: string): boolean;
-    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: StateMachineInstance) => void): void;
-    sendSubscribeRequestToTopic(topic: string, kind: number): void;
-    sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
-    unsubscribe(componentName: string, stateMachineName: string): void;
-    dispose(): void;
-}
-
-export class DefaultSubscriber implements Subscriber {
-
-    private webSocket: WebSocket;
-    private configuration: ApiConfiguration;
+export class WebSocketSubscriber implements Subscriber {
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private observableMsg: Observable<MessageEvent>;
     private deserializer: Deserializer;
     private serializer: Serializer;
     private timeout: string;
 
-    public privateTopics: Array<String>;
-    public replyPublisher: Publisher;
-
-    constructor(webSocket: WebSocket, configuration: ApiConfiguration, replyPublisher: Publisher, privateTopics: Array<String>) {
-        this.webSocket = webSocket;
-        this.configuration = configuration;
-        this.replyPublisher = replyPublisher;
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, public replyPublisher: Publisher, public privateTopics: Array<String>) {
         this.subscribedStateMachines = {};
         this.observableMsg = Observable.fromEvent(this.webSocket, "message");
-        this.privateTopics = privateTopics;
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
         this.timeout = "00:00:10";
@@ -115,7 +91,6 @@ export class DefaultSubscriber implements Subscriber {
         return promise;
     };
 
-
     getXcApi(xcApiFileName: string): Promise<string> {
         const thisSubscriber = this;
         const command = Commands[Commands.getXcApi];
@@ -135,7 +110,6 @@ export class DefaultSubscriber implements Subscriber {
         this.webSocket.send(thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData));
         return promise;
     };
-
 
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
@@ -178,7 +152,6 @@ export class DefaultSubscriber implements Subscriber {
         return dataToSendSnapshot;
     }
 
-
     private prepareStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance> {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
@@ -191,7 +164,6 @@ export class DefaultSubscriber implements Subscriber {
         return filteredObservable;
     };
 
-
     private isSameComponent(jsonData: StateMachineInstance, componentCode: number): boolean {
         let sameComponent = jsonData.stateMachineRef.ComponentCode === componentCode;
         return sameComponent;
@@ -202,20 +174,17 @@ export class DefaultSubscriber implements Subscriber {
         return sameStateMachine;
     }
 
-
     getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance> {
         let filteredObservable = this.prepareStateMachineUpdates(componentName, stateMachineName);
         this.sendSubscribeRequest(componentName, stateMachineName);
         return filteredObservable;
     };
 
-
     canSubscribe(componentName: string, stateMachineName: string): boolean {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         return this.configuration.containsSubscriber(componentCode, stateMachineCode, SubscriberEventType.Update);
     };
-
 
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: StateMachineInstance) => void): void {
         this.prepareStateMachineUpdates(componentName, stateMachineName)
@@ -368,5 +337,4 @@ export class DefaultSubscriber implements Subscriber {
             jsonMessage: JSON.parse(jsonData.JsonMessage)
         };
     };
-
 }
