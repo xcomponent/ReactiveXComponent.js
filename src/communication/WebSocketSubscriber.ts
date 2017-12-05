@@ -13,7 +13,6 @@ import {
     Event, Data, getHeaderWithIncomingType,
     Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { } from "./clientMessages";
-import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { isDebugEnabled } from "../loggerConfiguration";
 import { error } from "util";
 import { Subscriber } from "../interfaces/Subscriber";
