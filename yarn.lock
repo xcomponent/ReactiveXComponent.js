@@ -2429,9 +2429,9 @@ lodash@^4.14.0, lodash@^4.17.4:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
-loglevel@^1.4.1:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.6.0.tgz#ae0caa561111498c5ba13723d6fb631d24003934"
+log4ts@^0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/log4ts/-/log4ts-0.4.2.tgz#379c40bdc8390eab9cea4bd6f7bbae8b38d9839b"
 
 longest@^1.0.1:
   version "1.0.1"

@@ -13,13 +13,13 @@ import {
     Event, Data, getHeaderWithIncomingType,
     Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { } from "./clientMessages";
-import { isDebugEnabled } from "../loggerConfiguration";
 import { error } from "util";
 import { Subscriber } from "../interfaces/Subscriber";
-import * as log from "loglevel";
 import * as uuid from "uuid/v4";
+import { Logger } from "log4ts";
 
 export class WebSocketSubscriber implements Subscriber {
+    private logger: Logger = Logger.getLogger("WebSocketSubscriber");
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private observableMsg: Observable<MessageEvent>;
     private deserializer: Deserializer;
@@ -41,7 +41,7 @@ export class WebSocketSubscriber implements Subscriber {
             .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
             .filter((data: DeserializedData) => data.command === command)
             .subscribe((data: DeserializedData) => {
-                log.info("Heartbeat received successfully");
+                this.logger.info("Heartbeat received successfully");
             });
         let commandData = {
             Command: command,
@@ -50,7 +50,7 @@ export class WebSocketSubscriber implements Subscriber {
         let input = thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         return setInterval(() => {
             thisSubscriber.webSocket.send(input);
-            log.info("Heartbeat sent");
+            this.logger.info("Heartbeat sent");
         }, heartbeatIntervalSeconds * 1000);
     }
 
@@ -62,7 +62,7 @@ export class WebSocketSubscriber implements Subscriber {
             .filter((data: DeserializedData) => data.command === command)
             .first()
             .map((data: DeserializedData) => {
-                log.info("Model " + xcApiName + " received successfully");
+                this.logger.info("Model " + xcApiName + " received successfully");
                 return thisSubscriber.deserializer.getJsonDataFromGetModelRequest(data.stringData);
             })
             .toPromise();
@@ -83,7 +83,7 @@ export class WebSocketSubscriber implements Subscriber {
             .filter((data: DeserializedData) => data.command === command)
             .first()
             .map((data: DeserializedData) => {
-                log.info("ApiList received successfully");
+                this.logger.info("ApiList received successfully");
                 return thisSubscriber.deserializer.getJsonDataFromGetXcApiListRequest(data.stringData);
             })
             .toPromise();
@@ -103,7 +103,7 @@ export class WebSocketSubscriber implements Subscriber {
             .filter((data: DeserializedData) => data.command === command)
             .first()
             .map((data: DeserializedData) => {
-                log.info(xcApiFileName + " " + "received successfully");
+                this.logger.info(xcApiFileName + " " + "received successfully");
                 return thisSubscriber.deserializer.getJsonDataFromXcApiRequest(data.stringData);
             })
             .toPromise();
@@ -284,9 +284,7 @@ export class WebSocketSubscriber implements Subscriber {
     };
 
     public getJsonDataFromSnapshot(data: string, topic: string): Array<StateMachineInstance> {
-        if (isDebugEnabled()) {
-            log.debug(`JsonData received from snapshot: ${topic} ${data}`);
-        }
+        this.logger.debug("JsonData received from snapshot: ", { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
@@ -317,9 +315,7 @@ export class WebSocketSubscriber implements Subscriber {
     };
 
     public getJsonDataFromEvent(data: string, topic: string): StateMachineInstance {
-        if (isDebugEnabled()) {
-            log.debug(`JsonData received from event: ${topic} ${data}`);
-        }
+        this.logger.debug("JsonData received from event: ", { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let componentCode = jsonData.Header.ComponentCode;
         let stateMachineCode = jsonData.Header.StateMachineCode;

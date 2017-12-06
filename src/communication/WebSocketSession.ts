@@ -7,7 +7,6 @@ import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { Publisher } from "../interfaces/Publisher";
 import { Subscriber } from "../interfaces/Subscriber";
 import { Session } from "../interfaces/Session";
-import * as log from "loglevel";
 import * as uuid from "uuid/v4";
 
 export class WebSocketSession implements Session {
