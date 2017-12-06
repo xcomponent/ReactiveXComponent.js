@@ -1,15 +1,16 @@
-import { Connection, DefaultConnection } from "./communication/xcConnection";
-import { Session } from "./communication/xcSession";
+import { WebSocketConnection } from "./communication/WebSocketConnection";
+import { Session } from "./interfaces/Session";
+import { Connection } from "./interfaces/Connection";
 import { CompositionModel } from "./communication/xcomponentMessages";
 import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "constants";
-let log = require("loglevel");
+import * as log from "loglevel";
 
 class XComponentAPI {
     private connection: Connection;
 
-    constructor() {
-        this.setLogLevel(log.levels.INFO);
-        this.connection = new DefaultConnection();
+    constructor(logLevel: number = log.levels.INFO) {
+        this.setLogLevel(logLevel);
+        this.connection = new WebSocketConnection();
     }
 
     getCompositionModel(xcApiName: string, serverUrl: string): Promise<CompositionModel> {

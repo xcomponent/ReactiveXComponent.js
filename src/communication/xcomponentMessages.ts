@@ -1,6 +1,5 @@
 let log = require("loglevel");
 import { isDebugEnabled } from "../loggerConfiguration";
-import { FSharpFormat } from "../configuration/FSharpConfiguration";
 import * as pako from "pako";
 import * as atob from "atob";
 

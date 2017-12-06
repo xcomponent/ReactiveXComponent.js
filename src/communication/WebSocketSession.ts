@@ -1,38 +1,16 @@
 import javascriptHelper from "../javascriptHelper";
-import { Publisher, DefaultPublisher } from "./xcWebSocketPublisher";
-import { DefaultSubscriber, Subscriber } from "./xcWebSocketSubscriber";
+import { WebSocketPublisher } from "./WebSocketPublisher";
+import { WebSocketSubscriber } from "./WebSocketSubscriber";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
+import { Publisher } from "../interfaces/Publisher";
+import { Subscriber } from "../interfaces/Subscriber";
+import { Session } from "../interfaces/Session";
+import * as log from "loglevel";
+import * as uuid from "uuid/v4";
 
-let log = require("loglevel");
-let uuid = require("uuid/v4");
-
-export interface Session {
-    serverUrl: string;
-    privateTopic: string;
-    heartbeatIntervalSeconds: number;
-    closedByUser: boolean;
-    privateSubscriber: Subscriber;
-    replyPublisher: Publisher;
-    configuration: ApiConfiguration;
-    webSocket: WebSocket;
-    heartbeatTimer: NodeJS.Timer;
-    getDefaultPrivateTopic(): string;
-    getPrivateTopics(): string[];
-    setPrivateTopic(privateTopic: string): void;
-    addPrivateTopic(privateTopic: string): void;
-    removePrivateTopic(privateTopic: string): void;
-    createPublisher(): Publisher;
-    createSubscriber(): Subscriber;
-    disposePublisher(publisher: Publisher): void;
-    disposeSubscriber(subscriber: Subscriber): void;
-    dispose(): void;
-    close(): void;
-}
-
-export class DefaultSession implements Session {
-
+export class WebSocketSession implements Session {
     private sessionData: string;
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
@@ -53,8 +31,8 @@ export class DefaultSession implements Session {
         this.configuration = configuration;
         this.privateTopic = uuid();
         this.sessionData = sessionData;
-        this.privateSubscriber = new DefaultSubscriber(this.webSocket, null, null, null);
-        this.replyPublisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
+        this.privateSubscriber = new WebSocketSubscriber(this.webSocket, null, null, null);
+        this.replyPublisher = new WebSocketPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this.publishers = [this.replyPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
@@ -105,13 +83,13 @@ export class DefaultSession implements Session {
     };
 
     createPublisher(): Publisher {
-        const publisher = new DefaultPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
+        const publisher = new WebSocketPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
         this.publishers.push(publisher);
         return publisher;
     };
 
     createSubscriber(): Subscriber {
-        const subscriber = new DefaultSubscriber(this.webSocket, this.configuration, this.replyPublisher, this.privateTopics);
+        const subscriber = new WebSocketSubscriber(this.webSocket, this.configuration, this.replyPublisher, this.privateTopics);
         this.subscribers.push(subscriber);
         return subscriber;
     };
@@ -152,12 +130,11 @@ export class DefaultSession implements Session {
         this.closedByUser = true;
         this.webSocket.close();
     };
-
 }
 
 export const SessionFactory = (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session => {
     const WebSocket: any = javascriptHelper().WebSocket;
     const webSocket = new WebSocket(serverUrl);
-    const session = new DefaultSession(serverUrl, webSocket, configuration, sessionData);
+    const session = new WebSocketSession(serverUrl, webSocket, configuration, sessionData);
     return session;
 };

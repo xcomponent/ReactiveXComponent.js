@@ -1,21 +1,8 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { FSharpFormat, getFSharpFormat } from "../configuration/FSharpConfiguration";
 import { Header, Event, Data, Serializer } from "./xcomponentMessages";
+import { Publisher } from "../interfaces/Publisher";
 
-
-
-export interface Publisher {
-    webSocket: WebSocket;
-    configuration: ApiConfiguration;
-    privateTopic: string;
-    sessionData: string;
-    sendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
-    send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
-    canPublish(componentName: string, stateMachineName: string, messageType: string): boolean;
-}
-
-export class DefaultPublisher implements Publisher {
-
+export class WebSocketPublisher implements Publisher {
     public webSocket: WebSocket;
     public configuration: ApiConfiguration;
     public privateTopic: string;
@@ -100,5 +87,4 @@ export class DefaultPublisher implements Publisher {
         }
         return false;
     };
-
 }

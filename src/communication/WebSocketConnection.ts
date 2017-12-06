@@ -1,20 +1,15 @@
-import { SessionFactory, Session } from "./xcSession";
+import { SessionFactory } from "./WebSocketSession";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
 import { CompositionModel } from "../communication/xcomponentMessages";
-let log = require("loglevel");
 import { isDebugEnabled } from "../loggerConfiguration";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { error } from "util";
+import { Session } from "../interfaces/Session";
+import { Connection } from "../interfaces/Connection";
+import * as log from "loglevel";
 
-export interface Connection {
-    getCompositionModel(xcApiName: string, serverUrl: string): Promise<CompositionModel>;
-    getXcApiList(serverUrl: string): Promise<Array<String>>;
-    createSession(xcApiFileName: string, serverUrl: string, errotListener?: (err: Error) => void): Promise<Session>;
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string, errorListener?: (err: Error) => void): Promise<Session>;
-}
-
-export class DefaultConnection implements Connection {
+export class WebSocketConnection implements Connection {
 
     constructor() {
     }
