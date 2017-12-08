@@ -10,16 +10,16 @@ import * as uuid from "uuid/v4";
 
 export class WebSocketSession implements Session {
     private sessionData: string;
-    private publishers: Array<Publisher>;
-    private subscribers: Array<Subscriber>;
+    private publishers: Array<WebSocketPublisher>;
+    private subscribers: Array<WebSocketSubscriber>;
     private privateTopics: Array<string>;
     private configuration: ApiConfiguration;
+    private stateMachineRefSendPublisher: WebSocketPublisher;
     public heartbeatIntervalSeconds: number;
     public privateTopic: string;
     public closedByUser: boolean;
     public heartbeatTimer: number;
     public privateSubscriber: Subscriber;
-    public replyPublisher: WebSocketPublisher;
     public webSocket: WebSocket;
 
     constructor(webSocket: WebSocket, sessionData?: string) {
@@ -27,8 +27,8 @@ export class WebSocketSession implements Session {
         this.privateTopic = uuid();
         this.sessionData = sessionData;
         this.privateSubscriber = new WebSocketSubscriber(this.webSocket, null, null, null);
-        this.replyPublisher = new WebSocketPublisher(this.webSocket, null, this.privateTopic, this.sessionData);
-        this.publishers = [this.replyPublisher];
+        this.stateMachineRefSendPublisher = new WebSocketPublisher(this.webSocket, null, this.privateTopic, this.sessionData);
+        this.publishers = [this.stateMachineRefSendPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
         this.heartbeatIntervalSeconds = 10;
@@ -37,7 +37,7 @@ export class WebSocketSession implements Session {
 
     public setConfiguration(configuration: ApiConfiguration) {
         this.configuration = configuration;
-        this.replyPublisher.configuration = configuration;
+        this.stateMachineRefSendPublisher.configuration = configuration;
     }
 
     setPrivateTopic(privateTopic: string): void {
@@ -48,9 +48,6 @@ export class WebSocketSession implements Session {
             this.publishers.forEach((publisher: Publisher) => {
                 publisher.privateTopic = privateTopic;
             });
-            this.subscribers.forEach((subscriber: Subscriber) => {
-                subscriber.replyPublisher = this.replyPublisher;
-            }, this);
         }
     };
 
@@ -89,7 +86,7 @@ export class WebSocketSession implements Session {
     };
 
     createSubscriber(): Subscriber {
-        const subscriber = new WebSocketSubscriber(this.webSocket, this.configuration, this.replyPublisher, this.privateTopics);
+        const subscriber = new WebSocketSubscriber(this.webSocket, this.configuration, this.stateMachineRefSendPublisher, this.privateTopics);
         this.subscribers.push(subscriber);
         return subscriber;
     };
