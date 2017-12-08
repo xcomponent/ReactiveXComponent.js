@@ -3,15 +3,13 @@ import { Subscriber } from "../interfaces/Subscriber";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 
 export interface Session {
-    serverUrl: string;
     privateTopic: string;
     heartbeatIntervalSeconds: number;
     closedByUser: boolean;
     privateSubscriber: Subscriber;
     replyPublisher: Publisher;
-    configuration: ApiConfiguration;
     webSocket: WebSocket;
-    heartbeatTimer: NodeJS.Timer;
+    heartbeatTimer: number;
     getDefaultPrivateTopic(): string;
     getPrivateTopics(): string[];
     setPrivateTopic(privateTopic: string): void;

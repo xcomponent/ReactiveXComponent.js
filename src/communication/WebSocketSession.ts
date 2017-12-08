@@ -1,4 +1,3 @@
-import javascriptHelper from "../javascriptHelper";
 import { WebSocketPublisher } from "./WebSocketPublisher";
 import { WebSocketSubscriber } from "./WebSocketSubscriber";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
@@ -14,29 +13,31 @@ export class WebSocketSession implements Session {
     private publishers: Array<Publisher>;
     private subscribers: Array<Subscriber>;
     private privateTopics: Array<string>;
+    private configuration: ApiConfiguration;
     public heartbeatIntervalSeconds: number;
-    public serverUrl: string;
     public privateTopic: string;
     public closedByUser: boolean;
-    public heartbeatTimer: NodeJS.Timer;
+    public heartbeatTimer: number;
     public privateSubscriber: Subscriber;
-    public replyPublisher: Publisher;
-    public configuration: ApiConfiguration;
+    public replyPublisher: WebSocketPublisher;
     public webSocket: WebSocket;
 
-    constructor(serverUrl: string, webSocket: WebSocket, configuration: ApiConfiguration, sessionData: string) {
-        this.serverUrl = serverUrl;
+    constructor(webSocket: WebSocket, sessionData?: string) {
         this.webSocket = webSocket;
-        this.configuration = configuration;
         this.privateTopic = uuid();
         this.sessionData = sessionData;
         this.privateSubscriber = new WebSocketSubscriber(this.webSocket, null, null, null);
-        this.replyPublisher = new WebSocketPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
+        this.replyPublisher = new WebSocketPublisher(this.webSocket, null, this.privateTopic, this.sessionData);
         this.publishers = [this.replyPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
         this.heartbeatIntervalSeconds = 10;
         this.closedByUser = false;
+    }
+
+    public setConfiguration(configuration: ApiConfiguration) {
+        this.configuration = configuration;
+        this.replyPublisher.configuration = configuration;
     }
 
     setPrivateTopic(privateTopic: string): void {
@@ -130,10 +131,3 @@ export class WebSocketSession implements Session {
         this.webSocket.close();
     };
 }
-
-export const SessionFactory = (serverUrl: string, configuration: ApiConfiguration, sessionData: string): Session => {
-    const WebSocket: any = javascriptHelper().WebSocket;
-    const webSocket = new WebSocket(serverUrl);
-    const session = new WebSocketSession(serverUrl, webSocket, configuration, sessionData);
-    return session;
-};

@@ -2,7 +2,6 @@ import { WebSocketConnection } from "./communication/WebSocketConnection";
 import { Session } from "./interfaces/Session";
 import { Connection } from "./interfaces/Connection";
 import { CompositionModel } from "./communication/xcomponentMessages";
-import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "constants";
 import { Logger, LoggerConfig } from "log4ts";
 import BasicLayout from "log4ts/build/layouts/BasicLayout";
 import ConsoleAppender from "log4ts/build/appenders/ConsoleAppender";
