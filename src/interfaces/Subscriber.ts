@@ -5,7 +5,7 @@ import { Observable } from "rxjs/Observable";
 export interface Subscriber {
     privateTopics: Array<String>;
     replyPublisher: Publisher;
-    getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer;
+    getHeartbeatTimer(heartbeatIntervalSeconds: number): number;
     getCompositionModel(xcApiName: string): Promise<CompositionModel>;
     getXcApiList(): Promise<Array<String>>;
     getXcApi(xcApiFileName: string): Promise<string>;

@@ -13,7 +13,7 @@ describe("Test xcSession module", function () {
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
+            session = new WebSocketSession(mockWebSocket);
         });
 
         it("should return a new instance of Publisher", function () {
@@ -28,7 +28,7 @@ describe("Test xcSession module", function () {
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
+            session = new WebSocketSession(mockWebSocket);
         });
         it("should return a new instance of Subscriber", function () {
             let subscriber = session.createSubscriber();
@@ -41,7 +41,7 @@ describe("Test xcSession module", function () {
         beforeEach(function () {
             let serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
+            session = new WebSocketSession(mockWebSocket);
         });
         it("should call onclose method when session is closed", function (done) {
             session.webSocket.onclose = function (e) {
@@ -56,7 +56,7 @@ describe("Test xcSession module", function () {
             const serverUrl = "wss:\\serverUrl";
             let mockWebSocket: any = {};
             mockWebSocket.send = jest.fn();
-            const session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
+            const session = new WebSocketSession(mockWebSocket);
             session.setPrivateTopic(undefined);
             session.addPrivateTopic(undefined);
             expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
@@ -65,7 +65,7 @@ describe("Test xcSession module", function () {
         it("Should add and set correctly the given private topics", () => {
             const serverUrl = "wss:\\serverUrl";
             let mockWebSocket = new WebSocket(serverUrl);
-            const session = new WebSocketSession(serverUrl, mockWebSocket, null, null);
+            const session = new WebSocketSession(mockWebSocket);
             const privateTopic = "privateTopic";
             const anotherPrivateTopic = "anotherPrivateTopic";
             session.setPrivateTopic(privateTopic);

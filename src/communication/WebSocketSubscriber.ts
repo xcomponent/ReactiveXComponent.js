@@ -34,7 +34,7 @@ export class WebSocketSubscriber implements Subscriber {
         this.timeout = "00:00:10";
     }
 
-    getHeartbeatTimer(heartbeatIntervalSeconds: number): NodeJS.Timer {
+    getHeartbeatTimer(heartbeatIntervalSeconds: number): number {
         let thisSubscriber = this;
         let command = Commands[Commands.hb];
         this.observableMsg

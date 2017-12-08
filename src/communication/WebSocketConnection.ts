@@ -1,4 +1,4 @@
-import { SessionFactory } from "./WebSocketSession";
+import { WebSocketSession } from "./WebSocketSession";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
 import { CompositionModel } from "../communication/xcomponentMessages";
@@ -15,8 +15,8 @@ export class WebSocketConnection implements Connection {
     }
 
     getCompositionModel(xcApiName: string, serverUrl: string): Promise<CompositionModel> {
-        const session = SessionFactory(serverUrl, null, null);
-        return this.initSession(session)
+        const session = new WebSocketSession(new WebSocket(serverUrl));
+        return this.initSession(serverUrl, session)
             .then(_ => {
                 return session.privateSubscriber.getCompositionModel(xcApiName);
             })
@@ -26,8 +26,8 @@ export class WebSocketConnection implements Connection {
     }
 
     getXcApiList(serverUrl: string): Promise<Array<String>> {
-        const session = SessionFactory(serverUrl, null, null);
-        return this.initSession(session)
+        const session = new WebSocketSession(new WebSocket(serverUrl));
+        return this.initSession(serverUrl, session)
             .then(_ => {
                 return session.privateSubscriber.getXcApiList();
             })
@@ -44,36 +44,9 @@ export class WebSocketConnection implements Connection {
         return this.initConnection(xcApiFileName, serverUrl, sessionData, errorListener);
     };
 
-    private initSession(session: Session, errorListener?: (err: Error) => void): Promise<Event> {
-        return new Promise((resolve, reject) => {
-            session.webSocket.onopen = (e: Event) => {
-                session.closedByUser = false;
-                session.privateSubscriber.sendSubscribeRequestToTopic(session.privateTopic, Kinds.Private);
-                session.heartbeatTimer = session.privateSubscriber.getHeartbeatTimer(session.heartbeatIntervalSeconds);
-                this.logger.info("connection started on " + session.serverUrl + ".");
-                resolve(e);
-            };
-
-            session.webSocket.onerror = ((err: Event) => {
-                const messageError = "Error on " + session.serverUrl + ".";
-                reject(new Error(messageError));
-                console.error(err);
-            }).bind(this);
-
-            session.webSocket.onclose = (closeEvent: CloseEvent) => {
-                this.logger.info("connection on " + session.serverUrl + " closed.", closeEvent);
-                if (!session.closedByUser && errorListener) {
-                    errorListener(new Error("Unxecpected session close on " + session.serverUrl));
-                }
-                clearInterval(session.heartbeatTimer);
-                session.dispose();
-            };
-        });
-    }
-
     private initConnection(xcApiFileName: string, serverUrl: string, sessionData: string, errorListener?: (err: Error) => void): Promise<Session> {
-        const session = SessionFactory(serverUrl, null, sessionData);
-        return this.initSession(session, errorListener)
+        const session = new WebSocketSession(new WebSocket(serverUrl), sessionData);
+        return this.initSession(serverUrl, session, errorListener)
             .then(_ => {
                 return session.privateSubscriber.getXcApi(xcApiFileName);
             })
@@ -85,9 +58,35 @@ export class WebSocketConnection implements Connection {
                 return parser.parse(xcApi);
             })
             .then(configuration => {
-                session.configuration = configuration;
-                session.replyPublisher.configuration = configuration;
+                session.setConfiguration(configuration);
                 return session;
             });
+    }
+
+    private initSession(serverUrl: string, session: Session, errorListener?: (err: Error) => void): Promise<Event> {
+        return new Promise((resolve, reject) => {
+            session.webSocket.onopen = (e: Event) => {
+                session.closedByUser = false;
+                session.privateSubscriber.sendSubscribeRequestToTopic(session.privateTopic, Kinds.Private);
+                session.heartbeatTimer = session.privateSubscriber.getHeartbeatTimer(session.heartbeatIntervalSeconds);
+                this.logger.info("connection started on " + serverUrl + ".");
+                resolve(e);
+            };
+
+            session.webSocket.onerror = ((err: Event) => {
+                const messageError = "Error on " + serverUrl + ".";
+                reject(new Error(messageError));
+                console.error(err);
+            }).bind(this);
+
+            session.webSocket.onclose = (closeEvent: CloseEvent) => {
+                this.logger.info("connection on " + serverUrl + " closed.", closeEvent);
+                if (!session.closedByUser && errorListener) {
+                    errorListener(new Error("Unxecpected session close on " + serverUrl));
+                }
+                clearInterval(session.heartbeatTimer);
+                session.dispose();
+            };
+        });
     }
 }

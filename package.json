@@ -63,7 +63,6 @@
     "@types/jest": "^18.1.1",
     "@types/pako": "^0.2.31",
     "@types/rx": "^4.1.1",
-    "@types/websocket": "0.0.32",
     "@types/xml2js": "0.0.32",
     "@types/xmldom": "^0.1.28",
     "atob": "^2.0.3",
@@ -72,7 +71,6 @@
     "rxjs": "^5.3.0",
     "typescript-collections": "^1.2.3",
     "uuid": "^3.0.1",
-    "websocket": "^1.0.24",
     "xml2js": "^0.4.17"
   },
   "devDependencies": {
