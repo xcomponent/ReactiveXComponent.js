@@ -90,15 +90,15 @@ Example of XComponent API usage
 ## Build from source
 Download the source code and execute the following commands:
 ``` 
-npm install
-npm run build    
+yarn install
+yarn build    
 ```
-*xcomponentapi.js* is built in the *dist* folder. 
+*xcomponentapi.js* is built in the *lib* folder. 
 
 ## Run unit tests
 Execute the following command:
 ``` 
-npm test        
+yarn test        
 ```
 
 ## Contributing

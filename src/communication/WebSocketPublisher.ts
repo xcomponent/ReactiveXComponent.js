@@ -1,5 +1,5 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { Header, Event, Data, Serializer } from "./xcomponentMessages";
+import { Header, Event, Data, Serializer, StateMachineRef } from "./xcomponentMessages";
 import { Publisher } from "../interfaces/Publisher";
 
 export class WebSocketPublisher implements Publisher {
@@ -7,7 +7,6 @@ export class WebSocketPublisher implements Publisher {
     public configuration: ApiConfiguration;
     public privateTopic: string;
     public sessionData: string;
-
     private serializer: Serializer;
 
     constructor(webSocket: WebSocket, configuration: ApiConfiguration, privateTopic: string, sessionData: string) {
@@ -18,10 +17,25 @@ export class WebSocketPublisher implements Publisher {
         this.serializer = new Serializer();
     }
 
-    send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
+    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
+    };
+
+    public sendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
+        let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+        let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
+        this.webSocket.send(webSocketInput);
+    };
+
+    public canPublish(componentName: string, stateMachineName: string, messageType: string): boolean {
+        if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
+            const componentCode = this.configuration.getComponentCode(componentName);
+            const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
+            return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
+        }
+        return false;
     };
 
     private getDataToSend(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
@@ -58,12 +72,6 @@ export class WebSocketPublisher implements Publisher {
         return publisher.routingKey;
     }
 
-    sendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
-        let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-        let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
-        this.webSocket.send(webSocketInput);
-    };
-
     private getDataToSendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
@@ -78,13 +86,4 @@ export class WebSocketPublisher implements Publisher {
             }
         };
     }
-
-    canPublish(componentName: string, stateMachineName: string, messageType: string): boolean {
-        if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
-            const componentCode = this.configuration.getComponentCode(componentName);
-            const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
-            return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
-        }
-        return false;
-    };
 }
