@@ -3,40 +3,46 @@ import { Session } from "./interfaces/Session";
 import { Connection } from "./interfaces/Connection";
 import { CompositionModel } from "./communication/xcomponentMessages";
 import { SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION } from "constants";
-import * as log from "loglevel";
+import { Logger, LoggerConfig } from "log4ts";
+import BasicLayout from "log4ts/build/layouts/BasicLayout";
+import ConsoleAppender from "log4ts/build/appenders/ConsoleAppender";
+import { LogLevel } from "log4ts/build/LogLevel";
 
 class XComponentAPI {
+    private loggerconfig: LoggerConfig;
     private connection: Connection;
 
-    constructor(logLevel: number = log.levels.INFO) {
-        this.setLogLevel(logLevel);
+    public constructor(logLevel: LogLevel = LogLevel.INFO) {
+        let consoleAppender = new ConsoleAppender();
+        consoleAppender.setLayout(new BasicLayout());
+        this.loggerconfig = new LoggerConfig(consoleAppender, logLevel);
+        Logger.setConfig(this.loggerconfig);
         this.connection = new WebSocketConnection();
     }
 
-    getCompositionModel(xcApiName: string, serverUrl: string): Promise<CompositionModel> {
+    public getCompositionModel(xcApiName: string, serverUrl: string): Promise<CompositionModel> {
         return this.connection.getCompositionModel(xcApiName, serverUrl);
     }
 
-    getXcApiList(serverUrl: string): Promise<Array<String>> {
+    public getXcApiList(serverUrl: string): Promise<Array<String>> {
         return this.connection.getXcApiList(serverUrl);
     }
 
-    createSession(xcApiFileName: string, serverUrl: string, errorListener?: (err: Error) => void): Promise<Session> {
+    public createSession(xcApiFileName: string, serverUrl: string, errorListener?: (err: Error) => void): Promise<Session> {
         return this.connection.createSession(xcApiFileName, serverUrl, errorListener);
     }
 
-    createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string): Promise<Session> {
+    public createAuthenticatedSession(xcApiFileName: string, serverUrl: string, sessionData: string): Promise<Session> {
         return this.connection.createAuthenticatedSession(xcApiFileName, serverUrl, sessionData);
     }
 
-    setLogLevel(logLevel: number): void {
-        log.setLevel(logLevel);
+    public setLogLevel(logLevel: LogLevel): void {
+        this.loggerconfig.setLevel(logLevel);
     }
 
-    getLogLevel(): string {
-        return Object.keys(log.levels)[log.getLevel()];
+    public getLogLevel(): LogLevel {
+        return this.loggerconfig.getLevel();
     }
 }
-
 
 export default XComponentAPI;

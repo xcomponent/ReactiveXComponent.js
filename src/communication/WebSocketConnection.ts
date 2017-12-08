@@ -2,14 +2,14 @@ import { SessionFactory } from "./WebSocketSession";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
 import { CompositionModel } from "../communication/xcomponentMessages";
-import { isDebugEnabled } from "../loggerConfiguration";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { error } from "util";
 import { Session } from "../interfaces/Session";
 import { Connection } from "../interfaces/Connection";
-import * as log from "loglevel";
+import { Logger } from "log4ts";
 
 export class WebSocketConnection implements Connection {
+    private logger: Logger = Logger.getLogger("WebSocketConnection");
 
     constructor() {
     }
@@ -21,8 +21,7 @@ export class WebSocketConnection implements Connection {
                 return session.privateSubscriber.getCompositionModel(xcApiName);
             })
             .catch(err => {
-                log.debug("getModel request failed");
-                log.debug(err);
+                this.logger.debug("getModel request failed", err);
             });
     }
 
@@ -33,8 +32,7 @@ export class WebSocketConnection implements Connection {
                 return session.privateSubscriber.getXcApiList();
             })
             .catch(err => {
-                log.debug("getModel request failed");
-                log.debug(err);
+                this.logger.debug("getModel request failed", err);
             });
     };
 
@@ -52,7 +50,7 @@ export class WebSocketConnection implements Connection {
                 session.closedByUser = false;
                 session.privateSubscriber.sendSubscribeRequestToTopic(session.privateTopic, Kinds.Private);
                 session.heartbeatTimer = session.privateSubscriber.getHeartbeatTimer(session.heartbeatIntervalSeconds);
-                log.info("connection started on " + session.serverUrl + ".");
+                this.logger.info("connection started on " + session.serverUrl + ".");
                 resolve(e);
             };
 
@@ -63,8 +61,7 @@ export class WebSocketConnection implements Connection {
             }).bind(this);
 
             session.webSocket.onclose = (closeEvent: CloseEvent) => {
-                log.info("connection on " + session.serverUrl + " closed.");
-                log.info(closeEvent);
+                this.logger.info("connection on " + session.serverUrl + " closed.", closeEvent);
                 if (!session.closedByUser && errorListener) {
                     errorListener(new Error("Unxecpected session close on " + session.serverUrl));
                 }
