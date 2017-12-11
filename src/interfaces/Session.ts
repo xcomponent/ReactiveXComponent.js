@@ -7,7 +7,6 @@ export interface Session {
     heartbeatIntervalSeconds: number;
     closedByUser: boolean;
     privateSubscriber: Subscriber;
-    replyPublisher: Publisher;
     webSocket: WebSocket;
     heartbeatTimer: number;
     getDefaultPrivateTopic(): string;

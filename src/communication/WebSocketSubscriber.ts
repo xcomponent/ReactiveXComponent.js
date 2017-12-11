@@ -26,7 +26,7 @@ export class WebSocketSubscriber implements Subscriber {
     private serializer: Serializer;
     private timeout: string;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, public replyPublisher: Publisher, public privateTopics: Array<String>) {
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private stateMachineRefSendPublisher: Publisher, public privateTopics: Array<String>) {
         this.subscribedStateMachines = {};
         this.observableMsg = Observable.fromEvent(this.webSocket, "message");
         this.deserializer = new Deserializer();
@@ -303,7 +303,7 @@ export class WebSocketSubscriber implements Subscriber {
                 "ComponentCode": parseInt(items[i].ComponentCode),
                 "StateName": thisSubscriber.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
                 "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
-                    thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+                    thisSubscriber.stateMachineRefSendPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
                 }
             };
             snapshotItems.push({
@@ -329,7 +329,7 @@ export class WebSocketSubscriber implements Subscriber {
             "ComponentCode": jsonData.Header.ComponentCode,
             "StateName": (jsonData.Header.ErrorMessage) ? fatalErrorState : thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
             "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
-                thisSubscriber.replyPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+                thisSubscriber.stateMachineRefSendPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
             }
         };
         return {
