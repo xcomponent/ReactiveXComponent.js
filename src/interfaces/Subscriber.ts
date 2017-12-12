@@ -4,7 +4,6 @@ import { Observable } from "rxjs/Observable";
 
 export interface Subscriber {
     privateTopics: Array<String>;
-    getHeartbeatTimer(heartbeatIntervalSeconds: number): number;
     getCompositionModel(xcApiName: string): Promise<CompositionModel>;
     getXcApiList(): Promise<Array<String>>;
     getXcApi(xcApiFileName: string): Promise<string>;
@@ -15,5 +14,4 @@ export interface Subscriber {
     sendSubscribeRequestToTopic(topic: string, kind: number): void;
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void;
     unsubscribe(componentName: string, stateMachineName: string): void;
-    dispose(): void;
 }

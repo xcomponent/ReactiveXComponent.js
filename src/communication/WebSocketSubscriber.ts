@@ -34,26 +34,6 @@ export class WebSocketSubscriber implements Subscriber {
         this.timeout = "00:00:10";
     }
 
-    getHeartbeatTimer(heartbeatIntervalSeconds: number): number {
-        let thisSubscriber = this;
-        let command = Commands[Commands.hb];
-        this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
-            .filter((data: DeserializedData) => data.command === command)
-            .subscribe((data: DeserializedData) => {
-                this.logger.info("Heartbeat received successfully");
-            });
-        let commandData = {
-            Command: command,
-            Data: {}
-        };
-        let input = thisSubscriber.serializer.convertCommandDataToWebsocketInputFormat(commandData);
-        return setInterval(() => {
-            thisSubscriber.webSocket.send(input);
-            this.logger.info("Heartbeat sent");
-        }, heartbeatIntervalSeconds * 1000);
-    }
-
     getCompositionModel(xcApiName: string): Promise<CompositionModel> {
         const thisSubscriber = this;
         const command = Commands[Commands.getModel];
@@ -261,9 +241,6 @@ export class WebSocketSubscriber implements Subscriber {
         let isSubscribed = subscribedStateMachines[componentName] !== undefined && subscribedStateMachines[componentName].indexOf(stateMachineName) > -1;
         return isSubscribed;
     }
-
-    dispose(): void {
-    };
 
     private addSubscribedStateMachines(componentName: string, stateMachineName: string): void {
         if (this.subscribedStateMachines[componentName] === undefined) {
