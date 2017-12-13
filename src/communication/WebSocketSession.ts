@@ -1,5 +1,6 @@
 import { WebSocketPublisher } from "./WebSocketPublisher";
 import { WebSocketSubscriber } from "./WebSocketSubscriber";
+import { Utils } from "./Utils";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
@@ -57,7 +58,7 @@ export class WebSocketSession implements Session {
     removePrivateTopic(privateTopic: string): void {
         const kindPrivate = Kinds.Private;
         this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
-        WebSocketSession.removeElement(this.privateTopics, privateTopic);
+        Utils.removeElementFromArray(this.privateTopics, privateTopic);
         this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.privateTopics = this.privateTopics;
         }, this);
@@ -88,19 +89,10 @@ export class WebSocketSession implements Session {
             this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, Kinds.Private);
         }, this);
         this.publishers.forEach((publisher: WebSocketPublisher) => {
-            WebSocketSession.removeElement(this.publishers, publisher);
+            Utils.removeElementFromArray(this.publishers, publisher);
         }, this);
         this.subscribers.forEach((subscriber: WebSocketSubscriber) => {
-            WebSocketSession.removeElement(this.subscribers, subscriber);
+            Utils.removeElementFromArray(this.subscribers, subscriber);
         }, this);
-    };
-
-    public static removeElement<T>(array: Array<T>, e: T): void {
-        const index = array.indexOf(e);
-        if (index > -1) {
-            array.splice(index, 1);
-        } else {
-            throw new Error("Element to remove not found");
-        }
     };
 }

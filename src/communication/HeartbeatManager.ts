@@ -23,7 +23,7 @@ export class HeartbeatManager {
         this.serializer = new Serializer();
     }
 
-    public startToSendHeartbeat(heartbeatIntervalSeconds: number): void {
+    public start(heartbeatIntervalSeconds: number): void {
         let thisHeartbeatManager = this;
         let command = Commands[Commands.hb];
         this.observableMsg
@@ -43,7 +43,7 @@ export class HeartbeatManager {
         }, heartbeatIntervalSeconds * 1000);
     }
 
-    public stopToSendHeartbeat(): void {
+    public stop(): void {
         window.clearInterval(this.heartbeatTimer);
     }
 }

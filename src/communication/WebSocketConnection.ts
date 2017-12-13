@@ -1,5 +1,6 @@
 import { WebSocketSession } from "./WebSocketSession";
 import { HeartbeatManager } from "./HeartbeatManager";
+import { Utils } from "./Utils";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
 import { CompositionModel } from "../communication/xcomponentMessages";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
@@ -49,7 +50,7 @@ export class WebSocketConnection implements Connection {
     }
 
     public disposeSession(session: WebSocketSession): void {
-        WebSocketSession.removeElement(this.sessions, session);
+        Utils.removeElementFromArray(this.sessions, session);
     };
 
     private initConnection(xcApiFileName: string, sessionData: string): Promise<Session> {

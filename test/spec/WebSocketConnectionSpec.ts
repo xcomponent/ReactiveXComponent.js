@@ -22,14 +22,14 @@ describe("Test xcConnection module", function () {
     describe("Test createSession method", function () {
         it("given an unknown server url, should call the error listener", function (done) {
             let serverUrl = "wss://wrongServerUrl";
-            const connection = XComponent.connect(serverUrl, new FakeErrorHandler((err) => done()));
+            const connection = new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()));
         });
 
         it("should call the sessionListener with the created session as argument", function (done) {
             let serverUrl = "wss://serverUrl";
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "api.xcApi";
-            XComponent.connect(serverUrl)
+            new XComponent().connect(serverUrl)
             .then(connection => {
                 connection.createSession(xcApiFileName)
                 .then(session => {
@@ -58,7 +58,7 @@ describe("Test xcConnection module", function () {
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "unknownApi";
 
-            XComponent.connect(serverUrl)
+            new XComponent().connect(serverUrl)
             .then(connection => {
                 connection.createSession(xcApiFileName)
                 .catch(error => {
@@ -82,7 +82,7 @@ describe("Test xcConnection module", function () {
             mockServer.on("connection", (server) => {
                 mockServer.close();
             });
-            XComponent.connect(serverUrl, new FakeErrorHandler((err) => done()))
+            new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()))
             .then(connection => {
                 connection.createSession(xcApiFileName);
             });
@@ -93,7 +93,7 @@ describe("Test xcConnection module", function () {
         beforeEach(function () {
         it("should call onclose method when connection is disposed", function ( done) {
             let serverUrl = "wss:\\serverUrl";
-            XComponent.connect(serverUrl)
+            new XComponent().connect(serverUrl)
                 .then(connection => {
                     connection.webSocket.onclose = function (e) {
                         done();
