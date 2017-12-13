@@ -1,5 +1,6 @@
 import { WebSocketPublisher } from "./WebSocketPublisher";
 import { WebSocketSubscriber } from "./WebSocketSubscriber";
+import { Utils } from "./Utils";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
@@ -9,30 +10,22 @@ import { Session } from "../interfaces/Session";
 import * as uuid from "uuid/v4";
 
 export class WebSocketSession implements Session {
-    private sessionData: string;
     private publishers: Array<WebSocketPublisher>;
     private subscribers: Array<WebSocketSubscriber>;
     private privateTopics: Array<string>;
     private configuration: ApiConfiguration;
     private stateMachineRefSendPublisher: WebSocketPublisher;
-    public heartbeatIntervalSeconds: number;
     public privateTopic: string;
-    public closedByUser: boolean;
-    public heartbeatTimer: number;
     public privateSubscriber: Subscriber;
-    public webSocket: WebSocket;
 
-    constructor(webSocket: WebSocket, sessionData?: string) {
-        this.webSocket = webSocket;
+    constructor(public webSocket: WebSocket, private sessionData?: string) {
         this.privateTopic = uuid();
-        this.sessionData = sessionData;
         this.privateSubscriber = new WebSocketSubscriber(this.webSocket, null, null, null);
+        this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
         this.stateMachineRefSendPublisher = new WebSocketPublisher(this.webSocket, null, this.privateTopic, this.sessionData);
         this.publishers = [this.stateMachineRefSendPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
-        this.heartbeatIntervalSeconds = 10;
-        this.closedByUser = false;
     }
 
     public setConfiguration(configuration: ApiConfiguration) {
@@ -65,7 +58,7 @@ export class WebSocketSession implements Session {
     removePrivateTopic(privateTopic: string): void {
         const kindPrivate = Kinds.Private;
         this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
-        this.removeElement(this.privateTopics, privateTopic);
+        Utils.removeElementFromArray(this.privateTopics, privateTopic);
         this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.privateTopics = this.privateTopics;
         }, this);
@@ -91,40 +84,15 @@ export class WebSocketSession implements Session {
         return subscriber;
     };
 
-    private removeElement<T>(array: Array<T>, e: T): void {
-        const index = array.indexOf(e);
-        if (index > -1) {
-            array.splice(index, 1);
-        } else {
-            throw new Error("Element to remove not found");
-        }
-    };
-
-    disposePublisher(publisher: Publisher): void {
-        this.removeElement(this.publishers, publisher);
-    };
-
-    disposeSubscriber(subscriber: Subscriber): void {
-        this.removeElement(this.subscribers, subscriber);
-        subscriber.dispose();
-    };
-
-    dispose(): void {
-        this.publishers.forEach((publisher: Publisher) => {
-            this.disposePublisher(publisher);
-        }, this);
-        this.subscribers.forEach((subscriber: Subscriber) => {
-            this.disposeSubscriber(subscriber);
-        }, this);
-    };
-
-    close(): void {
+    public dispose(): void {
         this.privateTopics.forEach((privateTopic: string) => {
             this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, Kinds.Private);
         }, this);
-        clearInterval(this.heartbeatTimer);
-        this.dispose();
-        this.closedByUser = true;
-        this.webSocket.close();
+        this.publishers.forEach((publisher: WebSocketPublisher) => {
+            Utils.removeElementFromArray(this.publishers, publisher);
+        }, this);
+        this.subscribers.forEach((subscriber: WebSocketSubscriber) => {
+            Utils.removeElementFromArray(this.subscribers, subscriber);
+        }, this);
     };
 }

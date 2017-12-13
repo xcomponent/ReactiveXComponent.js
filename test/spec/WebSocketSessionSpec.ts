@@ -36,21 +36,6 @@ describe("Test xcSession module", function () {
         });
     });
 
-    describe("Test close method", function () {
-        let session;
-        beforeEach(function () {
-            let serverUrl = "wss:\\serverUrl";
-            let mockWebSocket = new WebSocket(serverUrl);
-            session = new WebSocketSession(mockWebSocket);
-        });
-        it("should call onclose method when session is closed", function (done) {
-            session.webSocket.onclose = function (e) {
-                done();
-            };
-            session.close();
-        });
-    });
-
     describe("Add private topic / SetPrivateTopic", function () {
         it("should not trigger server subscription on undefined topic", () => {
             const serverUrl = "wss:\\serverUrl";
@@ -59,7 +44,7 @@ describe("Test xcSession module", function () {
             const session = new WebSocketSession(mockWebSocket);
             session.setPrivateTopic(undefined);
             session.addPrivateTopic(undefined);
-            expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
+            expect(mockWebSocket.send).toHaveBeenCalledTimes(1);
         });
 
         it("Should add and set correctly the given private topics", () => {

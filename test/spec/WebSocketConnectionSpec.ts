@@ -1,6 +1,8 @@
+import { XComponent } from "../../src/XComponent";
 import { WebSocket, Server, SocketIO } from "mock-socket";
 import { WebSocketConnection } from "../../src/communication/WebSocketConnection";
 import { Connection } from "../../src/interfaces/Connection";
+import { ErrorListener } from "../../src/interfaces/ErrorListener";
 import pako = require("pako");
 import { log } from "util";
 
@@ -12,33 +14,30 @@ const encodeServerMessage = (strData: string) => {
 
 describe("Test xcConnection module", function () {
 
-    let connection;
-
     beforeEach(function () {
         (<any>window).WebSocket = WebSocket;
         (<any>window).isTestEnvironnement = true;
-        connection = new WebSocketConnection();
     });
 
     describe("Test createSession method", function () {
-        it("given an unknown server url, should call the session listener with an error argument", function (done) {
+        it("given an unknown server url, should call the error listener", function (done) {
             let serverUrl = "wss://wrongServerUrl";
-            connection.createSession("xcApiFileName", serverUrl)
-                .catch(error => {
-                    expect(error).not.toBe(null);
-                    done();
-                });
+            const connection = new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()));
         });
 
         it("should call the sessionListener with the created session as argument", function (done) {
             let serverUrl = "wss://serverUrl";
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "api.xcApi";
-            connection.createSession(xcApiFileName, serverUrl)
+            new XComponent().connect(serverUrl)
+            .then(connection => {
+                connection.createSession(xcApiFileName)
                 .then(session => {
                     expect(session).not.toBe(null);
                     mockServer.stop(done);
                 });
+            });
+
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
                     const getApiResponse = `<deployment>  
@@ -59,12 +58,15 @@ describe("Test xcConnection module", function () {
             let mockServer = new Server(serverUrl);
             let xcApiFileName = "unknownApi";
 
-            connection.createSession(xcApiFileName, serverUrl)
+            new XComponent().connect(serverUrl)
+            .then(connection => {
+                connection.createSession(xcApiFileName)
                 .catch(error => {
                     // it refers explicitly to the unknown Api on the error message, not to some random crash
                     expect(error.message).toMatch(xcApiFileName);
                     mockServer.stop(done);
                 });
+            });
 
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
@@ -80,8 +82,34 @@ describe("Test xcConnection module", function () {
             mockServer.on("connection", (server) => {
                 mockServer.close();
             });
-            connection.createSession(xcApiFileName, serverUrl, (err) => done());
+            new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()))
+            .then(connection => {
+                connection.createSession(xcApiFileName);
+            });
         });
     });
 
+    describe("Test close method", function () {
+        beforeEach(function () {
+        it("should call onclose method when connection is disposed", function ( done) {
+            let serverUrl = "wss:\\serverUrl";
+            new XComponent().connect(serverUrl)
+                .then(connection => {
+                    connection.webSocket.onclose = function (e) {
+                        done();
+                    };
+                    connection.dispose();
+                });
+            });
+        });
+    });
 });
+
+class FakeErrorHandler implements ErrorListener{
+    constructor(private done) {
+    }
+
+    onError(err: Error) {
+        this.done();
+    }
+}

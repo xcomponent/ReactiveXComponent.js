@@ -3,15 +3,9 @@ import { Header, Event, Data, Serializer, StateMachineRef } from "./xcomponentMe
 import { Publisher } from "../interfaces/Publisher";
 
 export class WebSocketPublisher implements Publisher {
-    public webSocket: WebSocket;
-    public privateTopic: string;
-    public sessionData: string;
     private serializer: Serializer;
 
-    constructor(webSocket: WebSocket, public configuration: ApiConfiguration, privateTopic: string, sessionData: string) {
-        this.webSocket = webSocket;
-        this.privateTopic = privateTopic;
-        this.sessionData = sessionData;
+    constructor(public webSocket: WebSocket, public configuration: ApiConfiguration, public privateTopic: string, public sessionData: string) {
         this.serializer = new Serializer();
     }
 
