@@ -5,7 +5,7 @@ import { Publisher } from "../interfaces/Publisher";
 export class WebSocketPublisher implements Publisher {
     private serializer: Serializer;
 
-    constructor(public webSocket: WebSocket, public configuration: ApiConfiguration, public privateTopic: string, public sessionData: string) {
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, public privateTopic: string, public sessionData: string) {
         this.serializer = new Serializer();
     }
 

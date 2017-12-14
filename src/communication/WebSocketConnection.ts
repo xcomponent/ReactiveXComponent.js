@@ -1,5 +1,5 @@
 import { WebSocketSession } from "./WebSocketSession";
-import { HeartbeatManager } from "./HeartbeatManager";
+import { WebSocketBridgeCommunication } from "./WebSocketBridgeCommunication";
 import { Utils } from "./Utils";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
 import { CompositionModel } from "../communication/xcomponentMessages";
@@ -14,57 +14,44 @@ export class WebSocketConnection implements Connection {
     private logger: Logger = Logger.getLogger("WebSocketConnection");
     public closedByUser: boolean = false;
 
-    constructor(private webSocket: WebSocket, private heartbeatManager: HeartbeatManager) {
+    constructor(private webSocket: WebSocket, private webSocketBridgeCommunication: WebSocketBridgeCommunication) {
     }
 
-    public getXcApiList(): Promise<Array<String>> {
-        const session = new WebSocketSession(this.webSocket);
-        return session.privateSubscriber.getXcApiList()
-            .catch(err => {
-                this.logger.debug("getModel request failed", err);
-            });
+    public getXcApiList(): Promise<Array<string>> {
+        return this.webSocketBridgeCommunication.getXcApiList();
     };
 
     public getCompositionModel(xcApiName: string): Promise<CompositionModel> {
-        const session = new WebSocketSession(this.webSocket);
-        return session.privateSubscriber.getCompositionModel(xcApiName)
-            .catch(err => {
-                this.logger.debug("getModel request failed", err);
-            });
+        return this.webSocketBridgeCommunication.getCompositionModel(xcApiName);
     }
 
-    public createSession(xcApiFileName: string): Promise<Session> {
-        return this.initConnection(xcApiFileName, null);
+    public createSession(apiName: string): Promise<Session> {
+        return this.initConnection(apiName, null);
     };
 
-    public createAuthenticatedSession(xcApiFileName: string, sessionData: string): Promise<Session> {
-        return this.initConnection(xcApiFileName, sessionData);
+    public createAuthenticatedSession(apiName: string, sessionData: string): Promise<Session> {
+        return this.initConnection(apiName, sessionData);
     };
 
     public dispose(): void {
         this.sessions.forEach((session: WebSocketSession) => {
-            this.disposeSession(session);
+            Utils.removeElementFromArray(this.sessions, session);
         }, this);
         this.closedByUser = true;
         this.webSocket.close();
     }
 
-    public disposeSession(session: WebSocketSession): void {
-        Utils.removeElementFromArray(this.sessions, session);
-    };
-
-    private initConnection(xcApiFileName: string, sessionData: string): Promise<Session> {
-        const session = new WebSocketSession(this.webSocket, sessionData);
-        return session.privateSubscriber.getXcApi(xcApiFileName)
+    private initConnection(apiName: string, sessionData: string): Promise<Session> {
+        return this.webSocketBridgeCommunication.getXcApi(apiName)
             .then((xcApi: string) => {
                 if (xcApi === null) {
-                    throw new Error(`Unknown Api: ${xcApiFileName}`);
+                    throw new Error(`Unknown Api: ${apiName}`);
                 }
                 const parser = new DefaultApiConfigurationParser();
                 return parser.parse(xcApi);
             })
             .then(configuration => {
-                session.setConfiguration(configuration);
+                const session = new WebSocketSession(this.webSocket, configuration, sessionData);
                 this.sessions.push(session);
                 return session;
             });

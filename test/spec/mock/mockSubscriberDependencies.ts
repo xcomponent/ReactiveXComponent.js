@@ -1,5 +1,4 @@
 import { WebSocket, Server, SocketIO } from "mock-socket";
-import { Subscriber } from "../../../src/communication/xcWebSocketSubscriber";
 import { Kinds } from "../../../src/configuration/xcWebSocketBridgeConfiguration";
 
 // Mocking configuration
@@ -78,12 +77,6 @@ let createMockServer = function (serverUrl) {
     return new Server(serverUrl);
 };
 
-let createMockWebSocket = function (serverUrl) {
-    //window["WebSocket"] = WebSocket;
-    let mockWebSocket = new WebSocket(serverUrl);
-    return mockWebSocket;
-};
-
 let guid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 let privateTopic = guid;
 
@@ -122,7 +115,6 @@ let returnObj = {
     correctSubscribeRequest: correctSubscribeRequest,
     correctUnsubscribeRequest: correctUnsubscribeRequest,
     createMockServer: createMockServer,
-    createMockWebSocket: createMockWebSocket,
     correctDataToSendSnapshot: correctDataToSendSnapshot,
     correctSnapshotRequest: correctSnapshotRequest,
     snapshotResponseData: snapshotResponseData,
