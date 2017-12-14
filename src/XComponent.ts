@@ -7,7 +7,7 @@ import { Logger, LoggerConfig } from "log4ts";
 import BasicLayout from "log4ts/build/layouts/BasicLayout";
 import ConsoleAppender from "log4ts/build/appenders/ConsoleAppender";
 import { LogLevel } from "log4ts/build/LogLevel";
-import { HeartbeatManager } from "./communication/HeartbeatManager";
+import { WebSocketBridgeCommunication } from "./communication/WebSocketBridgeCommunication";
 
 export class XComponent {
     private logger: Logger = Logger.getLogger("XComponent");
@@ -18,12 +18,12 @@ export class XComponent {
         this.ensureInitialized();
         return new Promise((resolve, reject): void => {
             let webSocket = new WebSocket(serverUrl);
-            let heartbeatManager = new HeartbeatManager(webSocket);
-            let connection = new WebSocketConnection(webSocket, heartbeatManager);
+            let webSocketBridgeCommunication = new WebSocketBridgeCommunication(webSocket);
+            let connection = new WebSocketConnection(webSocket, webSocketBridgeCommunication);
 
             webSocket.onopen = ((e: Event) => {
                 connection.closedByUser = false;
-                heartbeatManager.start(heartbeatIntervalSeconds);
+                webSocketBridgeCommunication.startHeartbeat(heartbeatIntervalSeconds);
                 this.logger.info("connection started on " + serverUrl + ".");
                 resolve(connection);
             }).bind(this);
@@ -42,7 +42,7 @@ export class XComponent {
                     errorListener.onError(new Error("Unxecpected connection close on " + serverUrl));
                     reject(closeEvent);
                 }
-                heartbeatManager.stop();
+                webSocketBridgeCommunication.dispose();
                 connection.dispose();
             }).bind(this);
         });

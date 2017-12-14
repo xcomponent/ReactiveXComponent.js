@@ -13,24 +13,15 @@ export class WebSocketSession implements Session {
     private publishers: Array<WebSocketPublisher>;
     private subscribers: Array<WebSocketSubscriber>;
     private privateTopics: Array<string>;
-    private configuration: ApiConfiguration;
     private stateMachineRefSendPublisher: WebSocketPublisher;
     public privateTopic: string;
-    public privateSubscriber: Subscriber;
 
-    constructor(public webSocket: WebSocket, private sessionData?: string) {
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private sessionData?: string) {
         this.privateTopic = uuid();
-        this.privateSubscriber = new WebSocketSubscriber(this.webSocket, null, null, null);
-        this.privateSubscriber.sendSubscribeRequestToTopic(this.privateTopic, Kinds.Private);
-        this.stateMachineRefSendPublisher = new WebSocketPublisher(this.webSocket, null, this.privateTopic, this.sessionData);
+        this.stateMachineRefSendPublisher = new WebSocketPublisher(this.webSocket, configuration, this.privateTopic, this.sessionData);
         this.publishers = [this.stateMachineRefSendPublisher];
         this.subscribers = [];
         this.privateTopics = [this.privateTopic];
-    }
-
-    public setConfiguration(configuration: ApiConfiguration) {
-        this.configuration = configuration;
-        this.stateMachineRefSendPublisher.configuration = configuration;
     }
 
     setPrivateTopic(privateTopic: string): void {
@@ -47,7 +38,6 @@ export class WebSocketSession implements Session {
     addPrivateTopic(privateTopic: string): void {
         if (privateTopic && this.privateTopics.indexOf(privateTopic) === -1) {
             const kindPrivate = Kinds.Private;
-            this.privateSubscriber.sendSubscribeRequestToTopic(privateTopic, kindPrivate);
             this.privateTopics.push(privateTopic);
             this.subscribers.forEach((subscriber: Subscriber) => {
                 subscriber.privateTopics = this.privateTopics;
@@ -57,7 +47,6 @@ export class WebSocketSession implements Session {
 
     removePrivateTopic(privateTopic: string): void {
         const kindPrivate = Kinds.Private;
-        this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, kindPrivate);
         Utils.removeElementFromArray(this.privateTopics, privateTopic);
         this.subscribers.forEach((subscriber: Subscriber) => {
             subscriber.privateTopics = this.privateTopics;
@@ -85,9 +74,6 @@ export class WebSocketSession implements Session {
     };
 
     public dispose(): void {
-        this.privateTopics.forEach((privateTopic: string) => {
-            this.privateSubscriber.sendUnsubscribeRequestToTopic(privateTopic, Kinds.Private);
-        }, this);
         this.publishers.forEach((publisher: WebSocketPublisher) => {
             Utils.removeElementFromArray(this.publishers, publisher);
         }, this);

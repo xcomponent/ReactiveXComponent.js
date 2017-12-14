@@ -148,7 +148,7 @@ export class Deserializer {
         return jsonData.ApiFound ? this.decodeServerMessage(jsonData.Content) : null;
     };
 
-    public getJsonDataFromGetXcApiListRequest(data: string): Array<String> {
+    public getJsonDataFromGetXcApiListRequest(data: string): Array<string> {
         let jsonData = this.getJsonData(data);
         return jsonData.Apis;
     };

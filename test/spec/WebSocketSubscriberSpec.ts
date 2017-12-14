@@ -17,7 +17,7 @@ describe("Test xcWebSocketSubscriber module", function () {
         beforeEach(function () {
             let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
-            mockWebSocket = Mock.createMockWebSocket(serverUrl);
+            mockWebSocket = new WebSocket(serverUrl);
             subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration, undefined, undefined);
         });
 
@@ -95,14 +95,12 @@ describe("Test xcWebSocketSubscriber module", function () {
         });
     });
 
-
-
     describe("Test getSnapshot method", function () {
         let subscriber, mockServer, mockWebSocket;
         beforeEach(function () {
             let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
-            mockWebSocket = Mock.createMockWebSocket(serverUrl);
+            mockWebSocket = new WebSocket(serverUrl);
             subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration, null, [Mock.privateTopic]);
         });
 
@@ -160,66 +158,6 @@ describe("Test xcWebSocketSubscriber module", function () {
                         console.error(err);
                     });
             };
-        });
-
-    });
-
-
-    describe("Test getModel method", function () {
-        let subscriber, mockServer, mockWebSocket;
-        beforeEach(function () {
-            let serverUrl = "wss://" + uuid();
-            mockServer = Mock.createMockServer(serverUrl);
-            mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            subscriber = new WebSocketSubscriber(mockWebSocket, null, null, null);
-        });
-
-        it("send getModel request, getModelListener callback should be executed when a response is received", function (done) {
-            mockWebSocket.onopen = function (e) {
-                let apiName = "xcApi";
-                subscriber.getCompositionModel(apiName).then((compositionModel) => {
-                    expect(compositionModel.projectName).not.toBe(null);
-                    expect(compositionModel.components).not.toBe(null);
-                    expect(compositionModel.composition).not.toBe(null);
-                    mockServer.stop(done);
-                });
-            };
-
-            mockServer.on("connection", function (server) {
-                server.on("message", function (message) {
-                    server.send(Mock.getModelResponse);
-                });
-            });
-
-        });
-
-    });
-
-    describe("Test getXcApi method", function () {
-        let subscriber, mockServer, mockWebSocket;
-        beforeEach(function () {
-            let serverUrl = "wss://" + uuid();
-            mockServer = Mock.createMockServer(serverUrl);
-            mockWebSocket = Mock.createMockWebSocket(serverUrl);
-            subscriber = new WebSocketSubscriber(mockWebSocket, null, null, null);
-        });
-
-        it("returns null when Api is not found", function (done) {
-            mockWebSocket.onopen = function (e) {
-                let apiName = "unknownApi";
-                subscriber.getXcApi(apiName)
-                .then(xcApi => {
-                    expect(xcApi).toBe(null);
-                    mockServer.stop(done);
-                });
-            };
-
-            mockServer.on("connection", function (server) {
-                server.on("message", function (message) {
-                    server.send(Mock.getXcApiNotFoundResponse);
-                });
-            });
-
         });
 
     });

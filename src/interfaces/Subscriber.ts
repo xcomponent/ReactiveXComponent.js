@@ -4,9 +4,6 @@ import { Observable } from "rxjs/Observable";
 
 export interface Subscriber {
     privateTopics: Array<String>;
-    getCompositionModel(xcApiName: string): Promise<CompositionModel>;
-    getXcApiList(): Promise<Array<String>>;
-    getXcApi(xcApiFileName: string): Promise<string>;
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>>;
     getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance>;
     canSubscribe(componentName: string, stateMachineName: string): boolean;

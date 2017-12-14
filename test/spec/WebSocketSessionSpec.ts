@@ -44,7 +44,7 @@ describe("Test xcSession module", function () {
             const session = new WebSocketSession(mockWebSocket);
             session.setPrivateTopic(undefined);
             session.addPrivateTopic(undefined);
-            expect(mockWebSocket.send).toHaveBeenCalledTimes(1);
+            expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
         });
 
         it("Should add and set correctly the given private topics", () => {

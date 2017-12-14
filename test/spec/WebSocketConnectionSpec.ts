@@ -3,8 +3,11 @@ import { WebSocket, Server, SocketIO } from "mock-socket";
 import { WebSocketConnection } from "../../src/communication/WebSocketConnection";
 import { Connection } from "../../src/interfaces/Connection";
 import { ErrorListener } from "../../src/interfaces/ErrorListener";
+import Mock from "./mock/mockSubscriberDependencies";
 import pako = require("pako");
 import { log } from "util";
+
+let uuid = require("uuid/v4");
 
 const encodeServerMessage = (strData: string) => {
     let binaryString = pako.deflate(strData, { to: "string" });
@@ -12,7 +15,7 @@ const encodeServerMessage = (strData: string) => {
     return window.btoa(binaryString);
 };
 
-describe("Test xcConnection module", function () {
+describe("Test Connection module", function () {
 
     beforeEach(function () {
         (<any>window).WebSocket = WebSocket;
@@ -102,6 +105,35 @@ describe("Test xcConnection module", function () {
                 });
             });
         });
+    });
+
+    describe("Test getModel method", function () {
+        let mockServer, serverUrl;
+        beforeEach(function () {
+            serverUrl = "wss://" + uuid();
+            mockServer = Mock.createMockServer(serverUrl);
+        });
+
+        it("send getModel request, getModelListener callback should be executed when a response is received", function (done) {
+            new XComponent().connect(serverUrl)
+            .then(connection => {
+                let apiName = "unknownApi";
+                connection.getCompositionModel(apiName).then((compositionModel) => {
+                    expect(compositionModel.projectName).not.toBe(null);
+                    expect(compositionModel.components).not.toBe(null);
+                    expect(compositionModel.composition).not.toBe(null);
+                    mockServer.stop(done);
+                });
+            });
+
+            mockServer.on("connection", function (server) {
+                server.on("message", function (message) {
+                    server.send(Mock.getModelResponse);
+                });
+            });
+
+        });
+
     });
 });
 
