@@ -1,11 +1,11 @@
-export { XComponent } from "./XComponent";
-export { Connection } from "./interfaces/Connection";
-export { Session } from "./interfaces/Session";
-export { Publisher } from "./interfaces/Publisher";
-export { Subscriber } from "./interfaces/Subscriber";
-export { LogLevel } from "log4ts/build/LogLevel";
+export { StateMachineUpdateListener } from "./interfaces/StateMachineUpdateListener";
+export { StateMachineInstance } from "./interfaces/StateMachineInstance";
+export { StateMachineRef } from "./interfaces/StateMachineRef";
 export { ErrorListener } from "./interfaces/ErrorListener";
-export { StateMachineInstance, StateMachineRef } from "./communication/xcomponentMessages";
+export { Connection } from "./interfaces/Connection";
+export { LogLevel } from "log4ts/build/LogLevel";
+export { Session } from "./interfaces/Session";
+export { XComponent } from "./XComponent";
 
 import { XComponent } from "./XComponent";
 export default new XComponent();

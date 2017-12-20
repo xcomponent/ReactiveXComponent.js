@@ -1,5 +1,6 @@
 import { WebSocketPublisher } from "../../src/communication/WebSocketPublisher";
 import Mock from "./mock/mockPublisherDependencies";
+import { PrivateTopics } from "../../src/interfaces/PrivateTopics";
 
 describe("Test xcWebSocketPublisher module", function () {
 
@@ -8,9 +9,10 @@ describe("Test xcWebSocketPublisher module", function () {
     });
 
     describe("Test send method", function () {
-        var publisher;
+        var publisher, privateTopics;
+        privateTopics = new PrivateTopics();
         beforeEach(function () {
-            publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
+            publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, privateTopics, Mock.sessionData);
         });
 
         it("should send a message to the given stateMachine and component", function () {
@@ -19,7 +21,8 @@ describe("Test xcWebSocketPublisher module", function () {
             expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.getCorretWebsocketInputFormat(false));
         });
 
-        it("sould send a message in a priavte topic to the given stateMachine and component", function () {
+        it("sould send a message in a private topic to the given stateMachine and component", function () {
+            privateTopics.setDefaultPublisherTopic(Mock.guiExample);
             publisher.send("componentName", "stateMachineName", Mock.messageType, Mock.jsonMessage, true);
             expect(publisher.webSocket.send).toHaveBeenCalledTimes(1);
             expect(publisher.webSocket.send).toHaveBeenCalledWith(Mock.getCorretWebsocketInputFormat(true));
@@ -30,7 +33,7 @@ describe("Test xcWebSocketPublisher module", function () {
     describe("Test sendWithStateMachineRef", function () {
         var publisher;
         beforeEach(function () {
-            publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
+            publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, new PrivateTopics(), Mock.sessionData);
         });
 
         it("sould send a message to the given instance of stateMachine", function () {
@@ -43,7 +46,7 @@ describe("Test xcWebSocketPublisher module", function () {
     describe("Test canPublish", function () {
         var publisher;
         beforeEach(function () {
-            publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, Mock.guiExample, Mock.sessionData);
+            publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, new PrivateTopics(), Mock.sessionData);
         });
 
         it("should return true if there is a publisher details and false otherwise", function () {
