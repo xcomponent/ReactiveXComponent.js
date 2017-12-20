@@ -1,11 +1,12 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { Header, Event, Data, Serializer, StateMachineRef } from "./xcomponentMessages";
-import { Publisher } from "../interfaces/Publisher";
+import { Header, Event, Data, Serializer} from "./xcomponentMessages";
+import { StateMachineRef } from "../interfaces/StateMachineRef";
+import { PrivateTopics } from "../interfaces/PrivateTopics";
 
-export class WebSocketPublisher implements Publisher {
+export class WebSocketPublisher {
     private serializer: Serializer;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, public privateTopic: string, public sessionData: string) {
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private privateTopics: PrivateTopics, public sessionData: string) {
         this.serializer = new Serializer();
     }
 
@@ -29,6 +30,10 @@ export class WebSocketPublisher implements Publisher {
         }
         return false;
     };
+
+    public dispose(): void {
+
+    }
 
     private getDataToSend(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
         const componentCode = this.configuration.getComponentCode(componentName);
@@ -54,7 +59,7 @@ export class WebSocketPublisher implements Publisher {
             "EventCode": this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType).eventCode,
             "IncomingEventType": 0,
             "MessageType": messageType,
-            "PublishTopic": (!visibilityPrivate) ? undefined : ((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopic),
+            "PublishTopic": (!visibilityPrivate) ? undefined : ((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopics.getdefaultPublisherTopic()),
             "SessionData": this.sessionData
         };
     };
@@ -64,7 +69,7 @@ export class WebSocketPublisher implements Publisher {
         return publisher.routingKey;
     }
 
-    private getDataToSendWithStateMachineRef(stateMachineRef: any, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
+    private getDataToSendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
         let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic, stateMachineRef.StateMachineId, stateMachineRef.WorkerId);

@@ -1,9 +1,5 @@
 import { Commands } from "../configuration/xcWebSocketBridgeConfiguration";
-import {
-    StateMachineInstance, StateMachineRef, Component,
-    CompositionModel, DeserializedData, CommandData, Header,
-    Event, Data, getHeaderWithIncomingType,
-    Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
+import { CompositionModel, DeserializedData, Serializer, Deserializer } from "./xcomponentMessages";
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/filter";
@@ -13,25 +9,26 @@ import { Logger } from "log4ts";
 
 export class WebSocketBridgeCommunication {
     private logger: Logger = Logger.getLogger("HeartbeatManager");
-    private observableMsg: Observable<MessageEvent>;
+    private observable: Observable<DeserializedData>;
     private deserializer: Deserializer;
     private serializer: Serializer;
     private heartbeatTimer: number;
     private runnning: boolean = true;
 
     constructor(private webSocket: WebSocket) {
-        this.observableMsg = Observable.fromEvent(this.webSocket, "message");
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
+        let thisWebSocketBridgeCommunication = this;
+        this.observable = Observable.fromEvent(this.webSocket, "message")
+            .takeWhile((rawMessage: MessageEvent) => this.runnning)
+            .map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage));
     }
 
     public startHeartbeat(heartbeatIntervalSeconds: number): void {
         let thisWebSocketBridgeCommunication = this;
         let command = Commands[Commands.hb];
-        this.observableMsg
-            .map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+        this.observable
             .filter((data: DeserializedData) => data.command === command)
-            .takeWhile((data: DeserializedData) => this.runnning)
             .subscribe((data: DeserializedData) => {
                 this.logger.trace("Heartbeat received successfully");
             });
@@ -49,8 +46,7 @@ export class WebSocketBridgeCommunication {
     public getCompositionModel(xcApiName: string): Promise<CompositionModel> {
         const thisWebSocketBridgeCommunication = this;
         const command = Commands[Commands.getModel];
-        const promise = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+        const promise = this.observable
             .filter((data: DeserializedData) => data.command === command)
             .first()
             .map((data: DeserializedData) => {
@@ -70,8 +66,7 @@ export class WebSocketBridgeCommunication {
     public getXcApiList(): Promise<Array<string>> {
         const thisWebSocketBridgeCommunication = this;
         const command = Commands[Commands.getXcApiList];
-        const promise = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+        const promise = this.observable
             .filter((data: DeserializedData) => data.command === command)
             .first()
             .map((data: DeserializedData) => {
@@ -90,8 +85,7 @@ export class WebSocketBridgeCommunication {
     public getXcApi(xcApiFileName: string): Promise<string> {
         const thisWebSocketBridgeCommunication = this;
         const command = Commands[Commands.getXcApi];
-        const promise = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage))
+        const promise = this.observable
             .filter((data: DeserializedData) => data.command === command)
             .first()
             .map((data: DeserializedData) => {

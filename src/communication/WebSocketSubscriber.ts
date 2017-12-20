@@ -6,39 +6,40 @@ import "rxjs/add/operator/filter";
 import "rxjs/add/operator/first";
 import "rxjs/add/observable/fromEvent";
 import "rxjs/add/operator/toPromise";
-import { Publisher } from "../interfaces/Publisher";
+import { WebSocketPublisher } from "../communication/WebSocketPublisher";
 import {
-    StateMachineInstance, StateMachineRef, Component,
-    CompositionModel, DeserializedData, CommandData, Header,
+    Component, CompositionModel, DeserializedData, CommandData, Header,
     Event, Data, getHeaderWithIncomingType,
     Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { } from "./clientMessages";
 import { error } from "util";
-import { Subscriber } from "../interfaces/Subscriber";
+import { PrivateTopics } from "../interfaces/PrivateTopics";
+import { StateMachineInstance } from "../interfaces/StateMachineInstance";
+import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
 import * as uuid from "uuid/v4";
 import { Logger } from "log4ts";
 
-export class WebSocketSubscriber implements Subscriber {
+export class WebSocketSubscriber {
     private logger: Logger = Logger.getLogger("WebSocketSubscriber");
     private subscribedStateMachines: { [componentName: string]: Array<String> };
-    private observableMsg: Observable<MessageEvent>;
+    private observable: Observable<DeserializedData>;
     private deserializer: Deserializer;
     private serializer: Serializer;
     private timeout: string;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private stateMachineRefSendPublisher: Publisher, public privateTopics: Array<String>) {
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private stateMachineRefSendPublisher: WebSocketPublisher, private privateTopics: PrivateTopics) {
         this.subscribedStateMachines = {};
-        this.observableMsg = Observable.fromEvent(this.webSocket, "message");
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
         this.timeout = "00:00:10";
+        const thisSubscriber = this;
+        this.observable = Observable.fromEvent(this.webSocket, "message").map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage));
     }
 
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
         const thisSubscriber = this;
-        const promise = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
+        const promise = this.observable
             .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
             .first()
             .map((data: DeserializedData) => {
@@ -52,13 +53,17 @@ export class WebSocketSubscriber implements Subscriber {
         return promise;
     };
 
+    public dispose(): void {
+
+    }
+
     private getDataToSendSnapshot(componentName: string, stateMachineName: string, replyTopic: string): Data {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let topic = this.configuration.getSnapshotTopic(componentCode);
         let jsonMessage = {
             Timeout: this.timeout,
-            CallerPrivateTopic: this.privateTopics,
+            CallerPrivateTopic: this.privateTopics.getSubscriberTopics(),
             ReplyTopic: replyTopic
         };
         let header = getHeaderWithIncomingType();
@@ -79,8 +84,7 @@ export class WebSocketSubscriber implements Subscriber {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
-        let filteredObservable = this.observableMsg
-            .map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage))
+        let filteredObservable = this.observable
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
             .filter((jsonData: StateMachineInstance) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
@@ -109,10 +113,10 @@ export class WebSocketSubscriber implements Subscriber {
         return this.configuration.containsSubscriber(componentCode, stateMachineCode, SubscriberEventType.Update);
     };
 
-    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: (data: StateMachineInstance) => void): void {
+    subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: StateMachineUpdateListener): void {
         this.prepareStateMachineUpdates(componentName, stateMachineName)
-            .subscribe((jsonData: StateMachineInstance) => {
-                stateMachineUpdateListener(jsonData);
+            .subscribe((stateMachineInstance: StateMachineInstance) => {
+                stateMachineUpdateListener.onStateMachineUpdate(stateMachineInstance);
             });
         this.sendSubscribeRequest(componentName, stateMachineName);
     };

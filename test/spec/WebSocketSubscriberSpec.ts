@@ -3,6 +3,7 @@ import { Deserializer, Serializer } from "../../src/communication/xcomponentMess
 import Rx = require("rx");
 import Mock from "./mock/mockSubscriberDependencies";
 import { EventEmitter } from "events";
+import { PrivateTopics } from "../../src/interfaces/PrivateTopics";
 
 let uuid = require("uuid/v4");
 
@@ -32,7 +33,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                     mockServer.stop(done);
                 };
                 // subscribe send a message (subscribe request)
-                subscriber.subscribe("component", "stateMachine", stateMachineUpdateListener);
+                subscriber.subscribe("component", "stateMachine", { onStateMachineUpdate: stateMachineUpdateListener });
             };
 
             mockServer.on("connection", function (server) {
@@ -96,12 +97,14 @@ describe("Test xcWebSocketSubscriber module", function () {
     });
 
     describe("Test getSnapshot method", function () {
-        let subscriber, mockServer, mockWebSocket;
+        let subscriber, mockServer, mockWebSocket, privateTopics;
         beforeEach(function () {
             let serverUrl = "wss://" + uuid();
+            privateTopics = new PrivateTopics();
+            privateTopics.setDefaultPublisherTopic(Mock.privateTopic);
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
-            subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration, null, [Mock.privateTopic]);
+            subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration, null, privateTopics);
         });
 
         it("send snapshot request, promise resolve method should be executed when a response is received", function (done) {

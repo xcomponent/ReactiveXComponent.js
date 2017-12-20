@@ -1,84 +1,59 @@
+
 import { WebSocketPublisher } from "./WebSocketPublisher";
 import { WebSocketSubscriber } from "./WebSocketSubscriber";
 import { Utils } from "./Utils";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { Publisher } from "../interfaces/Publisher";
-import { Subscriber } from "../interfaces/Subscriber";
 import { Session } from "../interfaces/Session";
+import { PrivateTopics } from "../interfaces/PrivateTopics";
+import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
+import { StateMachineInstance } from "../interfaces/StateMachineInstance";
+import { Observable } from "rxjs/Observable";
 import * as uuid from "uuid/v4";
 
 export class WebSocketSession implements Session {
-    private publishers: Array<WebSocketPublisher>;
-    private subscribers: Array<WebSocketSubscriber>;
-    private privateTopics: Array<string>;
-    private stateMachineRefSendPublisher: WebSocketPublisher;
-    public privateTopic: string;
+    private publisher: WebSocketPublisher;
+    private subscriber: WebSocketSubscriber;
+    public privateTopics: PrivateTopics;
 
     constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private sessionData?: string) {
-        this.privateTopic = uuid();
-        this.stateMachineRefSendPublisher = new WebSocketPublisher(this.webSocket, configuration, this.privateTopic, this.sessionData);
-        this.publishers = [this.stateMachineRefSendPublisher];
-        this.subscribers = [];
-        this.privateTopics = [this.privateTopic];
+        this.privateTopics = new PrivateTopics();
+        this.publisher = new WebSocketPublisher(this.webSocket, configuration, this.privateTopics, sessionData);
+        this.subscriber = new WebSocketSubscriber(this.webSocket, configuration, this.publisher, this.privateTopics);
     }
 
-    setPrivateTopic(privateTopic: string): void {
-        if (privateTopic) {
-            this.addPrivateTopic(privateTopic);
-            this.removePrivateTopic(this.privateTopic);
-            this.privateTopic = privateTopic;
-            this.publishers.forEach((publisher: Publisher) => {
-                publisher.privateTopic = privateTopic;
-            });
-        }
-    };
+    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
+        this.publisher.send(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+    }
 
-    addPrivateTopic(privateTopic: string): void {
-        if (privateTopic && this.privateTopics.indexOf(privateTopic) === -1) {
-            const kindPrivate = Kinds.Private;
-            this.privateTopics.push(privateTopic);
-            this.subscribers.forEach((subscriber: Subscriber) => {
-                subscriber.privateTopics = this.privateTopics;
-            }, this);
-        }
-    };
+    public canPublish(componentName: string, stateMachineName: string, messageType: string): boolean {
+        return this.publisher.canPublish(componentName, stateMachineName, messageType);
+    }
 
-    removePrivateTopic(privateTopic: string): void {
-        const kindPrivate = Kinds.Private;
-        Utils.removeElementFromArray(this.privateTopics, privateTopic);
-        this.subscribers.forEach((subscriber: Subscriber) => {
-            subscriber.privateTopics = this.privateTopics;
-        }, this);
-    };
+    public getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
+        return this.subscriber.getSnapshot(componentName, stateMachineName);
+    }
 
-    getDefaultPrivateTopic(): string {
-        return this.privateTopic;
-    };
+    public getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance> {
+        return this.subscriber.getStateMachineUpdates(componentName, stateMachineName);
+    }
 
-    getPrivateTopics(): string[] {
-        return this.privateTopics;
-    };
+    public subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: StateMachineUpdateListener): void {
+        this.subscriber.subscribe(componentName, stateMachineName, stateMachineUpdateListener);
+    }
 
-    createPublisher(): Publisher {
-        const publisher = new WebSocketPublisher(this.webSocket, this.configuration, this.privateTopic, this.sessionData);
-        this.publishers.push(publisher);
-        return publisher;
-    };
+    public unsubscribe(componentName: string, stateMachineName: string): void {
+        this.subscriber.unsubscribe(componentName, stateMachineName);
+        throw new Error("Method not implemented.");
+    }
 
-    createSubscriber(): Subscriber {
-        const subscriber = new WebSocketSubscriber(this.webSocket, this.configuration, this.stateMachineRefSendPublisher, this.privateTopics);
-        this.subscribers.push(subscriber);
-        return subscriber;
-    };
+    public canSubscribe(componentName: string, stateMachineName: string): boolean {
+        return this.subscriber.canSubscribe(componentName, stateMachineName);
+    }
 
     public dispose(): void {
-        this.publishers.forEach((publisher: WebSocketPublisher) => {
-            Utils.removeElementFromArray(this.publishers, publisher);
-        }, this);
-        this.subscribers.forEach((subscriber: WebSocketSubscriber) => {
-            Utils.removeElementFromArray(this.subscribers, subscriber);
-        }, this);
+        this.publisher.dispose();
+        this.subscriber.dispose();
     };
 }
