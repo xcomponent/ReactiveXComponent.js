@@ -10,7 +10,6 @@ import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
 import { Observable } from "rxjs/Observable";
-import * as uuid from "uuid/v4";
 
 export class WebSocketSession implements Session {
     private publisher: WebSocketPublisher;

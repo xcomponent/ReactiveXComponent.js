@@ -3686,10 +3686,6 @@ type-check@~0.3.2:
   dependencies:
     prelude-ls "~1.1.2"
 
-typescript-collections@^1.2.3:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/typescript-collections/-/typescript-collections-1.2.5.tgz#192978f2f432171222a5248663f45da4a0df3f18"
-
 typescript@^2.1.4:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.6.2.tgz#3c5b6fd7f6de0914269027f03c0946758f7673a4"

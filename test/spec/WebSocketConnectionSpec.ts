@@ -5,9 +5,8 @@ import { Connection } from "../../src/interfaces/Connection";
 import { ErrorListener } from "../../src/interfaces/ErrorListener";
 import Mock from "./mock/mockSubscriberDependencies";
 import pako = require("pako");
+import * as uuid from "uuid/v4";
 import { log } from "util";
-
-let uuid = require("uuid/v4");
 
 const encodeServerMessage = (strData: string) => {
     let binaryString = pako.deflate(strData, { to: "string" });
