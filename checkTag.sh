@@ -2,7 +2,7 @@
 version=`git tag -l --points-at HEAD`
 
 if [ ! -z "$version" ]; then
-	if [[ $string == *"-BETA" ]]; then
+	if [[ $version == *"-BETA"* ]]; then
 		echo "BETA"
 	else
 		echo "RELEASE"
