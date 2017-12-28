@@ -27,8 +27,8 @@ export class WebSocketSession implements Session {
         this.publisher.send(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
     }
 
-    public canPublish(componentName: string, stateMachineName: string, messageType: string): boolean {
-        return this.publisher.canPublish(componentName, stateMachineName, messageType);
+    public canSend(componentName: string, stateMachineName: string, messageType: string): boolean {
+        return this.publisher.canSend(componentName, stateMachineName, messageType);
     }
 
     public getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {

@@ -43,15 +43,15 @@ describe("Test xcWebSocketPublisher module", function () {
         });
     });
 
-    describe("Test canPublish", function () {
+    describe("Test canSend", function () {
         var publisher;
         beforeEach(function () {
             publisher = new WebSocketPublisher(Mock.createMockWebSocket(), Mock.configuration, new PrivateTopics(), Mock.sessionData);
         });
 
         it("should return true if there is a publisher details and false otherwise", function () {
-            expect(publisher.canPublish()).toBe(false);
-            expect(publisher.canPublish("componentName", "stateMachineName")).toBe(true);
+            expect(publisher.canSend()).toBe(false);
+            expect(publisher.canSend("componentName", "stateMachineName")).toBe(true);
         });
     });
 

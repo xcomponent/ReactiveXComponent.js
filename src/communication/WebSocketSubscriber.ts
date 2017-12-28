@@ -15,6 +15,7 @@ import { } from "./clientMessages";
 import { error } from "util";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
+import { StateMachineRef } from "../interfaces/StateMachineRef";
 import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
 import * as uuid from "uuid/v4";
 import { Logger } from "log4ts";
@@ -22,7 +23,7 @@ import { Logger } from "log4ts";
 export class WebSocketSubscriber {
     private logger: Logger = Logger.getLogger("WebSocketSubscriber");
     private subscribedStateMachines: { [componentName: string]: Array<String> };
-    private observable: Observable<DeserializedData>;
+    private updates$: Observable<DeserializedData>;
     private deserializer: Deserializer;
     private serializer: Serializer;
     private timeout: string;
@@ -33,13 +34,13 @@ export class WebSocketSubscriber {
         this.serializer = new Serializer();
         this.timeout = "00:00:10";
         const thisSubscriber = this;
-        this.observable = Observable.fromEvent(this.webSocket, "message").map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage));
+        this.updates$ = Observable.fromEvent(this.webSocket, "message").map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage));
     }
 
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
         const thisSubscriber = this;
-        const promise = this.observable
+        const promise = this.updates$
             .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
             .first()
             .map((data: DeserializedData) => {
@@ -84,7 +85,7 @@ export class WebSocketSubscriber {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
-        let filteredObservable = this.observable
+        let filteredObservable = this.updates$
             .filter((data: DeserializedData) => data.command === Commands[Commands.update])
             .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
             .filter((jsonData: StateMachineInstance) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
@@ -216,16 +217,7 @@ export class WebSocketSubscriber {
         let snapshotItems = [];
         let thisSubscriber = this;
         for (let i = 0; i < items.length; i++) {
-            let stateMachineRef = {
-                "StateMachineId": parseInt(items[i].StateMachineId),
-                "WorkerId": parseInt(items[i].WorkerId),
-                "StateMachineCode": parseInt(items[i].StateMachineCode),
-                "ComponentCode": parseInt(items[i].ComponentCode),
-                "StateName": thisSubscriber.configuration.getStateName(items[i].ComponentCode, items[i].StateMachineCode, items[i].StateCode),
-                "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
-                    thisSubscriber.stateMachineRefSendPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-                }
-            };
+            let stateMachineRef = this.getStateMachineRef(parseInt(items[i].StateMachineId), parseInt(items[i].WorkerId), parseInt(items[i].ComponentCode), parseInt(items[i].StateMachineCode), parseInt(items[i].StateCode));
             snapshotItems.push({
                 stateMachineRef: stateMachineRef,
                 jsonMessage: items[i].PublicMember
@@ -237,24 +229,23 @@ export class WebSocketSubscriber {
     public getJsonDataFromEvent(data: string, topic: string): StateMachineInstance {
         this.logger.debug("JsonData received from event: ", { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
-        let componentCode = jsonData.Header.ComponentCode;
-        let stateMachineCode = jsonData.Header.StateMachineCode;
-        let stateCode = jsonData.Header.StateCode;
+        let stateMachineRef = this.getStateMachineRef(jsonData.Header.StateMachineId, jsonData.Header.WorkerId, jsonData.Header.ComponentCode, jsonData.Header.StateMachineCode,  jsonData.Header.StateCode, jsonData.Header.ErrorMessage);
+        return new StateMachineInstance(stateMachineRef, JSON.parse(jsonData.JsonMessage));
+    };
+
+    private getStateMachineRef(StateMachineId: number, workerId: number, componentCode: number, stateMachineCode: number, stateCode: number, errorMessage: string = null): StateMachineRef {
         let thisSubscriber = this;
         let stateMachineRef = {
-            "ErrorMessage": jsonData.Header.ErrorMessage,
-            "StateMachineId": jsonData.Header.StateMachineId,
-            "WorkerId": jsonData.Header.WorkerId,
-            "StateMachineCode": jsonData.Header.StateMachineCode,
-            "ComponentCode": jsonData.Header.ComponentCode,
-            "StateName": (jsonData.Header.ErrorMessage) ? fatalErrorState : thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
+            "StateMachineId": StateMachineId,
+            "WorkerId": workerId,
+            "ComponentCode": componentCode,
+            "StateMachineCode": stateMachineCode,
+            "StateName": (errorMessage) ? fatalErrorState : thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
             "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
                 thisSubscriber.stateMachineRefSendPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
-            }
+            },
+            "ErrorMessage": errorMessage
         };
-        return {
-            stateMachineRef: stateMachineRef,
-            jsonMessage: JSON.parse(jsonData.JsonMessage)
-        };
-    };
+        return stateMachineRef;
+    }
 }

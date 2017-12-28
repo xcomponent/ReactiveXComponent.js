@@ -7,7 +7,7 @@ export interface Session {
     send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any): void;
     send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean): void;
     send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean, specifiedPrivateTopic: string): void;
-    canPublish(componentName: string, stateMachineName: string, messageType: string): boolean;
+    canSend(componentName: string, stateMachineName: string, messageType: string): boolean;
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>>;
     getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance>;
     subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: StateMachineUpdateListener): void;

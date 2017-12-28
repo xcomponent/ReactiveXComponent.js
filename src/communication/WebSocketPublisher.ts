@@ -22,7 +22,7 @@ export class WebSocketPublisher {
         this.webSocket.send(webSocketInput);
     };
 
-    public canPublish(componentName: string, stateMachineName: string, messageType: string): boolean {
+    public canSend(componentName: string, stateMachineName: string, messageType: string): boolean {
         if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
             const componentCode = this.configuration.getComponentCode(componentName);
             const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);

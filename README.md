@@ -2,6 +2,8 @@
 [![npm](https://img.shields.io/npm/v/reactivexcomponent.js.svg)](https://www.npmjs.com/package/reactivexcomponent.js)
 [![npm](https://img.shields.io/npm/dt/reactivexcomponent.js.svg)](https://www.npmjs.com/package/reactivexcomponent.js)
 [![Build Status](https://travis-ci.org/xcomponent/ReactiveXComponent.js.svg?branch=master)](https://travis-ci.org/xcomponent/ReactiveXComponent.js)
+[![TypeScript](https://badges.frapsoft.com/typescript/love/typescript.png?v=101)](https://github.com/ellerbrock/typescript-badges/)
+
 
 ## Reactive XComponent API
 Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
@@ -11,80 +13,87 @@ Use npm to install the latest version of the API:
 ``` npm i reactivexcomponent.js --save ```
 
 ## Usage
-Import *xcomponentapi.js* module:
-```html
-import xcomponentapi from 'reactivexcomponent.js';
+
+Import in JS :
+```js
+import xcomponent from 'reactivexcomponent.js';
 ```
 
-Example of XComponent API usage
+Import in TS :
 ```js
-        const serverUrl = "wss://localhost:443";
-        const xcApiName = "HelloWorldApi.xcApi"
+import { XComponent } from 'reactivexcomponent.js';
+const xcomponent = new XComponent();
+```
 
-        const jsonMessage = { "Name": "Test" };
-        const messageType = "XComponent.HelloWorld.UserObject.SayHello";
+Set/Get LogLevel of the API :
+```js
+import { LogLevel } from 'reactivexcomponent.js';
 
-        const componentName = "HelloWorld";
-        const stateMachineName = "HelloWorldManager";
-        const stateMachineResponse = "HelloWorldResponse";
+xcomponent.setLogLevel(LogLevel.DEBUG);
+const logLevel = xcomponent.getLogLevel();
+```
 
-        const visibilityPrivate = true;
+Connect to XComponent WebSocket Bridge :
+```js
+const serverUrl = 'ws://localhost:443';
 
-        const sessionListener = (session) => {
+xcomponent.connect(serverUrl)
+.then(connection => {
+    // Here goes your code that uses the connection
+});
+```
 
-            //Create a subscriber to receive updates and snapshots
-            const subscriber = session.createSubscriber();
-            
-            //Check if subscriber stateMachineResponse of is exposed by xcApi
-            if (subscriber.canSubscribe(componentName, stateMachineResponse)) {
-                //stateMachineUpdateListener : callback executed when a message is received by the subscribed stateMachine
-                const stateMachineUpdateListener = (jsonData) => {
-                    //jsonMessage property is the public member
-                    console.log(jsonData.jsonMessage);
-                    //send context using directly stateMachineRef
-                    jsonData.stateMachineRef.send(messageType, jsonMessage);
-                }       
-                // subscribe using a callback                
-                subscriber.subscribe(componentName, stateMachineResponse, stateMachineUpdateListener);  
-            }
+Get the list of available APIs on the WebSocket Bridge :
+```js
+connection.getXcApiList().then(apiList => {
+    apiList.forEach(api => console.log('Available Api : ' + api));
+});
+```
 
-            //Snapshot using with a Promise
-            subscriber.getSnapshot(componentName, stateMachineResponse).then(items => {
-                items.forEach(item => {
-                    console.log(item.jsonMessage);
-                    //each item contains stateMachineRef with a send method to publish an event to an instance                    
-                    item.stateMachineRef.send(messageType, jsonMessage);
-                })
-            });
+Create a Session on a specific API :
+```js
+const xcApiName = "HelloWorldApi.xcApi"
 
-            //Create a publisher to send an event
-            const publisher = session.createPublisher(); 
+connection.createSession(xcApiName)
+.then(session => {
+    // Here goes your code that uses the session
+});
+```
 
-            //Check if publisher of stateMachineName is exposed by xcApi
-            if (publisher.canPublish(componentName, stateMachineName, messageType1)) {
-                //visibility parameter is optional. It is false by default.
-                publisher.send(componentName, stateMachineName, messageType1, jsonMessage, visibilityPrivate);
-            } 
+Variables used in the following examples :
+```js
+const componentName = "HelloWorld";
+const stateMachineName = "HelloWorldManager";
+const stateMachineResponse = "HelloWorldResponse";
 
-        }
+const jsonMessage = { "Name": "Test" };
+const messageType = "XComponent.HelloWorld.UserObject.SayHello";
+```
 
-        const errorListener = (err) => {
-            console.error("Unexpected session close");
-            console.error(err);
-        }
-        // create a session using a Promise
-        // errorListener is an optional parameter. it handles imprevisible session close
-        xcomponentapi.createSession(xcApiName, serverUrl, errorListener)
-            .then(session => {
-                console.log("Session created successfully");
-                sessionListener(session);
-            })
-            .catch(err => {
-                console.error(err);
-                console.error("Initial connection Error");
-            });
-        });        
+Get the Snapshot using a Session :
+```js
+session.getSnapshot(componentName, stateMachineName)
+.then(snapshot => {
+    snapshot.forEach(snapshotElement => console.log('Element : ' + snapshotElement));
+});
+```
 
+Get StateMachine updates through an Observable using a Session :
+```js
+const updates$ = session.getStateMachineUpdates(componentName, stateMachineResponse);
+```
+
+Send a message to all instances of a state machine using a Session :
+```js
+// You can use the method canSend to check if the session is alowed the send this event to this state machine.
+if (session.canSend(componentName, stateMachineName, messageType)) {
+    session.send(componentName, stateMachineName, messageType, jsonMessage);
+}
+```
+
+Send a message to a specific state machine instance using a StateMachineInstance or StateMachineRef :
+```js
+stateMachineInstance.send(messageType, jsonMessage);
 ```
 
 ## Build from source
