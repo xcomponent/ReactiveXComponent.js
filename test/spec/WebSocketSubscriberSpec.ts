@@ -4,8 +4,7 @@ import Rx = require("rx");
 import Mock from "./mock/mockSubscriberDependencies";
 import { EventEmitter } from "events";
 import { PrivateTopics } from "../../src/interfaces/PrivateTopics";
-
-let uuid = require("uuid/v4");
+import * as uuid from "uuid/v4";
 
 describe("Test xcWebSocketSubscriber module", function () {
 

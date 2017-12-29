@@ -8,10 +8,10 @@ branches:
 os:
 - linux
 install:
-- npm install
-- npm run build
+- yarn install
+- yarn build
 script:
-- npm test --silent
+- yarn test --silent
 deploy:
   - provider: npm
     email: dev@xcomponent.com
