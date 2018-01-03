@@ -64,6 +64,7 @@ export class XComponent {
             consoleAppender.setLayout(new BasicLayout());
             this.loggerconfig = new LoggerConfig(consoleAppender, LogLevel.INFO);
             Logger.setConfig(this.loggerconfig);
+            this.initialized = true;
         }
     }
 }

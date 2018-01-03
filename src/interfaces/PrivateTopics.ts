@@ -6,7 +6,7 @@ export class PrivateTopics {
     private subscriberTopics: Array<string>;
 
     constructor() {
-        this.defaultPublisherTopic = new uuid();
+        this.defaultPublisherTopic = uuid();
         this.subscriberTopics = [this.defaultPublisherTopic];
     }
 
