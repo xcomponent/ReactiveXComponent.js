@@ -24,7 +24,7 @@ describe("Test xcSession module", function () {
             const privateTopic = "privateTopic";
             const anotherPrivateTopic = "anotherPrivateTopic";
             session.privateTopics.setDefaultPublisherTopic(privateTopic);
-            expect(session.privateTopics.getdefaultPublisherTopic()).toEqual(privateTopic);
+            expect(session.privateTopics.getDefaultPublisherTopic()).toEqual(privateTopic);
             session.privateTopics.addSubscriberTopic(anotherPrivateTopic);
             expect(session.privateTopics.getSubscriberTopics()).toEqual([privateTopic, anotherPrivateTopic]);
         });
