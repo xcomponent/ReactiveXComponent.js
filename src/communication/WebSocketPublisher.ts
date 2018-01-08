@@ -59,7 +59,7 @@ export class WebSocketPublisher {
             "EventCode": this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType).eventCode,
             "IncomingEventType": 0,
             "MessageType": messageType,
-            "PublishTopic": (!visibilityPrivate) ? undefined : ((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopics.getdefaultPublisherTopic()),
+            "PublishTopic": (!visibilityPrivate) ? undefined : ((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopics.getDefaultPublisherTopic()),
             "SessionData": this.sessionData
         };
     };

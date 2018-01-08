@@ -18,7 +18,7 @@ export class PrivateTopics {
         }
     };
 
-    public getdefaultPublisherTopic(): string {
+    public getDefaultPublisherTopic(): string {
         return this.defaultPublisherTopic;
     };
 
