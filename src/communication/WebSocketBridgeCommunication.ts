@@ -12,7 +12,7 @@ export class WebSocketBridgeCommunication {
     private updates$: Observable<DeserializedData>;
     private deserializer: Deserializer;
     private serializer: Serializer;
-    private heartbeatTimer: number;
+    private heartbeatTimer: NodeJS.Timer;
     private runnning: boolean = true;
 
     constructor(private webSocket: WebSocket) {
@@ -37,7 +37,7 @@ export class WebSocketBridgeCommunication {
             Data: {}
         };
         let input = thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData);
-        this.heartbeatTimer = window.setInterval(() => {
+        this.heartbeatTimer = setInterval(() => {
             thisWebSocketBridgeCommunication.webSocket.send(input);
             this.logger.trace("Heartbeat sent");
         }, heartbeatIntervalSeconds * 1000);
@@ -102,7 +102,7 @@ export class WebSocketBridgeCommunication {
     };
 
     public dispose(): void {
-        window.clearInterval(this.heartbeatTimer);
+        clearInterval(this.heartbeatTimer);
         this.runnning = false;
     }
 }

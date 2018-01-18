@@ -33,11 +33,14 @@ describe("Test Connection module", function () {
             let xcApiFileName = "api.xcApi";
             new XComponent().connect(serverUrl)
             .then(connection => {
-                connection.createSession(xcApiFileName)
-                .then(session => {
-                    expect(session).not.toBe(null);
-                    mockServer.stop(done);
-                });
+                return connection.createSession(xcApiFileName)
+            })
+            .then(session => {
+                expect(session).not.toBe(null);
+                mockServer.stop(done);
+            })
+            .catch(err => {
+                console.log(err);
             });
 
             mockServer.on("connection", function (server) {
