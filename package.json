@@ -61,6 +61,7 @@
   "dependencies": {
     "@types/es6-shim": "^0.31.32",
     "@types/jest": "^18.1.1",
+    "@types/node": "^9.3.0",
     "@types/pako": "^0.2.31",
     "@types/rx": "^4.1.1",
     "@types/xml2js": "0.0.32",
@@ -70,6 +71,7 @@
     "pako": "^1.0.3",
     "rxjs": "^5.3.0",
     "uuid": "^3.0.1",
+    "websocket": "^1.0.25",
     "xml2js": "^0.4.17"
   },
   "devDependencies": {

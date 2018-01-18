@@ -2,14 +2,16 @@ const serverUrl = "wss://localhost:443";
 const xcApiName = "HelloWorldApi.xcApi";
 
 xcomponentapi.default
-    .createSession(xcApiName, serverUrl, (err) => {
-        console.error("Unexecpected session close");
-        console.error(err);
+    .connect(serverUrl)
+    .then(connection => {
+        return connection.createSession(xcApiName);
     })
     .then(session => {
-        console.log("connected");
+        return session.getSnapshot(componentName, stateMachineName);
+    })
+    .then(snapshot => {
+        snapshot.forEach(snapshotElement => console.log('Element : ' + snapshotElement.stateMachineRef.StateMachineCode));
     })
     .catch(err => {
-        console.error(err);
-        console.error("Initial connection Error");
+        console.log(err);
     });

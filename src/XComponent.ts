@@ -8,6 +8,7 @@ import BasicLayout from "log4ts/build/layouts/BasicLayout";
 import ConsoleAppender from "log4ts/build/appenders/ConsoleAppender";
 import { LogLevel } from "log4ts/build/LogLevel";
 import { WebSocketBridgeCommunication } from "./communication/WebSocketBridgeCommunication";
+import { w3cwebsocket as WebSocketLib } from "websocket";
 
 export class XComponent {
     private logger: Logger = Logger.getLogger("XComponent");
@@ -17,7 +18,13 @@ export class XComponent {
     public connect(serverUrl: string, errorListener?: ErrorListener, heartbeatIntervalSeconds: number = 10): Promise<Connection> {
         this.ensureInitialized();
         return new Promise((resolve, reject): void => {
-            let webSocket = new WebSocket(serverUrl);
+            let webSocket;
+            if (this.isNodeApplication()) {
+                process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+                webSocket = new WebSocketLib(serverUrl);
+            } else {
+                webSocket = new WebSocket(serverUrl);
+            }
             let webSocketBridgeCommunication = new WebSocketBridgeCommunication(webSocket);
             let connection = new WebSocketConnection(webSocket, webSocketBridgeCommunication);
 
@@ -66,5 +73,10 @@ export class XComponent {
             Logger.setConfig(this.loggerconfig);
             this.initialized = true;
         }
+    }
+
+    private isNodeApplication() {
+        return typeof process === "object" &&
+            process + "" === "[object process]" && typeof window === "undefined";
     }
 }
