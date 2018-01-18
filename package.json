@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "webpack -d --watch",
-    "build": "webpack --define process.env.NODE_ENV='\"production\"' --progress --colors",
+    "build": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors",
     "test": "jest --coverage "
   },
   "jest": {
