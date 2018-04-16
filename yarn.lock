@@ -10,6 +10,10 @@
   version "18.1.1"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-18.1.1.tgz#6f63488c64726900885ab9cd5697bb7fa1b416cc"
 
+"@types/node@*":
+  version "9.6.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.5.tgz#ee700810fdf49ac1c399fc5980b7559b3e5a381d"
+
 "@types/node@^9.3.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
@@ -106,9 +110,11 @@
     "@types/rx-lite-time" "*"
     "@types/rx-lite-virtualtime" "*"
 
-"@types/xml2js@0.0.32":
-  version "0.0.32"
-  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.0.32.tgz#9f7e98cf0adcca085a35cdead0319b5ac19c9fd9"
+"@types/xml2js@0.4.2":
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.2.tgz#a4b84b3879ffd4710953fd92cabfde9a8a4e8456"
+  dependencies:
+    "@types/node" "*"
 
 "@types/xmldom@^0.1.28":
   version "0.1.29"
