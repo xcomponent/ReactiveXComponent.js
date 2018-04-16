@@ -62,7 +62,7 @@
     "@types/es6-shim": "^0.31.32",
     "@types/jest": "^18.1.1",
     "@types/node": "^9.3.0",
-    "@types/pako": "^0.2.31",
+    "@types/pako": "^1.0.0",
     "@types/rx": "^4.1.1",
     "@types/xml2js": "0.4.2",
     "@types/xmldom": "^0.1.28",

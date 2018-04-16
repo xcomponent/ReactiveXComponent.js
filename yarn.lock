@@ -18,9 +18,9 @@
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
 
-"@types/pako@^0.2.31":
-  version "0.2.31"
-  resolved "https://registry.yarnpkg.com/@types/pako/-/pako-0.2.31.tgz#dbeff0274ae7b782046fe2b7d45f7285ae3d37bc"
+"@types/pako@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/pako/-/pako-1.0.0.tgz#eaae8364d1b7f752e263bc3fd68dfec98e6136c5"
 
 "@types/rx-core-binding@*":
   version "4.0.4"
