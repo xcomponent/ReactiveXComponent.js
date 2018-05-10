@@ -1,10 +1,8 @@
+
+import {fromEvent as observableFromEvent,  Observable } from "rxjs";
+import {map, first, filter } from "rxjs/operators";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
-import { Observable } from "rxjs/Observable";
-import "rxjs/add/operator/map";
-import "rxjs/add/operator/filter";
-import "rxjs/add/operator/first";
-import "rxjs/add/observable/fromEvent";
 import "rxjs/add/operator/toPromise";
 import { WebSocketPublisher } from "../communication/WebSocketPublisher";
 import {
@@ -34,19 +32,19 @@ export class WebSocketSubscriber {
         this.serializer = new Serializer();
         this.timeout = "00:00:10";
         const thisSubscriber = this;
-        this.updates$ = Observable.fromEvent(this.webSocket, "message").map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage));
+        this.updates$ = observableFromEvent(this.webSocket, "message").pipe(map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage)));
     }
 
     getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
         const thisSubscriber = this;
-        const promise = this.updates$
-            .filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic))
-            .first()
-            .map((data: DeserializedData) => {
+        const promise = this.updates$.pipe(
+            filter((data: DeserializedData) => (data.command === Commands[Commands.snapshot] && data.topic === replyTopic)),
+            first(),
+            map((data: DeserializedData) => {
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
                 return thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic);
-            })
+            }), )
             .toPromise();
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         const dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
@@ -85,10 +83,10 @@ export class WebSocketSubscriber {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let thisSubscriber = this;
-        let filteredObservable = this.updates$
-            .filter((data: DeserializedData) => data.command === Commands[Commands.update])
-            .map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic))
-            .filter((jsonData: StateMachineInstance) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode));
+        let filteredObservable = this.updates$.pipe(
+            filter((data: DeserializedData) => data.command === Commands[Commands.update]),
+            map((data: DeserializedData) => thisSubscriber.getJsonDataFromEvent(data.stringData, data.topic)),
+            filter((jsonData: StateMachineInstance) => thisSubscriber.isSameComponent(jsonData, componentCode) && thisSubscriber.isSameStateMachine(jsonData, stateMachineCode)), );
         return filteredObservable;
     }
 

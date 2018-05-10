@@ -1,5 +1,5 @@
 import { StateMachineInstance } from "./StateMachineInstance";
-import { Observable } from "rxjs/Observable";
+import { Observable } from "rxjs";
 import { StateMachineUpdateListener } from "./StateMachineUpdateListener";
 import { PrivateTopics } from "./PrivateTopics";
 
