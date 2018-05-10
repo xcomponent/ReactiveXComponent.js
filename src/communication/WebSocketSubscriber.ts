@@ -44,7 +44,7 @@ export class WebSocketSubscriber {
             map((data: DeserializedData) => {
                 thisSubscriber.sendUnsubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
                 return thisSubscriber.getJsonDataFromSnapshot(data.stringData, data.topic);
-            }), )
+            }))
             .toPromise();
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         const dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);

@@ -20,7 +20,7 @@ export class WebSocketBridgeCommunication {
         let thisWebSocketBridgeCommunication = this;
         this.updates$ = observableFromEvent(this.webSocket, "message").pipe(
             takeWhile((rawMessage: MessageEvent) => this.runnning),
-            map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage)), );
+            map((rawMessage: MessageEvent) => thisWebSocketBridgeCommunication.deserializer.deserializeWithoutTopic(rawMessage.data || rawMessage)));
     }
 
     public startHeartbeat(heartbeatIntervalSeconds: number): void {
@@ -51,7 +51,7 @@ export class WebSocketBridgeCommunication {
             map((data: DeserializedData) => {
                 this.logger.info("Model " + xcApiName + " received successfully");
                 return thisWebSocketBridgeCommunication.deserializer.getJsonDataFromGetModelRequest(data.stringData);
-            }), )
+            }))
             .toPromise();
         const commandData = {
             Command: command,
@@ -71,7 +71,7 @@ export class WebSocketBridgeCommunication {
             map((data: DeserializedData) => {
                 this.logger.info("ApiList received successfully");
                 return thisWebSocketBridgeCommunication.deserializer.getJsonDataFromGetXcApiListRequest(data.stringData);
-            }), )
+            }))
             .toPromise();
         const commandData = {
             Command: command,
@@ -90,7 +90,7 @@ export class WebSocketBridgeCommunication {
             map((data: DeserializedData) => {
                 this.logger.info(xcApiFileName + " " + "received successfully");
                 return thisWebSocketBridgeCommunication.deserializer.getJsonDataFromXcApiRequest(data.stringData);
-            }), )
+            }))
             .toPromise();
         const commandData = {
             Command: command,
