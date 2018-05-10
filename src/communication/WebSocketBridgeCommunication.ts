@@ -80,7 +80,7 @@ export class WebSocketBridgeCommunication {
         };
         this.webSocket.send(thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData));
         return promise;
-    };
+    }
 
     public getXcApi(xcApiFileName: string): Promise<string> {
         const thisWebSocketBridgeCommunication = this;
@@ -99,7 +99,7 @@ export class WebSocketBridgeCommunication {
         };
         this.webSocket.send(thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData));
         return promise;
-    };
+    }
 
     public dispose(): void {
         clearInterval(this.heartbeatTimer);

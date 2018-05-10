@@ -19,7 +19,7 @@ export class WebSocketConnection implements Connection {
 
     public getXcApiList(): Promise<Array<string>> {
         return this.webSocketBridgeCommunication.getXcApiList();
-    };
+    }
 
     public getCompositionModel(xcApiName: string): Promise<CompositionModel> {
         return this.webSocketBridgeCommunication.getCompositionModel(xcApiName);
@@ -27,11 +27,11 @@ export class WebSocketConnection implements Connection {
 
     public createSession(apiName: string): Promise<Session> {
         return this.initConnection(apiName, null);
-    };
+    }
 
     public createAuthenticatedSession(apiName: string, sessionData: string): Promise<Session> {
         return this.initConnection(apiName, sessionData);
-    };
+    }
 
     public dispose(): void {
         this.sessions.forEach((session: WebSocketSession) => {

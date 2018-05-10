@@ -54,5 +54,5 @@ export class WebSocketSession implements Session {
     public dispose(): void {
         this.publisher.dispose();
         this.subscriber.dispose();
-    };
+    }
 }

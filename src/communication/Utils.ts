@@ -6,5 +6,5 @@ export class Utils {
         } else {
             throw new Error("Element to remove not found");
         }
-    };
+    }
 }
