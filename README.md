@@ -13,6 +13,7 @@ install the latest version of the API:
 
 npm :
 ``` npm i reactivexcomponent.js --save ```
+
 yarn :
 ``` yarn add reactivexcomponent.js ```
 
