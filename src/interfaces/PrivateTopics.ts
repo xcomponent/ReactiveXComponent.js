@@ -16,23 +16,23 @@ export class PrivateTopics {
             this.removeSubscriberTopic(this.defaultPublisherTopic);
             this.defaultPublisherTopic = newDefaultPublisherTopic;
         }
-    };
+    }
 
     public getDefaultPublisherTopic(): string {
         return this.defaultPublisherTopic;
-    };
+    }
 
     public addSubscriberTopic(privateTopic: string): void {
         if (privateTopic && this.subscriberTopics.indexOf(privateTopic) === -1) {
             this.subscriberTopics.push(privateTopic);
         }
-    };
+    }
 
     public removeSubscriberTopic(privateTopic: string): void {
         Utils.removeElementFromArray(this.subscriberTopics, privateTopic);
-    };
+    }
 
     public getSubscriberTopics(): Array<string> {
         return this.subscriberTopics;
-    };
+    }
 }

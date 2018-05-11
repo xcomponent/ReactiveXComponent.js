@@ -9,7 +9,7 @@ import { Session } from "../interfaces/Session";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
-import { Observable } from "rxjs/Observable";
+import { Observable } from "rxjs";
 
 export class WebSocketSession implements Session {
     private publisher: WebSocketPublisher;
@@ -54,5 +54,5 @@ export class WebSocketSession implements Session {
     public dispose(): void {
         this.publisher.dispose();
         this.subscriber.dispose();
-    };
+    }
 }

@@ -14,34 +14,34 @@ export interface Header {
     WorkerId: number;
     EventCode: number;
     IncomingEventType: number;
-};
+}
 
 export interface Event {
     Header: Header;
     JsonMessage: string;
-};
+}
 
 export interface Data {
     RoutingKey: string;
     ComponentCode: number;
     Event: Event;
-};
+}
 
 export interface NameData {
     Name: string;
-};
+}
 
 export interface EmptyData { }
 
 export interface TopicData {
     Header: Header;
     JsonMessage: string;
-};
+}
 
 export interface CommandData {
     Command: string;
     Data: NameData | EmptyData | TopicData;
-};
+}
 
 export interface Component {
     name: string;
@@ -82,14 +82,13 @@ export class Serializer {
         let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
         this.logger.debug("Message send : ", input);
         return input;
-    };
+    }
 
     public convertCommandDataToWebsocketInputFormat(commandData: CommandData): string {
         let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
         this.logger.debug("Message send : ", input);
         return input;
-    };
-
+    }
 }
 
 export class Deserializer {
@@ -126,17 +125,17 @@ export class Deserializer {
             strData += String.fromCharCode(finalData[i]);
         }
         return strData;
-    };
+    }
 
     public getJsonDataFromXcApiRequest(data: string): string {
         let jsonData = this.getJsonData(data);
         return jsonData.ApiFound ? this.decodeServerMessage(jsonData.Content) : null;
-    };
+    }
 
     public getJsonDataFromGetXcApiListRequest(data: string): Array<string> {
         let jsonData = this.getJsonData(data);
         return jsonData.Apis;
-    };
+    }
 
     public getJsonData(data: string): any {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));

@@ -14,13 +14,13 @@ export class WebSocketPublisher {
         let data = this.getDataToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
-    };
+    }
 
     public sendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocket.send(webSocketInput);
-    };
+    }
 
     public canSend(componentName: string, stateMachineName: string, messageType: string): boolean {
         if (this.configuration.containsStateMachine(componentName, stateMachineName)) {
@@ -29,7 +29,7 @@ export class WebSocketPublisher {
             return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
         }
         return false;
-    };
+    }
 
     public dispose(): void {
 
@@ -62,7 +62,7 @@ export class WebSocketPublisher {
             "PublishTopic": (!visibilityPrivate) ? undefined : ((specifiedPrivateTopic) ? specifiedPrivateTopic : this.privateTopics.getDefaultPublisherTopic()),
             "SessionData": this.sessionData
         };
-    };
+    }
 
     private getRoutingKey(componentCode: number, stateMachineCode: number, messageType: string): string {
         let publisher = this.configuration.getPublisherDetails(componentCode, stateMachineCode, messageType);
