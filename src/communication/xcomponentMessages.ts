@@ -112,6 +112,9 @@ export class Deserializer {
     }
 
     public decodeServerMessage(b64Data: string): string {
+        if (b64Data === undefined) {
+            return undefined;
+        }
         let charData = atob(b64Data).split("").map((x: string) => {
             return x.charCodeAt(0);
         });
