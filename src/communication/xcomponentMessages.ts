@@ -111,7 +111,7 @@ export class Deserializer {
         };
     }
 
-    public decodeServerMessage(b64Data: string): string {
+    public decodeServerMessage(b64Data?: string): string | undefined {
         if (b64Data === undefined) {
             return undefined;
         }
