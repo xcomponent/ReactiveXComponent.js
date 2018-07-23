@@ -136,6 +136,26 @@ describe("Test Connection module", function () {
 
         });
 
+        it("send getModel request, getModelListener callback should be executed and receive undefined model and undefined graphical", function (done) {
+            new XComponent().connect(serverUrl)
+            .then(connection => {
+                let apiName = "unknownApi";
+                connection.getCompositionModel(apiName).then((compositionModel) => {
+                    expect(compositionModel.components[0].model).toBeUndefined();
+                    expect(compositionModel.components[0].graphical).toBeUndefined();
+                    mockServer.stop(done);
+                });
+            });
+
+            mockServer.on("connection", function (server) {
+                server.on("message", function (message) {
+                    server.send(Mock.getModelResponseUndefined);
+                });
+            });
+
+        });
+
+
     });
 });
 
