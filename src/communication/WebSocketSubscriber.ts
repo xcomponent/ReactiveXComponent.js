@@ -5,12 +5,8 @@ import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 import "rxjs/add/operator/toPromise";
 import { WebSocketPublisher } from "../communication/WebSocketPublisher";
-import {
-    Component, CompositionModel, DeserializedData, CommandData, Header,
-    Event, Data, getHeaderWithIncomingType,
+import { DeserializedData, Event, Data, getHeaderWithIncomingType,
     Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
-import { } from "./clientMessages";
-import { error } from "util";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
 import { StateMachineRef } from "../interfaces/StateMachineRef";
@@ -20,13 +16,14 @@ import { Logger } from "log4ts";
 
 export class WebSocketSubscriber {
     private logger: Logger = Logger.getLogger("WebSocketSubscriber");
+    private stateMachineRefSendPublisher: WebSocketPublisher;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private updates$: Observable<DeserializedData>;
     private deserializer: Deserializer;
     private serializer: Serializer;
     private timeout: string;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private stateMachineRefSendPublisher: WebSocketPublisher, private privateTopics: PrivateTopics) {
+    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration) {
         this.subscribedStateMachines = {};
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
@@ -35,7 +32,11 @@ export class WebSocketSubscriber {
         this.updates$ = observableFromEvent(this.webSocket, "message").pipe(map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage)));
     }
 
-    getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
+    setStateMachineRefSendPublisher(stateMachineRefSendPublisher: WebSocketPublisher) {
+        this.stateMachineRefSendPublisher = stateMachineRefSendPublisher;
+    }
+
+    getSnapshot(componentName: string, stateMachineName: string, privateTopics: PrivateTopics): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
         const thisSubscriber = this;
         const promise = this.updates$.pipe(
@@ -47,22 +48,18 @@ export class WebSocketSubscriber {
             }))
             .toPromise();
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
-        const dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic);
+        const dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic, privateTopics);
         this.webSocket.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
         return promise;
     }
 
-    public dispose(): void {
-
-    }
-
-    private getDataToSendSnapshot(componentName: string, stateMachineName: string, replyTopic: string): Data {
+    private getDataToSendSnapshot(componentName: string, stateMachineName: string, replyTopic: string, privateTopics: PrivateTopics): Data {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let topic = this.configuration.getSnapshotTopic(componentCode);
         let jsonMessage = {
             Timeout: this.timeout,
-            CallerPrivateTopic: this.privateTopics.getSubscriberTopics(),
+            CallerPrivateTopic: privateTopics.getSubscriberTopics(),
             ReplyTopic: replyTopic
         };
         let header = getHeaderWithIncomingType();

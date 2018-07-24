@@ -1,9 +1,6 @@
 
 import { WebSocketPublisher } from "./WebSocketPublisher";
 import { WebSocketSubscriber } from "./WebSocketSubscriber";
-import { Utils } from "./Utils";
-import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
-import * as definition from "definition";
 import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { Session } from "../interfaces/Session";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
@@ -16,10 +13,11 @@ export class WebSocketSession implements Session {
     private subscriber: WebSocketSubscriber;
     public privateTopics: PrivateTopics;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private sessionData?: string) {
-        this.privateTopics = new PrivateTopics();
+    constructor(private webSocket: WebSocket, configuration: ApiConfiguration, sessionData?: string) {
+        this.subscriber = new WebSocketSubscriber(this.webSocket, configuration);
+        this.privateTopics = new PrivateTopics(this.subscriber);
         this.publisher = new WebSocketPublisher(this.webSocket, configuration, this.privateTopics, sessionData);
-        this.subscriber = new WebSocketSubscriber(this.webSocket, configuration, this.publisher, this.privateTopics);
+        this.subscriber.setStateMachineRefSendPublisher(this.publisher);
     }
 
     public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
@@ -31,7 +29,7 @@ export class WebSocketSession implements Session {
     }
 
     public getSnapshot(componentName: string, stateMachineName: string): Promise<Array<StateMachineInstance>> {
-        return this.subscriber.getSnapshot(componentName, stateMachineName);
+        return this.subscriber.getSnapshot(componentName, stateMachineName, this.privateTopics);
     }
 
     public getStateMachineUpdates(componentName: string, stateMachineName: string): Observable<StateMachineInstance> {
@@ -52,7 +50,6 @@ export class WebSocketSession implements Session {
     }
 
     public dispose(): void {
-        this.publisher.dispose();
-        this.subscriber.dispose();
+        this.privateTopics.dispose();
     }
 }

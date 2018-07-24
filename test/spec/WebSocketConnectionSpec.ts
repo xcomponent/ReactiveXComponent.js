@@ -1,12 +1,9 @@
 import { XComponent } from "../../src/XComponent";
-import { WebSocket, Server, SocketIO } from "mock-socket";
-import { WebSocketConnection } from "../../src/communication/WebSocketConnection";
-import { Connection } from "../../src/interfaces/Connection";
+import { WebSocket, Server } from "mock-socket";
 import { ErrorListener } from "../../src/interfaces/ErrorListener";
 import Mock from "./mock/mockSubscriberDependencies";
 import pako = require("pako");
 import * as uuid from "uuid/v4";
-import { log } from "util";
 
 const encodeServerMessage = (strData: string) => {
     let binaryString = pako.deflate(strData, { to: "string" });
@@ -33,7 +30,7 @@ describe("Test Connection module", function () {
             let xcApiFileName = "api.xcApi";
             new XComponent().connect(serverUrl)
             .then(connection => {
-                return connection.createSession(xcApiFileName)
+                return connection.createSession(xcApiFileName);
             })
             .then(session => {
                 expect(session).not.toBe(null);
@@ -45,10 +42,10 @@ describe("Test Connection module", function () {
 
             mockServer.on("connection", function (server) {
                 server.on("message", function (message) {
-                    const getApiResponse = `<deployment>  
-                                                    <clientAPICommunication>   
+                    const getApiResponse = `<deployment>
+                                                    <clientAPICommunication>
                                                     </clientAPICommunication>
-                                                    <codesConverter>   
+                                                    <codesConverter>
                                                     </codesConverter>
                                                 </deployment>`;
                     let content = encodeServerMessage(getApiResponse);
@@ -159,7 +156,7 @@ describe("Test Connection module", function () {
     });
 });
 
-class FakeErrorHandler implements ErrorListener{
+class FakeErrorHandler implements ErrorListener {
     constructor(private done) {
     }
 
