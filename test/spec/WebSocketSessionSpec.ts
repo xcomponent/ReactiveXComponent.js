@@ -1,6 +1,4 @@
-import { WebSocket, Server, SocketIO } from "mock-socket";
-import { WebSocketPublisher } from "../../src/communication/WebSocketPublisher";
-import { WebSocketSubscriber } from "../../src/communication/WebSocketSubscriber";
+import { WebSocket} from "mock-socket";
 import { WebSocketSession } from "../../src/communication/WebSocketSession";
 
 
@@ -14,7 +12,7 @@ describe("Test xcSession module", function () {
             const session = new WebSocketSession(mockWebSocket, null);
             session.privateTopics.setDefaultPublisherTopic(undefined);
             session.privateTopics.addSubscriberTopic(undefined);
-            expect(mockWebSocket.send).toHaveBeenCalledTimes(0);
+            expect(mockWebSocket.send).toHaveBeenCalledTimes(1);
         });
 
         it("Should add and set correctly the given private topics", () => {

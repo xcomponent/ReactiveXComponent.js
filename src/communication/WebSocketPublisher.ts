@@ -1,5 +1,5 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { Header, Event, Data, Serializer} from "./xcomponentMessages";
+import { Header, Data, Serializer} from "./xcomponentMessages";
 import { StateMachineRef } from "../interfaces/StateMachineRef";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
 
@@ -29,10 +29,6 @@ export class WebSocketPublisher {
             return this.configuration.containsPublisher(componentCode, stateMachineCode, messageType);
         }
         return false;
-    }
-
-    public dispose(): void {
-
     }
 
     private getDataToSend(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
