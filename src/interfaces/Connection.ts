@@ -1,5 +1,5 @@
 import { CompositionModel } from "../communication/xcomponentMessages";
-import { Session } from "../interfaces/Session";
+import { Session } from "./Session";
 import { ErrorListener } from "./ErrorListener";
 
 export interface Connection {

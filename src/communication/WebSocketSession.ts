@@ -7,16 +7,17 @@ import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
 import { Observable } from "rxjs";
+import { WebSocketWrapper } from "./WebSocketWrapper";
 
 export class WebSocketSession implements Session {
     private publisher: WebSocketPublisher;
     private subscriber: WebSocketSubscriber;
     public privateTopics: PrivateTopics;
 
-    constructor(private webSocket: WebSocket, configuration: ApiConfiguration, sessionData?: string) {
-        this.subscriber = new WebSocketSubscriber(this.webSocket, configuration);
+    constructor(webSocketWrapper: WebSocketWrapper, configuration: ApiConfiguration, sessionData?: string) {
+        this.subscriber = new WebSocketSubscriber(webSocketWrapper, configuration);
         this.privateTopics = new PrivateTopics(this.subscriber);
-        this.publisher = new WebSocketPublisher(this.webSocket, configuration, this.privateTopics, sessionData);
+        this.publisher = new WebSocketPublisher(webSocketWrapper, configuration, this.privateTopics, sessionData);
         this.subscriber.setStateMachineRefSendPublisher(this.publisher);
     }
 

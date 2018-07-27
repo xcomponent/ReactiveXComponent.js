@@ -1,8 +1,6 @@
 import { WebSocketConnection } from "./communication/WebSocketConnection";
-import { Session } from "./interfaces/Session";
 import { Connection } from "./interfaces/Connection";
 import { ErrorListener } from "./interfaces/ErrorListener";
-import { CompositionModel } from "./communication/xcomponentMessages";
 import { Logger, LoggerConfig } from "log4ts";
 import BasicLayout from "log4ts/build/layouts/BasicLayout";
 import ConsoleAppender from "log4ts/build/appenders/ConsoleAppender";

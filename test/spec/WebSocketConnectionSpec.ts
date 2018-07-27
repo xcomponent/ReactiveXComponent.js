@@ -12,21 +12,24 @@ const encodeServerMessage = (strData: string) => {
 };
 
 describe("Test Connection module", function () {
+    let mockServer: Server;
 
     beforeEach(function () {
         (<any>window).WebSocket = WebSocket;
         (<any>window).isTestEnvironnement = true;
     });
 
+    afterEach(() => {
+        if (mockServer) {
+            mockServer.stop(() => {});
+        }
+    });
+
     describe("Test createSession method", function () {
-        it("given an unknown server url, should call the error listener", function (done) {
-            let serverUrl = "wss://wrongServerUrl";
-            const connection = new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()));
-        });
 
         it("should call the sessionListener with the created session as argument", function (done) {
             let serverUrl = "wss://serverUrl";
-            let mockServer = new Server(serverUrl);
+            mockServer = new Server(serverUrl);
             let xcApiFileName = "api.xcApi";
             new XComponent().connect(serverUrl)
             .then(connection => {
@@ -57,7 +60,7 @@ describe("Test Connection module", function () {
 
         it("should provide meaningful error message when the Api is unknown", function (done) {
             let serverUrl = "wss://serverUrl1";
-            let mockServer = new Server(serverUrl);
+            mockServer = new Server(serverUrl);
             let xcApiFileName = "unknownApi";
 
             new XComponent().connect(serverUrl)
@@ -77,9 +80,10 @@ describe("Test Connection module", function () {
                 });
             });
         });
+
         it("when server stops after running in the first place, unexpectedCloseSessionErrorListener should be called", (done) => {
             const serverUrl = "wss://serverUrl";
-            const mockServer = new Server(serverUrl);
+            mockServer = new Server(serverUrl);
             const xcApiFileName = "api.xcApi";
             mockServer.on("connection", (server) => {
                 mockServer.close();
@@ -87,7 +91,14 @@ describe("Test Connection module", function () {
             new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()))
             .then(connection => {
                 connection.createSession(xcApiFileName);
-            });
+            })
+            .catch(error => {});
+        });
+
+        it("given an unknown server url, should call the error listener", function (done) {
+            let serverUrl = "wss://wrongServerUrl";
+            new XComponent().connect(serverUrl, new FakeErrorHandler((err) => done()))
+            .catch(error => {});
         });
     });
 
@@ -107,10 +118,10 @@ describe("Test Connection module", function () {
     });
 
     describe("Test getModel method", function () {
-        let mockServer, serverUrl;
+        let serverMock, serverUrl;
         beforeEach(function () {
             serverUrl = "wss://" + uuid();
-            mockServer = Mock.createMockServer(serverUrl);
+            serverMock = Mock.createMockServer(serverUrl);
         });
 
         it("send getModel request, getModelListener callback should be executed when a response is received", function (done) {
@@ -121,11 +132,11 @@ describe("Test Connection module", function () {
                     expect(compositionModel.projectName).not.toBe(null);
                     expect(compositionModel.components).not.toBe(null);
                     expect(compositionModel.composition).not.toBe(null);
-                    mockServer.stop(done);
+                    serverMock.stop(done);
                 });
             });
 
-            mockServer.on("connection", function (server) {
+            serverMock.on("connection", function (server) {
                 server.on("message", function (message) {
                     server.send(Mock.getModelResponse);
                 });
@@ -140,19 +151,16 @@ describe("Test Connection module", function () {
                 connection.getCompositionModel(apiName).then((compositionModel) => {
                     expect(compositionModel.components[0].model).toBeUndefined();
                     expect(compositionModel.components[0].graphical).toBeUndefined();
-                    mockServer.stop(done);
+                    serverMock.stop(done);
                 });
             });
 
-            mockServer.on("connection", function (server) {
+            serverMock.on("connection", function (server) {
                 server.on("message", function (message) {
                     server.send(Mock.getModelResponseUndefined);
                 });
             });
-
         });
-
-
     });
 });
 

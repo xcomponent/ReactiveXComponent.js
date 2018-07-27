@@ -1,10 +1,10 @@
 
-import {fromEvent as observableFromEvent,  Observable } from "rxjs";
+import { Observable } from "rxjs";
 import {map, first, filter } from "rxjs/operators";
 import { Commands, Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfiguration";
 import "rxjs/add/operator/toPromise";
-import { WebSocketPublisher } from "../communication/WebSocketPublisher";
+import { WebSocketPublisher } from "./WebSocketPublisher";
 import { DeserializedData, Event, Data, getHeaderWithIncomingType,
     Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
@@ -13,6 +13,7 @@ import { StateMachineRef } from "../interfaces/StateMachineRef";
 import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
 import * as uuid from "uuid/v4";
 import { Logger } from "log4ts";
+import { WebSocketWrapper } from "./WebSocketWrapper";
 
 export class WebSocketSubscriber {
     private logger: Logger = Logger.getLogger("WebSocketSubscriber");
@@ -23,13 +24,16 @@ export class WebSocketSubscriber {
     private serializer: Serializer;
     private timeout: string;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration) {
+    constructor(private webSocketWrapper: WebSocketWrapper, private configuration: ApiConfiguration) {
         this.subscribedStateMachines = {};
         this.deserializer = new Deserializer();
         this.serializer = new Serializer();
         this.timeout = "00:00:10";
         const thisSubscriber = this;
-        this.updates$ = observableFromEvent(this.webSocket, "message").pipe(map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage)));
+        const webSocketUpdates$ = this.webSocketWrapper.getObservable();
+        if (webSocketUpdates$ !== undefined && webSocketUpdates$ !== null) {
+            this.updates$ = webSocketUpdates$.pipe(map((rawMessage: MessageEvent) => thisSubscriber.deserializer.deserialize(rawMessage.data || rawMessage)));
+        }
     }
 
     setStateMachineRefSendPublisher(stateMachineRefSendPublisher: WebSocketPublisher) {
@@ -49,7 +53,7 @@ export class WebSocketSubscriber {
             .toPromise();
         this.sendSubscribeRequestToTopic(replyTopic, Kinds.Snapshot);
         const dataToSendSnapshot = this.getDataToSendSnapshot(componentName, stateMachineName, replyTopic, privateTopics);
-        this.webSocket.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
+        this.webSocketWrapper.send(thisSubscriber.serializer.convertToWebsocketInputFormat(dataToSendSnapshot));
         return promise;
     }
 
@@ -135,7 +139,7 @@ export class WebSocketSubscriber {
             Data: data
         };
         let input = this.serializer.convertCommandDataToWebsocketInputFormat(commandData);
-        this.webSocket.send(input);
+        this.webSocketWrapper.send(input);
     }
 
     sendUnsubscribeRequestToTopic(topic: string, kind: number): void {
@@ -145,7 +149,7 @@ export class WebSocketSubscriber {
             Data: data
         };
         let input = this.serializer.convertCommandDataToWebsocketInputFormat(commandData);
-        this.webSocket.send(input);
+        this.webSocketWrapper.send(input);
     }
 
     private getDataToSend(topic: string, kind: number): Event {
@@ -171,7 +175,7 @@ export class WebSocketSubscriber {
                 Command: Commands[Commands.unsubscribe],
                 Data: data
             };
-            this.webSocket.send(this.serializer.convertCommandDataToWebsocketInputFormat(commandData));
+            this.webSocketWrapper.send(this.serializer.convertCommandDataToWebsocketInputFormat(commandData));
             this.removeSubscribedStateMachines(componentName, stateMachineName);
         }
     }

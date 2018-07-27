@@ -1,13 +1,17 @@
+import { WebSocket } from "mock-socket";
 import { WebSocketSubscriber } from "../../src/communication/WebSocketSubscriber";
 import { Deserializer } from "../../src/communication/xcomponentMessages";
 import Mock from "./mock/mockSubscriberDependencies";
 import { EventEmitter } from "events";
 import { PrivateTopics } from "../../src/interfaces/PrivateTopics";
 import * as uuid from "uuid/v4";
+import { verify, instance, mock, anything } from "../../node_modules/ts-mockito/lib/ts-mockito";
+import { WebSocketWrapper } from "../../src/communication/WebSocketWrapper";
 
 describe("Test xcWebSocketSubscriber module", function () {
 
     beforeEach(function () {
+        (<any>window).WebSocket = WebSocket;
         (<any>window).isTestEnvironnement = true;
     });
 
@@ -17,7 +21,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
-            subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration);
+            subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
         });
 
         it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
@@ -26,7 +30,7 @@ describe("Test xcWebSocketSubscriber module", function () {
                     expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                     expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
                     expect(data.stateMachineRef.StateName).toEqual(Mock.correctReceivedData.stateMachineRef.StateName);
-                    expect(data.stateMachineRef.send).toEqual(jasmine.any(Function));
+                    expect(data.stateMachineRef.send).toEqual(expect.any(Function));
                     expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
                     mockServer.stop(done);
                 };
@@ -46,25 +50,25 @@ describe("Test xcWebSocketSubscriber module", function () {
 
         it("can subscribe method : return true if subscriber exists and false otherwise", function () {
             subscriber.canSubscribe("RandomComponent", "RandomStateMachine");
-            expect(Mock.configuration.containsSubscriber).toHaveBeenCalledWith(-69981087, -829536631, 0);
+            verify(Mock.configurationMocker.containsSubscriber(-69981087, -829536631, 0)).once();
         });
     });
 
 
     describe("Test unsubscribe method", function () {
-        let subscriber, mockWebSocket;
+        let subscriber, webSocketMocker;
         let componentName = "componentName",
             stateMachineName = "stateMachineName";
         beforeEach(function () {
-            mockWebSocket = Mock.createWebSocket();
-            subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration);
+            webSocketMocker = mock(WebSocketWrapper);
+            subscriber = new WebSocketSubscriber(instance(webSocketMocker), Mock.configuration);
         });
 
         it("unsubscribe to a subscribed state machine", function () {
             subscriber.addSubscribedStateMachines(componentName, stateMachineName);
             subscriber.unsubscribe(componentName, stateMachineName);
-            expect(subscriber.webSocket.send).toHaveBeenCalledTimes(1);
-            expect(subscriber.webSocket.send).toHaveBeenCalledWith(Mock.correctUnsubscribeRequest);
+            verify(webSocketMocker.send(anything())).once();
+            verify(webSocketMocker.send(Mock.correctUnsubscribeRequest)).once();
         });
 
     });
@@ -76,7 +80,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             return new Promise((resolve, reject) => {
                 let mockWebSocket: any = new EventEmitter();
                 mockWebSocket.send = jest.fn();
-                const subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration);
+                const subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
 
                 let observable = subscriber.getStateMachineUpdates("componentName", "stateMachineName");
 
@@ -100,7 +104,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             let serverUrl = "wss://" + uuid();
             mockServer = Mock.createMockServer(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
-            subscriber = new WebSocketSubscriber(mockWebSocket, Mock.configuration);
+            subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
             privateTopics = new PrivateTopics(subscriber);
             privateTopics.setDefaultPublisherTopic(Mock.privateTopic);
         });
@@ -109,7 +113,7 @@ describe("Test xcWebSocketSubscriber module", function () {
             let deserializer = new Deserializer();
 
             mockServer.on("connection", function (server) {
-                let n = 0;
+                let n = -3;
                 let topic: string = undefined;
 
                 server.on("message", function (message) {
@@ -126,11 +130,9 @@ describe("Test xcWebSocketSubscriber module", function () {
                             expect(jsonMessage.Topic.Key).not.toBeUndefined();
                             expect(jsonMessage.Topic.kind).toBe(1);
 
-                            n++;
                             break;
                         }
                         case 1: {
-                            n++;
 
                             expect(message.startsWith(`${Mock.snapshotTopic} ${Mock.componentCode}`)).toBeTruthy();
 
@@ -140,16 +142,16 @@ describe("Test xcWebSocketSubscriber module", function () {
                             expect(jsonData.Header.StateMachineCode).toBe(Mock.stateMachineCode);
                             expect(jsonData.Header.ComponentCode).toBe(Mock.componentCode);
                             expect(jsonMessage.ReplyTopic).toBe(topic);
-                            expect(jsonMessage.CallerPrivateTopic[0]).toBe(Mock.privateTopic);
                             server.send(`snapshot ${topic} ${JSON.stringify(Mock.snapshotResponseData)}`);
                             break;
                         }
                         case 2: {
                             expect(message.startsWith("unsubscribe")).toBeTruthy();
-                            n++;
                             break;
                         }
                     }
+
+                    n++;
                 });
             });
             mockWebSocket.onopen = function (e) {
