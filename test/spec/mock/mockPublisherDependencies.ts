@@ -1,3 +1,6 @@
+import { ApiConfiguration, DefaultApiConfiguration } from "../../../src/configuration/apiConfiguration";
+import { mock, when, anyString, anyNumber, instance } from "ts-mockito/lib/ts-mockito";
+
 // Initialisation
 let componentCode = -69981087;
 let stateMachineCode = -829536631;
@@ -7,11 +10,6 @@ let routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
 let guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 let sessionData = "sessiondata";
 
-let guid = jasmine.createSpyObj("guid", ["create"]);
-guid.create.and.callFake(function () {
-    return guiExample;
-});
-
 function getHeader(visibility) {
     let header = {
         "StateMachineCode": stateMachineCode,
@@ -19,12 +17,11 @@ function getHeader(visibility) {
         "EventCode": eventCode,
         "IncomingEventType": 0,
         "MessageType": messageType,
-        "PublishTopic": (!visibility) ? undefined : guid.create(),
+        "PublishTopic": (!visibility) ? undefined : guiExample,
         "SessionData": sessionData
     };
     return header;
 }
-
 
 let jsonMessage = { "Name": "MY NAME" };
 
@@ -67,31 +64,34 @@ let correctDataForSMRef = {
     },
     routingKey: routingKey
 };
+
 let corretWebsocketInputFormatForSendSMRef = correctDataForSMRef.routingKey + " " + correctDataForSMRef.event.Header.ComponentCode
     + " " + JSON.stringify(correctDataForSMRef.event);
 
+let apiConfiguration: ApiConfiguration = mock(DefaultApiConfiguration);
 
-// Mocking configuration
-let configuration = jasmine.createSpyObj("configuration", ["getComponentCode", "getStateMachineCode", "getPublisherDetails", "containsStateMachine", "containsPublisher"]);
-configuration.getComponentCode.and.callFake(function (componentName) {
-    if (!componentName){
+when(apiConfiguration.getComponentCode(anyString())).thenCall((componentName: string) => {
+    if (!componentName) {
         throw new Error();
     }
     return componentCode;
 });
-configuration.getStateMachineCode.and.callFake(function (componentName, stateMachineName) {
-    if (!componentName || !stateMachineName){
+
+when(apiConfiguration.getStateMachineCode(anyString(), anyString())).thenCall((componentName: string, stateMachineName: string) => {
+    if (!componentName || !stateMachineName) {
         throw new Error();
     }
     return stateMachineCode;
 });
-configuration.getPublisherDetails.and.callFake(function (componentCode, stateMachineCode) {
+
+when(apiConfiguration.getPublisherDetails(anyNumber(), anyNumber(), anyString())).thenCall(() => {
     return {
         eventCode: eventCode,
         routingKey: routingKey
     };
 });
-configuration.containsStateMachine.and.callFake(function (componentName, stateMachineName) {
+
+when(apiConfiguration.containsStateMachine(anyString(), anyString())).thenCall((componentName: string, stateMachineName: string) => {
     if (!componentName || !stateMachineName) {
         return false;
     } else {
@@ -99,21 +99,12 @@ configuration.containsStateMachine.and.callFake(function (componentName, stateMa
     }
 });
 
-configuration.containsPublisher.and.callFake(function (compCode, stmCode, messageType) {
+when(apiConfiguration.containsPublisher(anyNumber(), anyNumber(), anyString())).thenCall((compCode, stmCode) => {
     return compCode === componentCode && stmCode === stateMachineCode;
 });
 
-// Mocking webSocket
-let createMockWebSocket = function () {
-    let webSocket = jasmine.createSpyObj("webSocket", ["send"]);
-    return webSocket;
-};
-
-guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-
 let returnObject = {
-    configuration: configuration,
-    createMockWebSocket: createMockWebSocket,
+    configuration: instance(apiConfiguration),
     jsonMessage: jsonMessage,
     messageType: messageType,
     correctData: correctData,

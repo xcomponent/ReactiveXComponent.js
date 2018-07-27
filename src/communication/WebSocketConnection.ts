@@ -2,12 +2,13 @@ import { WebSocketSession } from "./WebSocketSession";
 import { WebSocketBridgeCommunication } from "./WebSocketBridgeCommunication";
 import { Utils } from "./Utils";
 import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
-import { CompositionModel } from "../communication/xcomponentMessages";
+import { CompositionModel } from "./xcomponentMessages";
 import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
 import { error } from "util";
 import { Session } from "../interfaces/Session";
 import { Connection } from "../interfaces/Connection";
 import { Logger } from "log4ts";
+import { WebSocketWrapper } from "./WebSocketWrapper";
 
 export class WebSocketConnection implements Connection {
     private sessions: Array<WebSocketSession> = new Array<WebSocketSession>();
@@ -51,7 +52,7 @@ export class WebSocketConnection implements Connection {
                 return parser.parse(xcApi);
             })
             .then(configuration => {
-                const session = new WebSocketSession(this.webSocket, configuration, sessionData);
+                const session = new WebSocketSession(new WebSocketWrapper(this.webSocket), configuration, sessionData);
                 this.sessions.push(session);
                 return session;
             });

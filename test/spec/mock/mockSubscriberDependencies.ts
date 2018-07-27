@@ -1,42 +1,26 @@
-import { WebSocket, Server, SocketIO } from "mock-socket";
+import { Server } from "mock-socket";
 import { Kinds } from "../../../src/configuration/xcWebSocketBridgeConfiguration";
+import { when, mock, anyString, anyNumber, anything, instance } from "../../../node_modules/ts-mockito/lib/ts-mockito";
+import { ApiConfiguration, DefaultApiConfiguration } from "../../../src/configuration/apiConfiguration";
 
 // Mocking configuration
 let outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
 let snapshotTopic = "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
-let configuration = jasmine.createSpyObj("configuration", ["getSubscriberTopic", "getComponentCode", "getStateMachineCode", "getHeaderConfig", "convertToWebsocketInputFormat", "getSnapshotTopic", "getStateName", "containsSubscriber"]);
-
-configuration.getSubscriberTopic.and.callFake(function (componentCode, stateMachineCode, type) {
-    return outputTopic;
-});
-
-configuration.getSnapshotTopic.and.callFake(function (componentCode) {
-    return "snapshot.1_0.HelloWorldMicroservice.HelloWorld";
-});
-
 let stateName = "stateName";
-configuration.getStateName.and.callFake(function () {
-    return stateName;
-});
 let componentCode = -69981087;
 let stateMachineCode = -829536631;
-configuration.getComponentCode.and.callFake(function (componentName, stateMachineName) {
-    return componentCode;
-});
-configuration.getStateMachineCode.and.callFake(function (componentName, stateMachineName) {
-    return stateMachineCode;
-});
 
+let apiConfiguration: ApiConfiguration = mock(DefaultApiConfiguration);
 
-// Mocking webSocket
-let createWebSocket = function () {
-    let webSocket = jasmine.createSpyObj("webSocket", ["send", "addEventListener", "getWebSocketCore", "close"]);
-    webSocket.getWebSocketCore.and.callFake(function (componentName, stateMachineName) {
-        return {};
-    });
+when(apiConfiguration.getSubscriberTopic(anyNumber(), anyNumber(), anything())).thenReturn(outputTopic);
 
-    return webSocket;
-};
+when(apiConfiguration.getSnapshotTopic(anyNumber())).thenReturn("snapshot.1_0.HelloWorldMicroservice.HelloWorld");
+
+when(apiConfiguration.getStateName(anyNumber(), anyNumber(), anyNumber())).thenReturn(stateName);
+
+when(apiConfiguration.getComponentCode(anyString())).thenReturn(componentCode);
+
+when(apiConfiguration.getStateMachineCode(anyString(), anyString())).thenReturn(stateMachineCode);
 
 // Initilisation of expected data
 let correctData = {
@@ -106,8 +90,8 @@ let getXcApiNotFoundResponseData = { "ApiFound": false, "ApiName": "unknownApi" 
 let getXcApiNotFoundResponse = "getXcApi " + JSON.stringify(getXcApiNotFoundResponseData);
 
 let returnObj = {
-    configuration: configuration,
-    createWebSocket: createWebSocket,
+    configuration: instance(apiConfiguration),
+    configurationMocker: apiConfiguration,
     correctData: correctData,
     jsonMessage: jsonMessage,
     jsonData: jsonData,

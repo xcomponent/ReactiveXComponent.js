@@ -2,24 +2,25 @@ import { ApiConfiguration } from "../configuration/apiConfiguration";
 import { Header, Data, Serializer} from "./xcomponentMessages";
 import { StateMachineRef } from "../interfaces/StateMachineRef";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
+import { WebSocketWrapper } from "./WebSocketWrapper";
 
 export class WebSocketPublisher {
     private serializer: Serializer;
 
-    constructor(private webSocket: WebSocket, private configuration: ApiConfiguration, private privateTopics: PrivateTopics, public sessionData: string) {
+    constructor(private webSocketWrapper: WebSocketWrapper, private configuration: ApiConfiguration, private privateTopics: PrivateTopics, public sessionData: string) {
         this.serializer = new Serializer();
     }
 
     public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
-        this.webSocket.send(webSocketInput);
+        this.webSocketWrapper.send(webSocketInput);
     }
 
     public sendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
         let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
-        this.webSocket.send(webSocketInput);
+        this.webSocketWrapper.send(webSocketInput);
     }
 
     public canSend(componentName: string, stateMachineName: string, messageType: string): boolean {
