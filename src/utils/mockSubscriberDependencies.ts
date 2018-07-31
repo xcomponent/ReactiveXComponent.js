@@ -1,7 +1,7 @@
-import { Server } from "mock-socket";
-import { Kinds } from "../../../src/configuration/xcWebSocketBridgeConfiguration";
-import { when, mock, anyString, anyNumber, anything, instance } from "../../../node_modules/ts-mockito/lib/ts-mockito";
-import { ApiConfiguration, DefaultApiConfiguration } from "../../../src/configuration/apiConfiguration";
+import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
+import { when, mock, anyString, anyNumber, anything, instance } from "ts-mockito";
+import { ApiConfiguration, DefaultApiConfiguration } from "../configuration/apiConfiguration";
+import { JsonMessage } from "../communication/xcomponentMessages";
 
 // Mocking configuration
 let outputTopic = "output.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldResponse";
@@ -29,9 +29,8 @@ let correctData = {
 };
 
 
-let agentId = 1;
 let stateMachineId = 2;
-let jsonMessage: any = { key: "value" };
+let jsonMessage: JsonMessage = { key: "value" };
 let jsonData = {
     Header: {
         StateMachineCode: stateMachineCode,
@@ -49,17 +48,15 @@ let correctReceivedData = {
         "StateMachineCode": jsonData.Header.StateMachineCode,
         "ComponentCode": jsonData.Header.ComponentCode,
         "StateName": stateName,
-        "send": function (jsonMessage) { }
+        "send": function () { 
+            //
+        }
     },
     jsonMessage: jsonMessage
 };
 
 let correctSubscribeRequest = "subscribe " + JSON.stringify(correctData);
 let correctUnsubscribeRequest = "unsubscribe " + JSON.stringify(correctData);
-
-let createMockServer = function (serverUrl) {
-    return new Server(serverUrl);
-};
 
 let guid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 let privateTopic = guid;
@@ -99,7 +96,6 @@ let returnObj = {
     correctReceivedData: correctReceivedData,
     correctSubscribeRequest: correctSubscribeRequest,
     correctUnsubscribeRequest: correctUnsubscribeRequest,
-    createMockServer: createMockServer,
     correctDataToSendSnapshot: correctDataToSendSnapshot,
     correctSnapshotRequest: correctSnapshotRequest,
     snapshotResponseData: snapshotResponseData,

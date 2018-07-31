@@ -1,4 +1,4 @@
-export { CompositionModel } from "./communication/xcomponentMessages";
+export { CompositionModel, JsonMessage } from "./communication/xcomponentMessages";
 export { StateMachineUpdateListener } from "./interfaces/StateMachineUpdateListener";
 export { StateMachineInstance } from "./interfaces/StateMachineInstance";
 export { StateMachineRef } from "./interfaces/StateMachineRef";

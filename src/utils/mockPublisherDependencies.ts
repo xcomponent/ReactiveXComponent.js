@@ -1,5 +1,5 @@
-import { ApiConfiguration, DefaultApiConfiguration } from "../../../src/configuration/apiConfiguration";
 import { mock, when, anyString, anyNumber, instance } from "ts-mockito/lib/ts-mockito";
+import { ApiConfiguration, DefaultApiConfiguration } from "../configuration/apiConfiguration";
 
 // Initialisation
 let componentCode = -69981087;
@@ -10,7 +10,7 @@ let routingKey = "input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager"
 let guiExample = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 let sessionData = "sessiondata";
 
-function getHeader(visibility) {
+function getHeader(visibility: boolean) {
     let header = {
         "StateMachineCode": stateMachineCode,
         "ComponentCode": componentCode,
@@ -25,7 +25,7 @@ function getHeader(visibility) {
 
 let jsonMessage = { "Name": "MY NAME" };
 
-function getCorrectData(visibility) {
+function getCorrectData(visibility: boolean) {
     return {
         event: {
             "Header": getHeader(visibility),
@@ -35,9 +35,7 @@ function getCorrectData(visibility) {
     };
 }
 
-let correctData = getCorrectData(false);
-
-function getCorretWebsocketInputFormat(visibility) {
+function getCorretWebsocketInputFormat(visibility: boolean) {
     let correctData = getCorrectData(visibility);
     let correctWebsocketInputFormat = correctData.routingKey + " " + correctData.event.Header.ComponentCode
         + " " + JSON.stringify(correctData.event);
@@ -107,7 +105,7 @@ let returnObject = {
     configuration: instance(apiConfiguration),
     jsonMessage: jsonMessage,
     messageType: messageType,
-    correctData: correctData,
+    correctData: getCorrectData(false),
     getCorretWebsocketInputFormat: getCorretWebsocketInputFormat,
     stateMachineRef: stateMachineRef,
     corretWebsocketInputFormatForSendSMRef: corretWebsocketInputFormatForSendSMRef,

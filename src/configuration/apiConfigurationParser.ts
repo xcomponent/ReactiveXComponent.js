@@ -10,7 +10,8 @@ export class DefaultApiConfigurationParser implements ApiConfigurationParser {
 
     parse(xmlConfig: string): Promise<ApiConfiguration> {
         return new Promise((resolve, reject) => {
-            parseString(xmlConfig, { charkey: "value", attrkey: "attributes" }, function (err, result) {
+            // tslint:disable-next-line:no-any
+            parseString(xmlConfig, { charkey: "value", attrkey: "attributes" }, function (err: any, result: any) {
                 if (err) {
                     reject(err);
                 }

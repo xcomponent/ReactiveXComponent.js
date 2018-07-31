@@ -3,7 +3,7 @@ import { SubscriberEventType } from "../../src/configuration/apiConfiguration";
 import fs = require("fs");
 
 const parse = (input?: string) => {
-  const xml = input ? input : fs.readFileSync("test/spec/apiConfigExample.xml", "utf8");
+  const xml = input ? input : fs.readFileSync("src/utils/apiConfigExample.xml", "utf8");
   const parser = new DefaultApiConfigurationParser();
   return parser.parse(xml);
 };
@@ -24,8 +24,8 @@ test("ApiConfiguration parsing: throws exception on wrong XML input", () => {
 const testParseWithWrongInput = (input: string) => {
   return parse(input)
     .then(_ => fail())
-    .catch(e => { });
-}
+    .catch(e => {/**/});
+};
 
 test("GetComponentCode should return the right code given an existing component name", () => {
   return parse()
