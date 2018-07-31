@@ -1,0 +1,11 @@
+tsconfig.json
+src
+.git
+config
+scripts
+tslint.json
+.travis.yml
+_config.yml
+checkTag.sh
+renovate.json
+*.tgz

@@ -75,47 +75,47 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findStateByCode(stateMachine: StateMachine, stateCode: number): State {
-        const state = stateMachine.states[0].State
+        const result = stateMachine.states[0].State
             .find((state) => Number(state.attributes.id) === stateCode);
-        if (!state) {
+        if (!result) {
             throw new Error(`State '${stateCode}' not found`);
         }
-        return state;
+        return result;
     }
 
     private findComponentByName(componentName: string): Component {
-        const component = this.findComponent(component => component.attributes.name === componentName);
-        if (!component) {
+        const result = this.findComponent(component => component.attributes.name === componentName);
+        if (!result) {
             throw new Error(`Component '${componentName}' not found`);
         }
-        return component;
+        return result;
     }
 
     private findComponentByCode(componentCode: number): Component {
-        const component = this.findComponent(component => Number(component.attributes.id) === componentCode);
-        if (!component) {
+        const result = this.findComponent(component => Number(component.attributes.id) === componentCode);
+        if (!result) {
             throw new Error(`Component '${componentCode}' not found`);
         }
-        return component;
+        return result;
     }
 
-    private findComponent(predicate: (component: Component) => boolean): Component {
+    private findComponent(predicate: (component: Component) => boolean): Component | undefined {
         return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
     }
 
-    private findStateMachine(component: Component, predicate: (stateMachine: StateMachine) => boolean): StateMachine {
+    private findStateMachine(component: Component, predicate: (stateMachine: StateMachine) => boolean): StateMachine | undefined {
         return component.stateMachines[0].stateMachine.find(predicate);
     }
 
     containsComponent(componentName: string): boolean {
-        const component = this.findComponent(component => component.attributes.name === componentName);
-        return component ? true : false;
+        const result = this.findComponent(component => component.attributes.name === componentName);
+        return result ? true : false;
     }
 
     containsStateMachine(componentName: string, stateMachineName: string): boolean {
-        const component = this.findComponent(component => component.attributes.name === componentName);
-        if (component) {
-            return component.stateMachines[0].stateMachine.find(stm => stm.attributes.name === stateMachineName) != null;
+        const result = this.findComponent(component => component.attributes.name === componentName);
+        if (result) {
+            return result.stateMachines[0].stateMachine.find(stm => stm.attributes.name === stateMachineName) != null;
         }
         return false;
     }
@@ -141,7 +141,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         };
     }
 
-    private getPublisher(componentCode: number, stateMachineCode: number, messageType: string): ApiCommunication {
+    private getPublisher(componentCode: number, stateMachineCode: number, messageType: string): ApiCommunication | undefined {
         return this._config.deployment.clientAPICommunication[0].publish
             .find(pub => Number(pub.attributes.componentCode) === componentCode
                 && Number(pub.attributes.stateMachineCode) === stateMachineCode
@@ -158,7 +158,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return subscriber.topic[0].value;
     }
 
-    private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): ApiCommunication {
+    private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): ApiCommunication | undefined {
         return this._config.deployment.clientAPICommunication[0].subscribe
             .find(pub => Number(pub.attributes.componentCode) === componentCode
                 && Number(pub.attributes.stateMachineCode) === stateMachineCode

@@ -4,15 +4,18 @@ import * as atob from "atob";
 
 export const fatalErrorState = "FatalError";
 
+// tslint:disable-next-line:no-any
+export type JsonMessage = any;
+
 export interface Header {
-    StateMachineCode: number;
-    ComponentCode: number;
-    MessageType: string;
-    PublishTopic: string;
-    SessionData: string;
-    StateMachineId: number;
-    WorkerId: number;
-    EventCode: number;
+    StateMachineCode?: number;
+    ComponentCode?: number;
+    MessageType?: string;
+    PublishTopic?: string;
+    SessionData?: string;
+    StateMachineId?: number;
+    WorkerId?: number;
+    EventCode?: number;
     IncomingEventType: number;
 }
 
@@ -46,7 +49,7 @@ export interface CommandData {
 export interface Component {
     name: string;
     model: string;
-    graphical: string;
+    graphical: string | undefined;
 }
 
 export interface CompositionModel {
@@ -57,20 +60,12 @@ export interface CompositionModel {
 
 export interface DeserializedData {
     command: string;
-    topic: string;
+    topic?: string;
     stringData: string;
 }
 
 export let getHeaderWithIncomingType = (): Header => {
     return {
-        StateMachineCode: undefined,
-        ComponentCode: undefined,
-        MessageType: undefined,
-        PublishTopic: undefined,
-        SessionData: undefined,
-        StateMachineId: undefined,
-        WorkerId: undefined,
-        EventCode: undefined,
         IncomingEventType: 0
     };
 };
@@ -92,23 +87,28 @@ export class Serializer {
 }
 
 export class Deserializer {
-    public getJsonDataFromGetModelRequest(stringData: string): CompositionModel {
+    public getJsonDataFromGetModelRequest(stringData: string): CompositionModel | undefined {
         let jsonData = this.getJsonData(stringData);
-        let components = [];
-        let componentGraphical = jsonData.ModelContent.Components;
+        let components = new Array<Component>();
         for (let i = 0; i < jsonData.ModelContent.Components.length; i++) {
             let component = jsonData.ModelContent.Components[i];
-            components.push({
-                name: component.Name,
-                model: this.decodeServerMessage(component.Model),
-                graphical: this.decodeServerMessage(component.Graphical)
-            });
+            if (component.Model) {
+                components.push({
+                    name: component.Name,
+                    model: this.decodeServerMessage(component.Model)!,
+                    graphical: this.decodeServerMessage(component.Graphical)
+                });
+            }
         }
-        return {
-            projectName: jsonData.ModelContent.ProjectName,
-            components: components,
-            composition: this.decodeServerMessage(jsonData.ModelContent.Composition)
-        };
+        if (jsonData.ModelContent.Composition) {
+            return {
+                projectName: jsonData.ModelContent.ProjectName,
+                components: components,
+                composition: this.decodeServerMessage(jsonData.ModelContent.Composition)!
+            };
+        }
+
+        return undefined;
     }
 
     public decodeServerMessage(b64Data?: string): string | undefined {
@@ -130,9 +130,9 @@ export class Deserializer {
         return strData;
     }
 
-    public getJsonDataFromXcApiRequest(data: string): string {
+    public getJsonDataFromXcApiRequest(data: string): string | undefined {
         let jsonData = this.getJsonData(data);
-        return jsonData.ApiFound ? this.decodeServerMessage(jsonData.Content) : null;
+        return jsonData.ApiFound ? this.decodeServerMessage(jsonData.Content) : undefined;
     }
 
     public getJsonDataFromGetXcApiListRequest(data: string): Array<string> {
@@ -140,6 +140,7 @@ export class Deserializer {
         return jsonData.Apis;
     }
 
+    // tslint:disable-next-line:no-any
     public getJsonData(data: string): any {
         return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
     }

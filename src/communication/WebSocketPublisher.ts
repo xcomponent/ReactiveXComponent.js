@@ -1,5 +1,5 @@
 import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { Header, Data, Serializer} from "./xcomponentMessages";
+import { Header, Data, Serializer, JsonMessage} from "./xcomponentMessages";
 import { StateMachineRef } from "../interfaces/StateMachineRef";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { WebSocketWrapper } from "./WebSocketWrapper";
@@ -7,17 +7,17 @@ import { WebSocketWrapper } from "./WebSocketWrapper";
 export class WebSocketPublisher {
     private serializer: Serializer;
 
-    constructor(private webSocketWrapper: WebSocketWrapper, private configuration: ApiConfiguration, private privateTopics: PrivateTopics, public sessionData: string) {
+    constructor(private webSocketWrapper: WebSocketWrapper, private configuration: ApiConfiguration, private privateTopics: PrivateTopics, public sessionData?: string) {
         this.serializer = new Serializer();
     }
 
-    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
+    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean = false, specifiedPrivateTopic?: string): void {
         let data = this.getDataToSend(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocketWrapper.send(webSocketInput);
     }
 
-    public sendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
+    public sendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean = false, specifiedPrivateTopic?: string): void {
         let data = this.getDataToSendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
         let webSocketInput = this.serializer.convertToWebsocketInputFormat(data);
         this.webSocketWrapper.send(webSocketInput);
@@ -32,7 +32,7 @@ export class WebSocketPublisher {
         return false;
     }
 
-    private getDataToSend(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
+    private getDataToSend(componentName: string, stateMachineName: string, messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean = false, specifiedPrivateTopic?: string): Data {
         const componentCode = this.configuration.getComponentCode(componentName);
         const stateMachineCode = this.configuration.getStateMachineCode(componentName, stateMachineName);
         let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic);
@@ -47,7 +47,7 @@ export class WebSocketPublisher {
         };
     }
 
-    private getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic: string, stateMachineId: number = undefined, workerId: number = undefined): Header {
+    private getHeaderConfig(componentCode: number, stateMachineCode: number, messageType: string, visibilityPrivate: boolean, specifiedPrivateTopic?: string, stateMachineId?: number, workerId?: number): Header {
         return {
             "WorkerId": workerId,
             "StateMachineId": stateMachineId,
@@ -66,7 +66,7 @@ export class WebSocketPublisher {
         return publisher.routingKey;
     }
 
-    private getDataToSendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): Data {
+    private getDataToSendWithStateMachineRef(stateMachineRef: StateMachineRef, messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean = false, specifiedPrivateTopic?: string): Data {
         let componentCode = stateMachineRef.ComponentCode;
         let stateMachineCode = stateMachineRef.StateMachineCode;
         let headerConfig = this.getHeaderConfig(componentCode, stateMachineCode, messageType, visibilityPrivate, specifiedPrivateTopic, stateMachineRef.StateMachineId, stateMachineRef.WorkerId);

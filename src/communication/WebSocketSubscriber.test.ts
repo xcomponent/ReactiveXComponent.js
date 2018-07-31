@@ -1,7 +1,7 @@
-import { WebSocket } from "mock-socket";
+import { WebSocket, Server } from "mock-socket";
 import { WebSocketSubscriber } from "../../src/communication/WebSocketSubscriber";
 import { Deserializer } from "../../src/communication/xcomponentMessages";
-import Mock from "./mock/mockSubscriberDependencies";
+import Mock from "../utils/mockSubscriberDependencies";
 import { EventEmitter } from "events";
 import { PrivateTopics } from "../../src/interfaces/PrivateTopics";
 import * as uuid from "uuid/v4";
@@ -11,22 +11,25 @@ import { WebSocketWrapper } from "../../src/communication/WebSocketWrapper";
 describe("Test xcWebSocketSubscriber module", function () {
 
     beforeEach(function () {
+        // tslint:disable-next-line:no-any
         (<any>window).WebSocket = WebSocket;
+        // tslint:disable-next-line:no-any
         (<any>window).isTestEnvironnement = true;
     });
 
     describe("Test subscribe method", function () {
-        let subscriber, mockServer, mockWebSocket;
+        let subscriber, mockServer: Server, mockWebSocket;
         beforeEach(function () {
             let serverUrl = "wss://" + uuid();
-            mockServer = Mock.createMockServer(serverUrl);
+            mockServer = new Server(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
             subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
         });
 
-        it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done) {
-            mockWebSocket.onopen = function (e) {
-                let stateMachineUpdateListener = function (data) {
+        it("subscribe to a state machine, subscriberListener callback should be executed when a message is received", function (done: jest.DoneCallback) {
+            mockWebSocket.onopen = function () {
+                // tslint:disable-next-line:no-any
+                let stateMachineUpdateListener = function (data: any) {
                     expect(data.stateMachineRef.ComponentCode).toEqual(Mock.correctReceivedData.stateMachineRef.ComponentCode);
                     expect(data.stateMachineRef.StateMachineCode).toEqual(Mock.correctReceivedData.stateMachineRef.StateMachineCode);
                     expect(data.stateMachineRef.StateName).toEqual(Mock.correctReceivedData.stateMachineRef.StateName);
@@ -38,9 +41,11 @@ describe("Test xcWebSocketSubscriber module", function () {
                 subscriber.subscribe("component", "stateMachine", { onStateMachineUpdate: stateMachineUpdateListener });
             };
 
-            mockServer.on("connection", function (server) {
+            // tslint:disable-next-line:no-any
+            mockServer.on("connection", function (server: any) {
                 // when subscribe request is received, we send send jsonData
-                server.on("message", function (subscribeRequest) {
+                // tslint:disable-next-line:no-any
+                server.on("message", function (subscribeRequest: any) {
                     expect(subscribeRequest).toEqual(Mock.correctSubscribeRequest);
                     server.send(Mock.updateResponse);
                 });
@@ -78,6 +83,7 @@ describe("Test xcWebSocketSubscriber module", function () {
 
         it("should receive jsonData updates on ObservableCollection", function () {
             return new Promise((resolve, reject) => {
+                // tslint:disable-next-line:no-any
                 let mockWebSocket: any = new EventEmitter();
                 mockWebSocket.send = jest.fn();
                 const subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
@@ -99,24 +105,26 @@ describe("Test xcWebSocketSubscriber module", function () {
     });
 
     describe("Test getSnapshot method", function () {
-        let subscriber, mockServer, mockWebSocket, privateTopics;
+        let subscriber, mockServer: Server, mockWebSocket, privateTopics;
         beforeEach(function () {
             let serverUrl = "wss://" + uuid();
-            mockServer = Mock.createMockServer(serverUrl);
+            mockServer = new Server(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
             subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
             privateTopics = new PrivateTopics(subscriber);
             privateTopics.setDefaultPublisherTopic(Mock.privateTopic);
         });
 
-        it("send snapshot request, promise resolve method should be executed when a response is received", function (done) {
+        it("send snapshot request, promise resolve method should be executed when a response is received", function (done: jest.DoneCallback) {
             let deserializer = new Deserializer();
 
-            mockServer.on("connection", function (server) {
+            // tslint:disable-next-line:no-any
+            mockServer.on("connection", function (server: any) {
                 let n = -3;
                 let topic: string = undefined;
 
-                server.on("message", function (message) {
+                // tslint:disable-next-line:no-any
+                server.on("message", function (message: any) {
                     switch (n) {
                         case 0: {
                             const deserializedMessage = deserializer.deserializeWithoutTopic(message);
@@ -149,12 +157,14 @@ describe("Test xcWebSocketSubscriber module", function () {
                             expect(message.startsWith("unsubscribe")).toBeTruthy();
                             break;
                         }
+                        default:
+                            break;
                     }
 
                     n++;
                 });
             });
-            mockWebSocket.onopen = function (e) {
+            mockWebSocket.onopen = function () {
                 subscriber.getSnapshot("component", "stateMachine", privateTopics)
                     .then(items => mockServer.stop(done))
                     .catch(err => {

@@ -6,7 +6,7 @@ import { ApiConfiguration, SubscriberEventType } from "../configuration/apiConfi
 import "rxjs/add/operator/toPromise";
 import { WebSocketPublisher } from "./WebSocketPublisher";
 import { DeserializedData, Event, Data, getHeaderWithIncomingType,
-    Serializer, Deserializer, fatalErrorState } from "./xcomponentMessages";
+    Serializer, Deserializer, fatalErrorState, JsonMessage } from "./xcomponentMessages";
 import { PrivateTopics } from "../interfaces/PrivateTopics";
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
 import { StateMachineRef } from "../interfaces/StateMachineRef";
@@ -36,11 +36,11 @@ export class WebSocketSubscriber {
         }
     }
 
-    setStateMachineRefSendPublisher(stateMachineRefSendPublisher: WebSocketPublisher) {
+    public setStateMachineRefSendPublisher(stateMachineRefSendPublisher: WebSocketPublisher) {
         this.stateMachineRefSendPublisher = stateMachineRefSendPublisher;
     }
 
-    getSnapshot(componentName: string, stateMachineName: string, privateTopics: PrivateTopics): Promise<Array<StateMachineInstance>> {
+    public getSnapshot(componentName: string, stateMachineName: string, privateTopics: PrivateTopics): Promise<Array<StateMachineInstance>> {
         const replyTopic = uuid();
         const thisSubscriber = this;
         const promise = this.updates$.pipe(
@@ -204,36 +204,32 @@ export class WebSocketSubscriber {
             .splice(index, 1);
     }
 
-    public getJsonDataFromSnapshot(data: string, topic: string): Array<StateMachineInstance> {
+    public getJsonDataFromSnapshot(data: string, topic?: string): Array<StateMachineInstance> {
         this.logger.debug("JsonData received from snapshot: ", { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
         try {
-            items = JSON.parse(this.deserializer.decodeServerMessage(b64Data));
+            items = JSON.parse(this.deserializer.decodeServerMessage(b64Data)!);
         } catch (e) {
             items = b64Data;
         }
-        let snapshotItems = [];
-        let thisSubscriber = this;
+        let snapshotItems = new Array<StateMachineInstance>();
         for (let i = 0; i < items.length; i++) {
-            let stateMachineRef = this.getStateMachineRef(parseInt(items[i].StateMachineId), parseInt(items[i].WorkerId), parseInt(items[i].ComponentCode), parseInt(items[i].StateMachineCode), parseInt(items[i].StateCode));
-            snapshotItems.push({
-                stateMachineRef: stateMachineRef,
-                jsonMessage: items[i].PublicMember
-            });
+            let stateMachineRef = this.getStateMachineRef(parseInt(items[i].StateMachineId, undefined), parseInt(items[i].WorkerId, undefined), parseInt(items[i].ComponentCode, undefined), parseInt(items[i].StateMachineCode, undefined), parseInt(items[i].StateCode, undefined));
+            snapshotItems.push(new StateMachineInstance(stateMachineRef, items[i].PublicMember));
         }
         return snapshotItems;
     }
 
-    public getJsonDataFromEvent(data: string, topic: string): StateMachineInstance {
+    public getJsonDataFromEvent(data: string, topic?: string): StateMachineInstance {
         this.logger.debug("JsonData received from event: ", { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let stateMachineRef = this.getStateMachineRef(jsonData.Header.StateMachineId, jsonData.Header.WorkerId, jsonData.Header.ComponentCode, jsonData.Header.StateMachineCode,  jsonData.Header.StateCode, jsonData.Header.ErrorMessage);
         return new StateMachineInstance(stateMachineRef, JSON.parse(jsonData.JsonMessage));
     }
 
-    private getStateMachineRef(StateMachineId: number, workerId: number, componentCode: number, stateMachineCode: number, stateCode: number, errorMessage: string = null): StateMachineRef {
+    private getStateMachineRef(StateMachineId: number, workerId: number, componentCode: number, stateMachineCode: number, stateCode: number, errorMessage?: string): StateMachineRef {
         let thisSubscriber = this;
         let stateMachineRef = {
             "StateMachineId": StateMachineId,
@@ -241,7 +237,7 @@ export class WebSocketSubscriber {
             "ComponentCode": componentCode,
             "StateMachineCode": stateMachineCode,
             "StateName": (errorMessage) ? fatalErrorState : thisSubscriber.configuration.getStateName(componentCode, stateMachineCode, stateCode),
-            "send": (messageType: string, jsonMessage: any, visibilityPrivate: boolean = undefined, specifiedPrivateTopic: string = undefined) => {
+            "send": (messageType: string, jsonMessage: JsonMessage, visibilityPrivate?: boolean , specifiedPrivateTopic?: string) => {
                 thisSubscriber.stateMachineRefSendPublisher.sendWithStateMachineRef(stateMachineRef, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
             },
             "ErrorMessage": errorMessage

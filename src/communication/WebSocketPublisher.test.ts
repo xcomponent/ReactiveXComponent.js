@@ -1,5 +1,5 @@
 import { WebSocketPublisher } from "../../src/communication/WebSocketPublisher";
-import Mock from "./mock/mockPublisherDependencies";
+import Mock from "../utils/mockPublisherDependencies";
 import { PrivateTopics } from "../../src/interfaces/PrivateTopics";
 import { WebSocketSubscriber } from "../../src/communication/WebSocketSubscriber";
 import { verify, anything, mock, instance } from "../../node_modules/ts-mockito/lib/ts-mockito";
@@ -8,6 +8,7 @@ import { WebSocketWrapper } from "../../src/communication/WebSocketWrapper";
 describe("Test xcWebSocketPublisher module", function () {
 
     beforeEach(function () {
+        // tslint:disable-next-line:no-any
         (<any>window).isTestEnvironnement = true;
     });
 

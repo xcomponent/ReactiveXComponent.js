@@ -1,10 +1,11 @@
-
 import {fromEvent as observableFromEvent,  Observable } from "rxjs";
 import {filter, first, map, takeWhile} from "rxjs/operators";
 import { Commands } from "../configuration/xcWebSocketBridgeConfiguration";
 import { CompositionModel, DeserializedData, Serializer, Deserializer } from "./xcomponentMessages";
 import "rxjs/add/observable/fromEvent";
 import { Logger } from "log4ts";
+import { DefaultApiConfigurationParser } from "../configuration/apiConfigurationParser";
+import { ApiConfiguration } from "../configuration/apiConfiguration";
 
 export class WebSocketBridgeCommunication {
     private logger: Logger = Logger.getLogger("HeartbeatManager");
@@ -42,20 +43,28 @@ export class WebSocketBridgeCommunication {
         }, heartbeatIntervalSeconds * 1000);
     }
 
-    public getCompositionModel(xcApiName: string): Promise<CompositionModel> {
+    public getCompositionModel(apiName: string): Promise<CompositionModel> {
         const thisWebSocketBridgeCommunication = this;
         const command = Commands[Commands.getModel];
         const promise = this.updates$.pipe(
             filter((data: DeserializedData) => data.command === command),
             first(),
             map((data: DeserializedData) => {
-                this.logger.info("Model " + xcApiName + " received successfully");
                 return thisWebSocketBridgeCommunication.deserializer.getJsonDataFromGetModelRequest(data.stringData);
             }))
-            .toPromise();
+            .toPromise()
+            .then((compositionModel: CompositionModel | undefined) => {
+                if (!compositionModel) {
+                    const errorMessage = "Model " + apiName + " not found";
+                    this.logger.error(errorMessage);
+                    throw new Error(errorMessage);
+                }
+                this.logger.info("Model " + apiName + " received successfully");
+                return compositionModel;
+            });
         const commandData = {
             Command: command,
-            Data: { "Name": xcApiName }
+            Data: { "Name": apiName }
         };
         const input = thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
@@ -81,20 +90,29 @@ export class WebSocketBridgeCommunication {
         return promise;
     }
 
-    public getXcApi(xcApiFileName: string): Promise<string> {
+    public getXcApiConfiguration(apiName: string): Promise<ApiConfiguration> {
         const thisWebSocketBridgeCommunication = this;
         const command = Commands[Commands.getXcApi];
         const promise = this.updates$.pipe(
             filter((data: DeserializedData) => data.command === command),
             first(),
             map((data: DeserializedData) => {
-                this.logger.info(xcApiFileName + " " + "received successfully");
+                this.logger.info(apiName + " " + "received successfully");
                 return thisWebSocketBridgeCommunication.deserializer.getJsonDataFromXcApiRequest(data.stringData);
             }))
-            .toPromise();
+            .toPromise()
+            .then((xcApi: string | undefined) => {
+                if (!xcApi) {
+                    const errorMessage = `Unknown Api: ${apiName}`;
+                    this.logger.error(errorMessage);
+                    throw new Error(errorMessage);
+                }
+                const parser = new DefaultApiConfigurationParser();
+                return parser.parse(xcApi);
+            });
         const commandData = {
             Command: command,
-            Data: { Name: xcApiFileName }
+            Data: { Name: apiName }
         };
         this.webSocket.send(thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData));
         return promise;

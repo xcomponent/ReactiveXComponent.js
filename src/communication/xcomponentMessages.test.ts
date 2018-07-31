@@ -1,4 +1,4 @@
-import { Deserializer } from "../../src/communication/xcomponentMessages";
+import { Deserializer } from "./xcomponentMessages";
 
 test("It should keep multiple spaces when deserializing messages", () => {
     let deserializer = new Deserializer();

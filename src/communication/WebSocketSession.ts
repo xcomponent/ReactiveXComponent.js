@@ -8,6 +8,7 @@ import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateList
 import { StateMachineInstance } from "../interfaces/StateMachineInstance";
 import { Observable } from "rxjs";
 import { WebSocketWrapper } from "./WebSocketWrapper";
+import { JsonMessage } from "./xcomponentMessages";
 
 export class WebSocketSession implements Session {
     private publisher: WebSocketPublisher;
@@ -21,7 +22,7 @@ export class WebSocketSession implements Session {
         this.subscriber.setStateMachineRefSendPublisher(this.publisher);
     }
 
-    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: any, visibilityPrivate: boolean = false, specifiedPrivateTopic: string = undefined): void {
+    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean = false, specifiedPrivateTopic?: string): void {
         this.publisher.send(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
     }
 
