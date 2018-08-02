@@ -97,6 +97,6 @@
     "tslint-loader": "^3.6.0",
     "tslint-plugin-prettier": "^1.3.0",
     "tslint-react": "^3.6.0",
-    "typescript": "^2.1.4"
+    "typescript": "^3.0.1"
   }
 }
