@@ -1,10 +1,4 @@
-import {
-    ParsedApiConfiguration,
-    ApiCommunication,
-    Component,
-    State,
-    StateMachine
-} from "./parsedApiConfiguration";
+import { ParsedApiConfiguration, ApiCommunication, Component, State, StateMachine } from './parsedApiConfiguration';
 
 export interface PublisherDetails {
     eventCode: number;
@@ -30,21 +24,22 @@ export interface ApiConfiguration {
 }
 
 export class DefaultApiConfiguration implements ApiConfiguration {
-
     private _config: ParsedApiConfiguration;
 
     constructor(rawConfig: ParsedApiConfiguration) {
         this._config = rawConfig;
         if (!this.validate()) {
-            throw new Error("invalid configuration");
+            throw new Error('invalid configuration');
         }
     }
 
     private validate(): boolean {
-        return this._config !== undefined
-            && this._config.deployment !== undefined
-            && this._config.deployment.codesConverter !== undefined
-            && this._config.deployment.clientAPICommunication !== undefined;
+        return (
+            this._config !== undefined &&
+            this._config.deployment !== undefined &&
+            this._config.deployment.codesConverter !== undefined &&
+            this._config.deployment.clientAPICommunication !== undefined
+        );
     }
 
     getComponentCode(componentName: string): number {
@@ -75,8 +70,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findStateByCode(stateMachine: StateMachine, stateCode: number): State {
-        const result = stateMachine.states[0].State
-            .find((state) => Number(state.attributes.id) === stateCode);
+        const result = stateMachine.states[0].State.find(state => Number(state.attributes.id) === stateCode);
         if (!result) {
             throw new Error(`State '${stateCode}' not found`);
         }
@@ -103,7 +97,10 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
     }
 
-    private findStateMachine(component: Component, predicate: (stateMachine: StateMachine) => boolean): StateMachine | undefined {
+    private findStateMachine(
+        component: Component,
+        predicate: (stateMachine: StateMachine) => boolean
+    ): StateMachine | undefined {
         return component.stateMachines[0].stateMachine.find(predicate);
     }
 
@@ -132,7 +129,9 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         const publisher = this.getPublisher(componentCode, stateMachineCode, messageType);
 
         if (!publisher) {
-            throw new Error(`publisher not found - component code: ${componentCode} - statemachine code: ${stateMachineCode} - message type: ${messageType} `);
+            throw new Error(
+                `publisher not found - component code: ${componentCode} - statemachine code: ${stateMachineCode} - message type: ${messageType} `
+            );
         }
 
         return {
@@ -141,33 +140,48 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         };
     }
 
-    private getPublisher(componentCode: number, stateMachineCode: number, messageType: string): ApiCommunication | undefined {
-        return this._config.deployment.clientAPICommunication[0].publish
-            .find(pub => Number(pub.attributes.componentCode) === componentCode
-                && Number(pub.attributes.stateMachineCode) === stateMachineCode
-                && pub.attributes.event === messageType);
+    private getPublisher(
+        componentCode: number,
+        stateMachineCode: number,
+        messageType: string
+    ): ApiCommunication | undefined {
+        return this._config.deployment.clientAPICommunication[0].publish.find(
+            pub =>
+                Number(pub.attributes.componentCode) === componentCode &&
+                Number(pub.attributes.stateMachineCode) === stateMachineCode &&
+                pub.attributes.event === messageType
+        );
     }
 
     getSubscriberTopic(componentCode: number, stateMachineCode: number, type: SubscriberEventType): string {
         const subscriber = this.getSubscriber(componentCode, stateMachineCode, type);
 
         if (!subscriber) {
-            throw new Error(`Subscriber not found - component code: ${componentCode} - statemachine code: ${stateMachineCode}`);
+            throw new Error(
+                `Subscriber not found - component code: ${componentCode} - statemachine code: ${stateMachineCode}`
+            );
         }
 
         return subscriber.topic[0].value;
     }
 
-    private getSubscriber(componentCode: number, stateMachineCode: number, type: SubscriberEventType): ApiCommunication | undefined {
-        return this._config.deployment.clientAPICommunication[0].subscribe
-            .find(pub => Number(pub.attributes.componentCode) === componentCode
-                && Number(pub.attributes.stateMachineCode) === stateMachineCode
-                && pub.attributes.eventType === SubscriberEventType[type].toUpperCase());
+    private getSubscriber(
+        componentCode: number,
+        stateMachineCode: number,
+        type: SubscriberEventType
+    ): ApiCommunication | undefined {
+        return this._config.deployment.clientAPICommunication[0].subscribe.find(
+            pub =>
+                Number(pub.attributes.componentCode) === componentCode &&
+                Number(pub.attributes.stateMachineCode) === stateMachineCode &&
+                pub.attributes.eventType === SubscriberEventType[type].toUpperCase()
+        );
     }
 
     getSnapshotTopic(componentCode: number): string {
-        const snapshot = this._config.deployment.clientAPICommunication[0].snapshot
-            .find(pub => Number(pub.attributes.componentCode) === componentCode);
+        const snapshot = this._config.deployment.clientAPICommunication[0].snapshot.find(
+            pub => Number(pub.attributes.componentCode) === componentCode
+        );
 
         if (!snapshot) {
             throw new Error(`Snapshot topic not found - component code: ${componentCode}`);

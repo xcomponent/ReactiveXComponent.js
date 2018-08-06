@@ -1,14 +1,13 @@
-
-import { WebSocketPublisher } from "./WebSocketPublisher";
-import { WebSocketSubscriber } from "./WebSocketSubscriber";
-import { ApiConfiguration } from "../configuration/apiConfiguration";
-import { Session } from "../interfaces/Session";
-import { PrivateTopics } from "../interfaces/PrivateTopics";
-import { StateMachineUpdateListener } from "../interfaces/StateMachineUpdateListener";
-import { StateMachineInstance } from "../interfaces/StateMachineInstance";
-import { Observable } from "rxjs";
-import { WebSocketWrapper } from "./WebSocketWrapper";
-import { JsonMessage } from "./xcomponentMessages";
+import { WebSocketPublisher } from './WebSocketPublisher';
+import { WebSocketSubscriber } from './WebSocketSubscriber';
+import { ApiConfiguration } from '../configuration/apiConfiguration';
+import { Session } from '../interfaces/Session';
+import { PrivateTopics } from '../interfaces/PrivateTopics';
+import { StateMachineUpdateListener } from '../interfaces/StateMachineUpdateListener';
+import { StateMachineInstance } from '../interfaces/StateMachineInstance';
+import { Observable } from 'rxjs';
+import { WebSocketWrapper } from './WebSocketWrapper';
+import { JsonMessage } from './xcomponentMessages';
 
 export class WebSocketSession implements Session {
     private publisher: WebSocketPublisher;
@@ -22,8 +21,22 @@ export class WebSocketSession implements Session {
         this.subscriber.setStateMachineRefSendPublisher(this.publisher);
     }
 
-    public send(componentName: string, stateMachineName: string, messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean = false, specifiedPrivateTopic?: string): void {
-        this.publisher.send(componentName, stateMachineName, messageType, jsonMessage, visibilityPrivate, specifiedPrivateTopic);
+    public send(
+        componentName: string,
+        stateMachineName: string,
+        messageType: string,
+        jsonMessage: JsonMessage,
+        visibilityPrivate: boolean = false,
+        specifiedPrivateTopic?: string
+    ): void {
+        this.publisher.send(
+            componentName,
+            stateMachineName,
+            messageType,
+            jsonMessage,
+            visibilityPrivate,
+            specifiedPrivateTopic
+        );
     }
 
     public canSend(componentName: string, stateMachineName: string, messageType: string): boolean {
@@ -38,13 +51,17 @@ export class WebSocketSession implements Session {
         return this.subscriber.getStateMachineUpdates(componentName, stateMachineName);
     }
 
-    public subscribe(componentName: string, stateMachineName: string, stateMachineUpdateListener: StateMachineUpdateListener): void {
+    public subscribe(
+        componentName: string,
+        stateMachineName: string,
+        stateMachineUpdateListener: StateMachineUpdateListener
+    ): void {
         this.subscriber.subscribe(componentName, stateMachineName, stateMachineUpdateListener);
     }
 
     public unsubscribe(componentName: string, stateMachineName: string): void {
         this.subscriber.unsubscribe(componentName, stateMachineName);
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 
     public canSubscribe(componentName: string, stateMachineName: string): boolean {

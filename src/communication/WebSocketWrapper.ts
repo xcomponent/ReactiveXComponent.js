@@ -1,4 +1,4 @@
-import {fromEvent as observableFromEvent,  Observable } from "rxjs";
+import { fromEvent as observableFromEvent, Observable } from 'rxjs';
 
 export class WebSocketWrapper {
     constructor(private webSocket: WebSocket) {}
@@ -8,6 +8,6 @@ export class WebSocketWrapper {
     }
 
     public getObservable(): Observable<Event> {
-        return observableFromEvent(this.webSocket, "message");
+        return observableFromEvent(this.webSocket, 'message');
     }
 }
