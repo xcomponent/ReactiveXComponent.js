@@ -1,8 +1,8 @@
-import { Logger } from "log4ts";
-import * as pako from "pako";
-import * as atob from "atob";
+import { Logger } from 'log4ts';
+import * as pako from 'pako';
+import * as atob from 'atob';
 
-export const fatalErrorState = "FatalError";
+export const fatalErrorState = 'FatalError';
 
 // tslint:disable-next-line:no-any
 export type JsonMessage = any;
@@ -34,7 +34,7 @@ export interface NameData {
     Name: string;
 }
 
-export interface EmptyData { }
+export interface EmptyData {}
 
 export interface TopicData {
     Header: Header;
@@ -71,17 +71,17 @@ export let getHeaderWithIncomingType = (): Header => {
 };
 
 export class Serializer {
-    private logger: Logger = Logger.getLogger("Serializer");
+    private logger: Logger = Logger.getLogger('Serializer');
 
     public convertToWebsocketInputFormat(data: Data): string {
         let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
-        this.logger.debug("Message send : ", input);
+        this.logger.debug('Message send : ', input);
         return input;
     }
 
     public convertCommandDataToWebsocketInputFormat(commandData: CommandData): string {
         let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
-        this.logger.debug("Message send : ", input);
+        this.logger.debug('Message send : ', input);
         return input;
     }
 }
@@ -115,15 +115,17 @@ export class Deserializer {
         if (b64Data === undefined) {
             return undefined;
         }
-        let charData = atob(b64Data).split("").map((x: string) => {
-            return x.charCodeAt(0);
-        });
+        let charData = atob(b64Data)
+            .split('')
+            .map((x: string) => {
+                return x.charCodeAt(0);
+            });
         let binData = new Uint8Array(charData);
-        let data = pako.inflate(binData).filter((x) => {
+        let data = pako.inflate(binData).filter(x => {
             return x !== 0;
         });
         let finalData = new Uint16Array(data);
-        let strData = "";
+        let strData = '';
         for (let i = 0; i < finalData.length; i++) {
             strData += String.fromCharCode(finalData[i]);
         }
@@ -142,7 +144,7 @@ export class Deserializer {
 
     // tslint:disable-next-line:no-any
     public getJsonData(data: string): any {
-        return JSON.parse(data.substring(data.indexOf("{"), data.lastIndexOf("}") + 1));
+        return JSON.parse(data.substring(data.indexOf('{'), data.lastIndexOf('}') + 1));
     }
 
     public getPosition(str: string, subString: string, index: number): number {
@@ -150,10 +152,10 @@ export class Deserializer {
     }
 
     public deserialize(data: string): DeserializedData {
-        let s = data.split(" ");
+        let s = data.split(' ');
         let command = s.splice(0, 1)[0];
         let topic = s.splice(0, 1)[0];
-        let stringData = s.join(" ");
+        let stringData = s.join(' ');
         return {
             command: command,
             topic: topic,
@@ -162,9 +164,9 @@ export class Deserializer {
     }
 
     public deserializeWithoutTopic(data: string): DeserializedData {
-        let s = data.split(" ");
+        let s = data.split(' ');
         let command = s.splice(0, 1)[0];
-        let stringData = s.join(" ");
+        let stringData = s.join(' ');
         return {
             command: command,
             topic: undefined,

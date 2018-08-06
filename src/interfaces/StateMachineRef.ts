@@ -1,4 +1,4 @@
-import { JsonMessage } from "../communication/xcomponentMessages";
+import { JsonMessage } from '../communication/xcomponentMessages';
 
 export interface StateMachineRef {
     WorkerId: number;
@@ -9,5 +9,10 @@ export interface StateMachineRef {
     StateName: string;
     send(messageType: string, jsonMessage: JsonMessage): void;
     send(messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean): void;
-    send(messageType: string, jsonMessage: JsonMessage, visibilityPrivate: boolean, specifiedPrivateTopic?: string): void;
+    send(
+        messageType: string,
+        jsonMessage: JsonMessage,
+        visibilityPrivate: boolean,
+        specifiedPrivateTopic?: string
+    ): void;
 }

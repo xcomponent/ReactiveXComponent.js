@@ -4,7 +4,7 @@ export class Utils {
         if (index > -1) {
             array.splice(index, 1);
         } else {
-            throw new Error("Element to remove not found");
+            throw new Error('Element to remove not found');
         }
     }
 }

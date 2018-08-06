@@ -1,7 +1,7 @@
-import { Utils } from "../communication/Utils";
-import * as uuid from "uuid/v4";
-import { WebSocketSubscriber } from "../communication/WebSocketSubscriber";
-import { Kinds } from "../configuration/xcWebSocketBridgeConfiguration";
+import { Utils } from '../communication/Utils';
+import * as uuid from 'uuid/v4';
+import { WebSocketSubscriber } from '../communication/WebSocketSubscriber';
+import { Kinds } from '../configuration/xcWebSocketBridgeConfiguration';
 
 export class PrivateTopics {
     private defaultPublisherTopic: string = uuid();

@@ -12,17 +12,17 @@ export interface CodeConverter {
 }
 
 export interface Component {
-    attributes: { name: string, id: string };
+    attributes: { name: string; id: string };
     stateMachines: [{ stateMachine: [StateMachine] }];
 }
 
 export interface StateMachine {
-    attributes: { name: string, id: string };
+    attributes: { name: string; id: string };
     states: [{ State: [State] }];
 }
 
 export interface State {
-    attributes: { name: string, id: string };
+    attributes: { name: string; id: string };
 }
 
 export interface ClientApiCommunication {
@@ -32,7 +32,13 @@ export interface ClientApiCommunication {
 }
 
 export interface ApiCommunication {
-    attributes: { componentCode: string, stateMachineCode?: string, eventType?: string, event?: string, eventCode?: string };
+    attributes: {
+        componentCode: string;
+        stateMachineCode?: string;
+        eventType?: string;
+        event?: string;
+        eventCode?: string;
+    };
     topic: [Topic];
 }
 
