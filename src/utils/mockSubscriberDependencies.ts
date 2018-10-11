@@ -28,7 +28,7 @@ let correctData = {
     JsonMessage: JSON.stringify({ Topic: { Key: outputTopic, kind: Kinds.Public } })
 };
 
-let stateMachineId = 2;
+let stateMachineId = '2';
 let jsonMessage: JsonMessage = { key: 'value' };
 let jsonData = {
     Header: {

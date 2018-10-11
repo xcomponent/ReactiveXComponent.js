@@ -268,7 +268,7 @@ export class WebSocketSubscriber {
         let snapshotItems = new Array<StateMachineInstance>();
         for (let i = 0; i < items.length; i++) {
             let stateMachineRef = this.getStateMachineRef(
-                parseInt(items[i].StateMachineId, undefined),
+                items[i].StateMachineId,
                 parseInt(items[i].WorkerId, undefined),
                 parseInt(items[i].ComponentCode, undefined),
                 parseInt(items[i].StateMachineCode, undefined),
@@ -294,7 +294,7 @@ export class WebSocketSubscriber {
     }
 
     private getStateMachineRef(
-        StateMachineId: number,
+        StateMachineId: string,
         workerId: number,
         componentCode: number,
         stateMachineCode: number,

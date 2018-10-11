@@ -3,7 +3,7 @@ import { JsonMessage } from '../communication/xcomponentMessages';
 export interface StateMachineRef {
     WorkerId: number;
     ErrorMessage?: string;
-    StateMachineId: number;
+    StateMachineId: string;
     StateMachineCode: number;
     ComponentCode: number;
     StateName: string;

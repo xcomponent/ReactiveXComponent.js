@@ -13,7 +13,7 @@ export interface Header {
     MessageType?: string;
     PublishTopic?: string;
     SessionData?: string;
-    StateMachineId?: number;
+    StateMachineId?: string;
     WorkerId?: number;
     EventCode?: number;
     IncomingEventType: number;
