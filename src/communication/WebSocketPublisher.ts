@@ -97,7 +97,7 @@ export class WebSocketPublisher {
         messageType: string,
         visibilityPrivate: boolean,
         specifiedPrivateTopic?: string,
-        stateMachineId?: number,
+        stateMachineId?: string,
         workerId?: number
     ): Header {
         return {

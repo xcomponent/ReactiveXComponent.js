@@ -43,7 +43,7 @@ function getCorretWebsocketInputFormat(visibility: boolean) {
 }
 
 let stateMachineRef = {
-    StateMachineId: 1,
+    StateMachineId: '1',
     StateMachineCode: stateMachineCode,
     ComponentCode: componentCode
 };
