@@ -93,10 +93,7 @@ describe('Test Connection module', function() {
                 mockServer.close(undefined);
             });
             new XComponent()
-                .connect(
-                    serverUrl,
-                    new FakeErrorHandler(err => done())
-                )
+                .connect(serverUrl, new FakeErrorHandler(err => done()))
                 .then(connection => {
                     connection.createSession(xcApiFileName);
                 })
@@ -108,14 +105,9 @@ describe('Test Connection module', function() {
         // tslint:disable-next-line:typedef
         it('given an unknown server url, should call the error listener', function(done) {
             let serverUrl = 'wss://wrongServerUrl';
-            new XComponent()
-                .connect(
-                    serverUrl,
-                    new FakeErrorHandler(err => done())
-                )
-                .catch(error => {
-                    /**/
-                });
+            new XComponent().connect(serverUrl, new FakeErrorHandler(err => done())).catch(error => {
+                /**/
+            });
         });
     });
 
@@ -130,9 +122,10 @@ describe('Test Connection module', function() {
             new XComponent().connect(serverUrl).then(connection => {
                 let apiName = 'unknownApi';
                 connection.getCompositionModel(apiName).then(compositionModel => {
-                    expect(compositionModel.projectName).not.toBe(null);
-                    expect(compositionModel.components).not.toBe(null);
-                    expect(compositionModel.composition).not.toBe(null);
+                    expect(compositionModel).not.toBe(undefined);
+                    expect(compositionModel!.projectName).not.toBe(null);
+                    expect(compositionModel!.components).not.toBe(null);
+                    expect(compositionModel!.composition).not.toBe(null);
                     serverMock.stop(done);
                 });
             });
