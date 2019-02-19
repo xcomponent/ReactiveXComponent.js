@@ -65,10 +65,11 @@ test('GetComponentCode throws exception when using an unkonwn component name', (
 
 test('GetStateMachineCode throws exception when using an unkonwn component name', () => {
     const componentName = 'random component';
+    const stateMachineName = 'random state machine';
     const messageError = "Component '" + componentName + "' not found";
     return parse()
         .then(config => {
-            config.getStateMachineCode(componentName, null);
+            config.getStateMachineCode(componentName, stateMachineName);
             fail();
         })
         .catch(e => expect(e.message).toBe(messageError));

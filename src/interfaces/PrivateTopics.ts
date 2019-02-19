@@ -11,7 +11,7 @@ export class PrivateTopics {
         this.addSubscriberTopic(this.defaultPublisherTopic);
     }
 
-    public setDefaultPublisherTopic(newDefaultPublisherTopic: string): void {
+    public setDefaultPublisherTopic(newDefaultPublisherTopic: string | undefined): void {
         if (newDefaultPublisherTopic) {
             this.addSubscriberTopic(newDefaultPublisherTopic);
             this.removeSubscriberTopic(this.defaultPublisherTopic);
@@ -23,7 +23,7 @@ export class PrivateTopics {
         return this.defaultPublisherTopic;
     }
 
-    public addSubscriberTopic(privateTopic: string): void {
+    public addSubscriberTopic(privateTopic: string | undefined): void {
         if (privateTopic && this.subscriberTopics.indexOf(privateTopic) === -1) {
             this.subscriber.sendSubscribeRequestToTopic(privateTopic, Kinds.Private);
             this.subscriberTopics.push(privateTopic);

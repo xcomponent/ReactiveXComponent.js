@@ -1,6 +1,6 @@
 {
     "name": "reactivexcomponent.js",
-    "version": "6.0.0",
+    "version": "6.0.1",
     "description": "Javascript reactive client API for XComponent",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -17,7 +17,9 @@
         "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'"
     },
     "jest": {
-        "setupTestFrameworkScriptFile": "<rootDir>/config/jest/setup.js",
+        "setupFilesAfterEnv": [
+            "<rootDir>/config/jest/setup.js"
+        ],
         "collectCoverageFrom": [
             "src/**/*.{js,jsx,ts,tsx}"
         ],
@@ -66,8 +68,8 @@
     "homepage": "https://github.com/xcomponent/ReactiveXComponent.js",
     "dependencies": {
         "@types/es6-shim": "^0.31.32",
-        "@types/jest": "^23.0.0",
-        "@types/node": "^10.0.0",
+        "@types/jest": "^24.0.0",
+        "@types/node": "^11.0.0",
         "@types/pako": "^1.0.0",
         "@types/rx": "^4.1.1",
         "@types/xml2js": "0.4.3",
@@ -85,14 +87,14 @@
         "clean-webpack-plugin": "^1.0.0",
         "compression": "^1.6.2",
         "husky": "^1.0.0-rc.13",
-        "jest": "^23.0.0",
-        "jest-cli": "^23.0.0",
+        "jest": "^24.0.0",
+        "jest-cli": "^24.0.0",
         "json-loader": "^0.5.4",
         "mock-socket": "^8.0.1",
         "prettier": "^1.14.0",
         "pretty-quick": "^1.6.0",
         "source-map-loader": "^0.2.0",
-        "ts-jest": "^23.0.0",
+        "ts-jest": "^24.0.0",
         "ts-loader": "^5.0.0",
         "ts-mockito": "^2.3.0",
         "tslint": "^5.0.0",

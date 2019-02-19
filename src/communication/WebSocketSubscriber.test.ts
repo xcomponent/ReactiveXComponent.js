@@ -119,7 +119,7 @@ describe('Test xcWebSocketSubscriber module', function() {
             // tslint:disable-next-line:no-any
             mockServer.on('connection', function(server: any) {
                 let n = -3;
-                let topic: string = undefined;
+                let topic: string = '';
 
                 // tslint:disable-next-line:no-any
                 server.on('message', function(message: any) {
