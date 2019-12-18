@@ -14,7 +14,8 @@
         "test": "node scripts/test.js --env=jsdom",
         "coverage": "node scripts/test.js --env=jsdom --coverage",
         "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
-        "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'"
+        "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
+        "build:lib": "webpack -p --define process.env.NODE_ENV='\"production\"' --progress --colors"
     },
     "jest": {
         "setupFilesAfterEnv": [
@@ -75,16 +76,17 @@
         "@types/xml2js": "0.4.3",
         "@types/xmldom": "^0.1.28",
         "atob": "^2.0.3",
+        "clean-webpack-plugin": "^3.0.0",
         "log4ts": "^0.4.2",
         "pako": "^1.0.3",
         "rxjs": "^6.0.0",
         "rxjs-compat": "^6",
         "uuid": "^3.0.1",
+        "webpack": "^4.41.3",
         "websocket": "^1.0.25",
         "xml2js": "^0.4.17"
     },
     "devDependencies": {
-        "clean-webpack-plugin": "^1.0.0",
         "compression": "^1.6.2",
         "husky": "^1.0.0-rc.13",
         "jest": "^24.0.0",
@@ -102,7 +104,8 @@
         "tslint-loader": "^3.6.0",
         "tslint-plugin-prettier": "^2.0.0",
         "tslint-react": "^3.6.0",
-        "typescript": "^3.0.1"
+        "typescript": "^3.0.1",
+        "webpack-cli": "^3.3.10"
     },
     "husky": {
         "hooks": {
