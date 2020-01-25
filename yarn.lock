@@ -121,10 +121,6 @@
   version "0.31.39"
   resolved "https://registry.yarnpkg.com/@types/es6-shim/-/es6-shim-0.31.39.tgz#61de60fac180f967177bcde598a62072a39ea04b"
 
-"@types/events@*":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
-
 "@types/jest-diff@*":
   version "20.0.1"
   resolved "https://registry.yarnpkg.com/@types/jest-diff/-/jest-diff-20.0.1.tgz#35cc15b9c4f30a18ef21852e255fdb02f6d59b89"
@@ -239,11 +235,10 @@
     "@types/rx-lite-time" "*"
     "@types/rx-lite-virtualtime" "*"
 
-"@types/xml2js@0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.3.tgz#2f41bfc74d5a4022511721f872ed395a210ad3b7"
+"@types/xml2js@0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.5.tgz#d21759b056f282d9c7066f15bbf5c19b908f22fa"
   dependencies:
-    "@types/events" "*"
     "@types/node" "*"
 
 "@types/xmldom@^0.1.28":
@@ -2094,6 +2089,10 @@ lodash.get@^4.4.2:
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
 
+lodash.memoize@4.x:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/lodash.memoize/-/lodash.memoize-4.1.2.tgz#bcc6c49a42a2840ed997f323eada5ecd182e0bfe"
+
 lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
@@ -3282,14 +3281,15 @@ trim-right@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
 
-ts-jest@^24.0.0:
-  version "24.0.0"
-  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-24.0.0.tgz#3f26bf2ec1fa584863a5a9c29bd8717d549efbf6"
+ts-jest@^25.0.0:
+  version "25.0.0"
+  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-25.0.0.tgz#d83b266e6ffda0c458a129951b3fe3567f8ce8df"
   dependencies:
     bs-logger "0.x"
     buffer-from "1.x"
     fast-json-stable-stringify "2.x"
     json5 "2.x"
+    lodash.memoize "4.x"
     make-error "1.x"
     mkdirp "0.x"
     resolve "1.x"
