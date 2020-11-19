@@ -72,7 +72,7 @@
         "@types/node": "^13.0.0",
         "@types/pako": "^1.0.0",
         "@types/rx": "^4.1.1",
-        "@types/xml2js": "0.4.5",
+        "@types/xml2js": "0.4.7",
         "@types/xmldom": "^0.1.28",
         "atob": "^2.0.3",
         "log4ts": "^0.4.2",
