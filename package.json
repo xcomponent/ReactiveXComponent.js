@@ -68,7 +68,7 @@
     "homepage": "https://github.com/xcomponent/ReactiveXComponent.js",
     "dependencies": {
         "@types/es6-shim": "^0.31.32",
-        "@types/jest": "^26.0.0",
+        "@types/jest": "^29.0.0",
         "@types/node": "^13.0.0",
         "@types/pako": "^1.0.0",
         "@types/rx": "^4.1.1",
@@ -87,7 +87,7 @@
         "clean-webpack-plugin": "^1.0.0",
         "compression": "^1.6.2",
         "husky": "^6.0.0",
-        "jest": "^26.0.0",
+        "jest": "^29.0.0",
         "jest-cli": "^24.0.0",
         "json-loader": "^0.5.4",
         "mock-socket": "^9.0.0",
