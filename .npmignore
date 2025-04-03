@@ -1,6 +1,6 @@
 tsconfig.json
-src
 .git
+.github
 config
 scripts
 tslint.json
@@ -9,3 +9,4 @@ _config.yml
 checkTag.sh
 renovate.json
 *.tgz
+
