@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'      # Toutes les branches
+    tags:
+      - '*'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Lint
+        run: yarn run lint
+
+      - name: Test with coverage
+        run: yarn run test --coverage
+
+      - name: Build
+        run: yarn build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Detect tag type (RELEASE or BETA)
+        id: tag_check
+        run: |
+          TAG_NAME="${GITHUB_REF##*/}"
+
+          if [[ "$TAG_NAME" == *"-BETA"* ]]; then
+            echo "Detected BETA release"
+            echo "tag_type=BETA" >> $GITHUB_OUTPUT
+          else
+            echo "Detected RELEASE"
+            echo "tag_type=RELEASE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish RELEASE
+        if: steps.tag_check.outputs.tag_type == 'RELEASE'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish BETA
+        if: steps.tag_check.outputs.tag_type == 'BETA'
+        run: npm publish --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+

@@ -1,9 +1,8 @@
 [![](http://slack.xcomponent.com/badge.svg)](http://slack.xcomponent.com/)
 [![npm](https://img.shields.io/npm/v/reactivexcomponent.js.svg)](https://www.npmjs.com/package/reactivexcomponent.js)
 [![npm](https://img.shields.io/npm/dt/reactivexcomponent.js.svg)](https://www.npmjs.com/package/reactivexcomponent.js)
-[![Build Status](https://travis-ci.org/xcomponent/ReactiveXComponent.js.svg?branch=master)](https://travis-ci.org/xcomponent/ReactiveXComponent.js)
 [![TypeScript](https://badges.frapsoft.com/typescript/love/typescript.png?v=101)](https://github.com/ellerbrock/typescript-badges/)
-
+![CI](https://github.com/xcomponent/ReactiveXComponent.js/actions/workflows/ci.yml/badge.svg)
 
 ## Reactive XComponent API
 Reactive XComponent is a javaScript client API that allows you to interact with microservices generated with XComponent software.
