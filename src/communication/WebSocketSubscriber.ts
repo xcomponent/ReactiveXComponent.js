@@ -12,18 +12,18 @@ import {
     Serializer,
     Deserializer,
     fatalErrorState,
-    JsonMessage
+    JsonMessage,
 } from './xcomponentMessages';
 import { PrivateTopics } from '../interfaces/PrivateTopics';
 import { StateMachineInstance } from '../interfaces/StateMachineInstance';
 import { StateMachineRef } from '../interfaces/StateMachineRef';
 import { StateMachineUpdateListener } from '../interfaces/StateMachineUpdateListener';
-import * as uuid from 'uuid/v4';
-import { Logger } from 'log4ts';
+import { generateUUID } from '../utils/uuid';
+import { Logger } from '../utils/Logger';
 import { WebSocketWrapper } from './WebSocketWrapper';
 
 export class WebSocketSubscriber {
-    private logger: Logger = Logger.getLogger('WebSocketSubscriber');
+    private logger = Logger.getLogger('WebSocketSubscriber');
     private stateMachineRefSendPublisher: WebSocketPublisher;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private updates$: Observable<DeserializedData>;
@@ -56,7 +56,7 @@ export class WebSocketSubscriber {
         stateMachineName: string,
         privateTopics: PrivateTopics
     ): Promise<Array<StateMachineInstance>> {
-        const replyTopic = uuid();
+        const replyTopic = generateUUID();
         const thisSubscriber = this;
         const promise = this.updates$
             .pipe(
@@ -94,7 +94,7 @@ export class WebSocketSubscriber {
         let jsonMessage = {
             Timeout: this.timeout,
             CallerPrivateTopic: privateTopics.getSubscriberTopics(),
-            ReplyTopic: replyTopic
+            ReplyTopic: replyTopic,
         };
         let header = getHeaderWithIncomingType();
         header.ComponentCode = componentCode;
@@ -104,8 +104,8 @@ export class WebSocketSubscriber {
             ComponentCode: componentCode,
             Event: {
                 Header: header,
-                JsonMessage: JSON.stringify(jsonMessage)
-            }
+                JsonMessage: JSON.stringify(jsonMessage),
+            },
         };
         return dataToSendSnapshot;
     }
@@ -183,7 +183,7 @@ export class WebSocketSubscriber {
         let data = this.getDataToSend(topic, kind);
         let commandData = {
             Command: Commands[Commands.subscribe],
-            Data: data
+            Data: data,
         };
         let input = this.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocketWrapper.send(input);
@@ -193,7 +193,7 @@ export class WebSocketSubscriber {
         let data = this.getDataToSend(topic, kind);
         let commandData = {
             Command: Commands[Commands.unsubscribe],
-            Data: data
+            Data: data,
         };
         let input = this.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocketWrapper.send(input);
@@ -205,9 +205,9 @@ export class WebSocketSubscriber {
             JsonMessage: JSON.stringify({
                 Topic: {
                     Key: topic,
-                    kind: kind
-                }
-            })
+                    kind: kind,
+                },
+            }),
         };
     }
 
@@ -224,7 +224,7 @@ export class WebSocketSubscriber {
             let data = this.getDataToSend(topic, kind);
             let commandData = {
                 Command: Commands[Commands.unsubscribe],
-                Data: data
+                Data: data,
             };
             this.webSocketWrapper.send(this.serializer.convertCommandDataToWebsocketInputFormat(commandData));
             this.removeSubscribedStateMachines(componentName, stateMachineName);
@@ -324,7 +324,7 @@ export class WebSocketSubscriber {
                     specifiedPrivateTopic
                 );
             },
-            ErrorMessage: errorMessage
+            ErrorMessage: errorMessage,
         };
         return stateMachineRef;
     }

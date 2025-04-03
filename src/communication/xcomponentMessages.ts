@@ -1,6 +1,6 @@
-import { Logger } from 'log4ts';
+import { Logger } from '../utils/Logger';
+
 import * as pako from 'pako';
-import * as atob from 'atob';
 
 export const fatalErrorState = 'FatalError';
 
@@ -71,7 +71,7 @@ export let getHeaderWithIncomingType = (): Header => {
 };
 
 export class Serializer {
-    private logger: Logger = Logger.getLogger('Serializer');
+    private logger = Logger.getLogger('Serializer');
 
     public convertToWebsocketInputFormat(data: Data): string {
         let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
@@ -139,7 +139,11 @@ export class Deserializer {
 
     public getJsonDataFromGetXcApiListRequest(data: string): Array<string> {
         let jsonData = this.getJsonData(data);
-        return jsonData.Apis.$values;
+        // NewtonSoft JSON adds $values....
+        if (jsonData.Apis.$values) {
+            return jsonData.Apis.$values;
+        }
+        return jsonData.Apis;
     }
 
     // tslint:disable-next-line:no-any

@@ -3,12 +3,12 @@ import { filter, first, map, takeWhile } from 'rxjs/operators';
 import { Commands } from '../configuration/xcWebSocketBridgeConfiguration';
 import { CompositionModel, DeserializedData, Serializer, Deserializer } from './xcomponentMessages';
 import 'rxjs/add/observable/fromEvent';
-import { Logger } from 'log4ts';
+import { Logger } from '../utils/Logger';
 import { DefaultApiConfigurationParser } from '../configuration/apiConfigurationParser';
 import { ApiConfiguration } from '../configuration/apiConfiguration';
 
 export class WebSocketBridgeCommunication {
-    private logger: Logger = Logger.getLogger('HeartbeatManager');
+    private logger = Logger.getLogger('HeartbeatManager');
     private updates$: Observable<DeserializedData>;
     private deserializer: Deserializer;
     private serializer: Serializer;
@@ -33,7 +33,7 @@ export class WebSocketBridgeCommunication {
         this.updates$
             .pipe(filter((data: DeserializedData) => data.command === command))
             .subscribe((data: DeserializedData) => {
-                this.logger.trace('Heartbeat received successfully');
+                this.logger.debug('Heartbeat received successfully');
             });
         let commandData = {
             Command: command,
@@ -42,7 +42,7 @@ export class WebSocketBridgeCommunication {
         let input = thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.heartbeatTimer = setInterval(() => {
             thisWebSocketBridgeCommunication.webSocket.send(input);
-            this.logger.trace('Heartbeat sent');
+            this.logger.debug('Heartbeat sent');
         }, heartbeatIntervalSeconds * 1000);
     }
 

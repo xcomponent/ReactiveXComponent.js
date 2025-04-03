@@ -1,10 +1,9 @@
 import { Utils } from '../communication/Utils';
-import * as uuid from 'uuid/v4';
 import { WebSocketSubscriber } from '../communication/WebSocketSubscriber';
 import { Kinds } from '../configuration/xcWebSocketBridgeConfiguration';
-
+import { generateUUID } from '../utils/uuid';
 export class PrivateTopics {
-    private defaultPublisherTopic: string = uuid();
+    private defaultPublisherTopic: string = generateUUID();
     private subscriberTopics: Array<string> = [];
 
     constructor(private subscriber: WebSocketSubscriber) {

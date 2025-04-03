@@ -4,7 +4,7 @@ import { Deserializer } from '../../src/communication/xcomponentMessages';
 import Mock from '../utils/mockSubscriberDependencies';
 import { EventEmitter } from 'events';
 import { PrivateTopics } from '../../src/interfaces/PrivateTopics';
-import * as uuid from 'uuid/v4';
+import { generateUUID } from '../utils/uuid';
 import { verify, instance, mock, anything } from '../../node_modules/ts-mockito/lib/ts-mockito';
 import { WebSocketWrapper } from '../../src/communication/WebSocketWrapper';
 
@@ -19,7 +19,7 @@ describe('Test xcWebSocketSubscriber module', function() {
     describe('Test subscribe method', function() {
         let subscriber, mockServer: Server, mockWebSocket;
         beforeEach(function() {
-            let serverUrl = 'wss://' + uuid();
+            let serverUrl = 'wss://' + generateUUID();
             mockServer = new Server(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
             subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);
@@ -105,7 +105,7 @@ describe('Test xcWebSocketSubscriber module', function() {
     describe('Test getSnapshot method', function() {
         let subscriber, mockServer: Server, mockWebSocket, privateTopics;
         beforeEach(function() {
-            let serverUrl = 'wss://' + uuid();
+            let serverUrl = 'wss://' + generateUUID();
             mockServer = new Server(serverUrl);
             mockWebSocket = new WebSocket(serverUrl);
             subscriber = new WebSocketSubscriber(new WebSocketWrapper(mockWebSocket), Mock.configuration);

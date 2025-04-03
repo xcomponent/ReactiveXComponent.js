@@ -1,14 +1,11 @@
 {
     "compilerOptions": {
         "outDir": "dist",
-        "module": "commonjs",
+        "module": "esnext",
         "target": "es5",
+        "importHelpers": false,
         "declaration": true,
-        "lib": [
-            "dom",
-            "es6",
-            "scripthost"
-        ],
+        "lib": ["dom", "es6", "scripthost"],
         "sourceMap": true,
         "allowJs": false,
         "jsx": "react",
@@ -22,19 +19,7 @@
         "noUnusedLocals": true,
         "skipLibCheck": true
     },
-    "exclude": [
-        "node_modules",
-        "build",
-        "scripts",
-        "acceptance-tests",
-        "jest",
-        "**/*.test.ts",
-        "**/*.test.tsx"
-    ],
-    "include": [
-        "src/**/*"
-    ],
-    "types": [
-        "typePatches"
-    ]
+    "exclude": ["node_modules", "build", "scripts", "acceptance-tests", "jest", "**/*.test.ts", "**/*.test.tsx"],
+    "include": ["src/**/*"],
+    "types": ["typePatches"]
 }

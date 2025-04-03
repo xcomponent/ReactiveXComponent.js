@@ -3,7 +3,7 @@ import { WebSocket, Server } from 'mock-socket';
 import { ErrorListener } from '../../src/interfaces/ErrorListener';
 import Mock from '../utils/mockSubscriberDependencies';
 import pako = require('pako');
-import * as uuid from 'uuid/v4';
+import { generateUUID } from '../utils/uuid';
 
 const encodeServerMessage = (strData: string) => {
     let binaryString = pako.deflate(strData, { to: 'string' });
@@ -114,7 +114,7 @@ describe('Test Connection module', function() {
     describe('Test getModel method', function() {
         let serverMock: Server, serverUrl: string;
         beforeEach(function() {
-            serverUrl = 'wss://' + uuid();
+            serverUrl = 'wss://' + generateUUID();
             serverMock = new Server(serverUrl);
         });
 
