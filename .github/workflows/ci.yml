@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  branches:
+      - '**'      # Toutes les branches
   push:
     tags:
       - '*'
