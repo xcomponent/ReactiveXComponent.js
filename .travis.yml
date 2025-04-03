@@ -1,19 +1,18 @@
 language: node_js
 node_js:
-- '8'
-- '10'
-sudo: false
+  - '18'
+  - '20'
 os:
-- linux
+  - linux
 cache:
   directories:
-  - node_modules
+    - node_modules
 install:
-- yarn install
+  - yarn install
 script:
-- yarn run lint
-- yarn run test --coverage
-- yarn build
+  - yarn run lint
+  - yarn run test --coverage
+  - yarn build
 deploy:
   - provider: npm
     email: dev@xcomponent.com
