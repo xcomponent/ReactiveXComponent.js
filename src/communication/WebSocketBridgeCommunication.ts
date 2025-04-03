@@ -37,7 +37,7 @@ export class WebSocketBridgeCommunication {
             });
         let commandData = {
             Command: command,
-            Data: {}
+            Data: {},
         };
         let input = thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.heartbeatTimer = setInterval(() => {
@@ -71,7 +71,7 @@ export class WebSocketBridgeCommunication {
             });
         const commandData = {
             Command: command,
-            Data: { Name: apiName }
+            Data: { Name: apiName },
         };
         const input = thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData);
         this.webSocket.send(input);
@@ -86,7 +86,7 @@ export class WebSocketBridgeCommunication {
                 filter((data: DeserializedData) => data.command === command),
                 first(),
                 map((data: DeserializedData) => {
-                    this.logger.info('ApiList received successfully');
+                    this.logger.info('ApiList received successfully : ' + JSON.stringify(data));
                     return thisWebSocketBridgeCommunication.deserializer.getJsonDataFromGetXcApiListRequest(
                         data.stringData
                     );
@@ -95,7 +95,7 @@ export class WebSocketBridgeCommunication {
             .toPromise();
         const commandData = {
             Command: command,
-            Data: {}
+            Data: {},
         };
         this.webSocket.send(
             thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData)
@@ -127,7 +127,7 @@ export class WebSocketBridgeCommunication {
             });
         const commandData = {
             Command: command,
-            Data: { Name: apiName }
+            Data: { Name: apiName },
         };
         this.webSocket.send(
             thisWebSocketBridgeCommunication.serializer.convertCommandDataToWebsocketInputFormat(commandData)

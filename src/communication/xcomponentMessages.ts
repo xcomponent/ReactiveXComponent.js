@@ -66,7 +66,7 @@ export interface DeserializedData {
 
 export let getHeaderWithIncomingType = (): Header => {
     return {
-        IncomingEventType: 0
+        IncomingEventType: 0,
     };
 };
 
@@ -96,7 +96,7 @@ export class Deserializer {
                 components.push({
                     name: component.Name,
                     model: this.decodeServerMessage(component.Model)!,
-                    graphical: this.decodeServerMessage(component.Graphical)
+                    graphical: this.decodeServerMessage(component.Graphical),
                 });
             }
         }
@@ -104,7 +104,7 @@ export class Deserializer {
             return {
                 projectName: jsonData.ModelContent.ProjectName,
                 components: components,
-                composition: this.decodeServerMessage(jsonData.ModelContent.Composition)!
+                composition: this.decodeServerMessage(jsonData.ModelContent.Composition)!,
             };
         }
 
@@ -139,7 +139,7 @@ export class Deserializer {
 
     public getJsonDataFromGetXcApiListRequest(data: string): Array<string> {
         let jsonData = this.getJsonData(data);
-        return jsonData.Apis;
+        return jsonData.Apis.$values;
     }
 
     // tslint:disable-next-line:no-any
@@ -159,7 +159,7 @@ export class Deserializer {
         return {
             command: command,
             topic: topic,
-            stringData: stringData
+            stringData: stringData,
         };
     }
 
@@ -170,7 +170,7 @@ export class Deserializer {
         return {
             command: command,
             topic: undefined,
-            stringData: stringData
+            stringData: stringData,
         };
     }
 }
