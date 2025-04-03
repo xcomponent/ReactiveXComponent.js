@@ -1,9 +1,14 @@
 {
     "name": "reactivexcomponent.js",
-    "version": "7.0.1",
+    "version": "7.0.2",
     "description": "Javascript reactive client API for XComponent",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "./index.js",         
+    "module": "./index.js",      
+    "types": "./index.d.ts",       
+    "exports": {
+      "import": "./index.js",
+      "require": "./index.js"
+    },
     "directories": {
         "test": "test",
         "lib": "./lib"
