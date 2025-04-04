@@ -15,7 +15,10 @@ export class DefaultApiConfigurationParser implements ApiConfigurationParser {
         const result = parseXmlToJson(xmlConfig); // voir fonction ci-dessous
         const rawConfig = result as ParsedApiConfiguration;
 
+        console.log('debug DefaultApiConfigurationParser: ' + JSON.stringify(rawConfig?.deployment));
         if (rawConfig?.deployment) {
+        console.log('debug DefaultApiConfigurationParser2 : ' + JSON.stringify(new DefaultApiConfiguration(rawConfig)));
+
           resolve(new DefaultApiConfiguration(rawConfig));
         } else {
           reject(new Error('Invalid parsed XML structure'));
