@@ -34,7 +34,6 @@ function normalizeTopic(
   const getTopicValue = (t: { value?: string; type?: string; _?: string }): string =>
     typeof t._ === 'string' ? t._ :
     typeof t.value === 'string' ? t.value :
-    typeof t.type === 'string' ? t.type :
     '';
 
   if (Array.isArray(topic)) {
