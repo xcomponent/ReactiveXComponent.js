@@ -6,6 +6,8 @@ import {
     StateMachine,
 } from './parsedApiConfigurationTypes';
 
+import { normalizeCommunication } from './apiCommunicationUtils';
+
 export interface PublisherDetails {
     eventCode: number;
     routingKey: string;
@@ -125,7 +127,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     containsStateMachine(componentName: string, stateMachineName: string): boolean {
         const result = this.findComponent(component => component.name === componentName);
         if (result) {
-            return result.stateMachines[0].stateMachine.find(stm => stm.attributes.name === stateMachineName) != null;
+            return result.stateMachines.stateMachine.find(stm => stm.name === stateMachineName) != null;
         }
         return false;
     }
@@ -158,7 +160,11 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         stateMachineCode: number,
         messageType: string
     ): ApiCommunication | undefined {
-        return this._config.deployment.clientAPICommunication[0].publish.find(
+        const raw = this._config.deployment.clientAPICommunication.publish;
+        const publishArrayRaw = Array.isArray(raw) ? raw : [raw];
+        const publishArray = publishArrayRaw.map(normalizeCommunication);
+
+        return publishArray.find(
             pub =>
                 Number(pub.attributes.componentCode) === componentCode &&
                 Number(pub.attributes.stateMachineCode) === stateMachineCode &&
@@ -183,18 +189,24 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         stateMachineCode: number,
         type: SubscriberEventType
     ): ApiCommunication | undefined {
-        return this._config.deployment.clientAPICommunication[0].subscribe.find(
-            pub =>
-                Number(pub.attributes.componentCode) === componentCode &&
-                Number(pub.attributes.stateMachineCode) === stateMachineCode &&
-                pub.attributes.eventType === SubscriberEventType[type].toUpperCase()
+        const raw = this._config.deployment.clientAPICommunication.subscribe;
+        const subscribeArrayRaw = Array.isArray(raw) ? raw : [raw];
+        const subscribeArray = subscribeArrayRaw.map(normalizeCommunication);
+
+        return subscribeArray.find(
+            sub =>
+                Number(sub.attributes.componentCode) === componentCode &&
+                Number(sub.attributes.stateMachineCode) === stateMachineCode &&
+                sub.attributes.eventType === SubscriberEventType[type].toUpperCase()
         );
     }
 
     getSnapshotTopic(componentCode: number): string {
-        const snapshot = this._config.deployment.clientAPICommunication[0].snapshot.find(
-            pub => Number(pub.attributes.componentCode) === componentCode
-        );
+        const raw = this._config.deployment.clientAPICommunication.snapshot;
+        const snapshotArrayRaw = Array.isArray(raw) ? raw : [raw];
+        const snapshotArray = snapshotArrayRaw.map(normalizeCommunication);
+
+        const snapshot = snapshotArray.find(pub => Number(pub.attributes.componentCode) === componentCode);
 
         if (!snapshot) {
             throw new Error(`Snapshot topic not found - component code: ${componentCode}`);
