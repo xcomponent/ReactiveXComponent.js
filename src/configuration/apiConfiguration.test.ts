@@ -93,6 +93,8 @@ test('GetPublisherDetails should return the right publisher details given existi
             routingKey: 'input.1_0.HelloWorldMicroservice.HelloWorld.HelloWorldManager',
         };
         let publish = config.getPublisherDetails(-69981087, -829536631, 'XComponent.HelloWorld.UserObject.SayHello');
+        console.log('debug GetPublisherDetails: ' + publish);
+        console.log('debug GetPublisherDetails: ' + JSON.stringify(publish));
         expect(publish).toEqual(correctPublish);
     });
 });

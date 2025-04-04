@@ -38,9 +38,9 @@ function normalizeTopic(
 
   if (Array.isArray(topic)) {
     const normalized = topic.map((t): Topic => ({ value: getTopicValue(t) }));
+    // ✅ on garde tous les éléments mais on force le type [Topic]
     return normalized.length > 0 ? (normalized as [Topic]) : [{ value: '' }];
   }
 
   return [{ value: getTopicValue(topic) }];
 }
-

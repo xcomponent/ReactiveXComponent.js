@@ -158,7 +158,6 @@ export class DefaultApiConfiguration implements ApiConfiguration {
                 `publisher not found - component code: ${componentCode} - statemachine code: ${stateMachineCode} - message type: ${messageType} `
             );
         }
-
         return {
             eventCode: Number(publisher.attributes.eventCode),
             routingKey: publisher.topic[0].value,
