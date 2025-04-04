@@ -77,9 +77,8 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         return stateMachine;
     }
 
-
     private findStateByCode(stateMachine: StateMachine, stateCode: number): State {
-        const stateContainer = stateMachine.states[0];
+        const stateContainer = stateMachine.states;
         const statesArray = Array.isArray(stateContainer?.State)
             ? stateContainer.State
             : stateContainer?.State
@@ -94,6 +93,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     
         return result;
     }
+
 
     private findComponentByName(componentName: string): Component {
         const result = this.findComponent(component => component.name === componentName);
@@ -170,12 +170,10 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         messageType: string
     ): ApiCommunication | undefined {
         const raw = this._config.deployment.clientAPICommunication.publish;
-        console.debug('debug publisher 1:' + JSON.stringify(raw));
 
         const publishArrayRaw = Array.isArray(raw) ? raw : [raw];
         const publishArray = publishArrayRaw.map(normalizeCommunication);
 
-        console.debug('debug publisher 2:' + JSON.stringify(publishArray));
         return publishArray.find(
             pub =>
                 Number(pub.attributes.componentCode) === componentCode &&
