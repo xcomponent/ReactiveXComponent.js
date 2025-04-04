@@ -1,30 +1,35 @@
 import { ApiCommunication, Topic } from './parsedApiConfigurationTypes';
 
-type RawCommunication = Partial<ApiCommunication> & {
+// Définir un type plus large pour couvrir les cas transformés depuis le XML
+export type RawCommunication = {
   attributes?: Partial<ApiCommunication['attributes']>;
-  topic?: Topic | Topic[] | undefined;
-  [key: string]: unknown;
+  topic?: { value?: string } | { value?: string }[];
 };
 
 export function normalizeCommunication(input: RawCommunication): ApiCommunication {
+  const attr = input.attributes ?? {};
+
   return {
     attributes: {
-      componentCode: input.componentCode ?? input.attributes?.componentCode ?? '',
-      stateMachineCode: input.stateMachineCode ?? input.attributes?.stateMachineCode,
-      eventType: input.eventType ?? input.attributes?.eventType,
-      event: input.event ?? input.attributes?.event,
-      eventCode: input.eventCode ?? input.attributes?.eventCode,
+      componentCode: attr.componentCode ?? '',
+      stateMachineCode: attr.stateMachineCode,
+      eventType: attr.eventType,
+      event: attr.event,
+      eventCode: attr.eventCode,
     },
     topic: normalizeTopic(input.topic),
   };
 }
 
-function normalizeTopic(topic: Topic | Topic[] | undefined): [Topic] {
+function normalizeTopic(topic: { value?: string } | { value?: string }[] | undefined): [Topic] {
   if (!topic) {
     return [{ value: '' }];
   }
+
   if (Array.isArray(topic)) {
-    return topic.map((t) => ({ value: t.value ?? '' })) as [Topic];
+    const normalized = topic.map((t): Topic => ({ value: t.value ?? '' }));
+    return normalized.length > 0 ? [normalized[0]] : [{ value: '' }];
   }
+
   return [{ value: topic.value ?? '' }];
 }

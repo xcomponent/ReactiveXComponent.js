@@ -4,6 +4,22 @@ export interface ParsedApiConfiguration {
     deployment: Deployment;
 }
 
+export type RawCommunication = {
+    componentCode?: string;
+    stateMachineCode?: string;
+    eventType?: string;
+    event?: string;
+    eventCode?: string;
+    topic?: { value?: string } | { value?: string }[];
+    attributes?: {
+        componentCode?: string;
+        stateMachineCode?: string;
+        eventType?: string;
+        event?: string;
+        eventCode?: string;
+    };
+};
+
 export interface ApiCommunication {
     attributes: {
         componentCode: string;
