@@ -173,6 +173,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         const publishArrayRaw = Array.isArray(raw) ? raw : [raw];
         const publishArray = publishArrayRaw.map(normalizeCommunication);
 
+        console.debug('debug publisher:' + JSON.stringify(publishArray));
         return publishArray.find(
             pub =>
                 Number(pub.attributes.componentCode) === componentCode &&
