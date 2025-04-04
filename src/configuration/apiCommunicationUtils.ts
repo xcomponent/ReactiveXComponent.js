@@ -3,7 +3,7 @@ import { ApiCommunication, Topic } from './parsedApiConfigurationTypes';
 // Définir un type plus large pour couvrir les cas transformés depuis le XML
 export type RawCommunication = {
   attributes?: Partial<ApiCommunication['attributes']>;
-  topic?: { value?: string } | { value?: string }[];
+  topic?: { value?: string; type?: string } | { value?: string; type?: string }[];
 };
 
 export function normalizeCommunication(input: RawCommunication): ApiCommunication {
@@ -21,15 +21,15 @@ export function normalizeCommunication(input: RawCommunication): ApiCommunicatio
   };
 }
 
-function normalizeTopic(topic: { value?: string } | { value?: string }[] | undefined): [Topic] {
+function normalizeTopic(topic: { value?: string; type?: string } | { value?: string; type?: string }[] | undefined): [Topic] {
   if (!topic) {
     return [{ value: '' }];
   }
 
   if (Array.isArray(topic)) {
-    const normalized = topic.map((t): Topic => ({ value: t.value ?? '' }));
+    const normalized = topic.map((t): Topic => ({ value: t.value ?? t.type ?? '' }));
     return normalized.length > 0 ? [normalized[0]] : [{ value: '' }];
   }
 
-  return [{ value: topic.value ?? '' }];
+  return [{ value: topic.value ?? topic.type ?? '' }];
 }
