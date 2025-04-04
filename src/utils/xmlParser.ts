@@ -1,29 +1,34 @@
+// src/utils/xmlParser.ts
 export function parseXmlToJson(xml: string): unknown {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, 'application/xml');
 
     const errorNode = doc.querySelector('parsererror');
     if (errorNode) {
-        throw new Error('Invalid XML');
-    }
+        throw new Error('Invalid XML');}
 
     function xmlNodeToJson(node: Element): unknown {
         const obj: Record<string, unknown> = {};
 
+        // Attributs
         for (const attr of Array.from(node.attributes)) {
             obj[attr.name] = attr.value;
         }
 
+        // Enfants
         for (const child of Array.from(node.children)) {
             const childObj = xmlNodeToJson(child);
-            if (obj[child.tagName]) {
-                if (!Array.isArray(obj[child.tagName])) {
-                    obj[child.tagName] = [obj[child.tagName]];
-                }
-                (obj[child.tagName] as unknown[]).push(childObj);
+            const key = child.tagName;
+            const existing = obj[key];
 
+            if (existing !== undefined) {
+                if (Array.isArray(existing)) {
+                    existing.push(childObj);
+                } else {
+                    obj[key] = [existing, childObj];
+                }
             } else {
-                obj[child.tagName] = childObj;
+                obj[key] = childObj;
             }
         }
 
