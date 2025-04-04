@@ -38,8 +38,9 @@ function normalizeTopic(
 
   if (Array.isArray(topic)) {
     const normalized = topic.map((t): Topic => ({ value: getTopicValue(t) }));
-    return normalized.length > 0 ? [normalized[0]] : [{ value: '' }];
+    return normalized.length > 0 ? (normalized as [Topic]) : [{ value: '' }];
   }
 
   return [{ value: getTopicValue(topic) }];
 }
+
