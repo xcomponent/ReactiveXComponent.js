@@ -1,6 +1,12 @@
 import { ApiCommunication, Topic } from './parsedApiConfigurationTypes';
 
-export function normalizeCommunication(input: Partial<ApiCommunication> & { [key: string]: any }): ApiCommunication {
+type RawCommunication = Partial<ApiCommunication> & {
+  attributes?: Partial<ApiCommunication['attributes']>;
+  topic?: Topic | Topic[] | undefined;
+  [key: string]: unknown;
+};
+
+export function normalizeCommunication(input: RawCommunication): ApiCommunication {
   return {
     attributes: {
       componentCode: input.componentCode ?? input.attributes?.componentCode ?? '',
@@ -9,11 +15,11 @@ export function normalizeCommunication(input: Partial<ApiCommunication> & { [key
       event: input.event ?? input.attributes?.event,
       eventCode: input.eventCode ?? input.attributes?.eventCode,
     },
-    topic: normalizeTopic(input.topic)
+    topic: normalizeTopic(input.topic),
   };
 }
 
-function normalizeTopic(topic: Topic[] | Topic | undefined): [Topic] {
+function normalizeTopic(topic: Topic | Topic[] | undefined): [Topic] {
   if (!topic) {
     return [{ value: '' }];
   }
