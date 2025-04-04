@@ -12,7 +12,7 @@ const encodeServerMessage = (strData: string) => {
 };
 
 describe('Test Connection module', function() {
-    let mockServer: Server;
+    let mockServer: Server | undefined;
 
     beforeEach(function() {
         // tslint:disable-next-line:no-any
@@ -21,12 +21,12 @@ describe('Test Connection module', function() {
         (<any>window).isTestEnvironnement = true;
     });
 
-    afterEach(() => {
+    afterEach((done) => {
         if (mockServer) {
-            mockServer.stop(() => {
-                /**/
-            });
+            mockServer.close(); // Utiliser close() et non stop()
+            mockServer = undefined;
         }
+        done(); // Pour Jest : signaler la fin du teardown
     });
 
     describe('Test createSession method', function() {
@@ -41,7 +41,7 @@ describe('Test Connection module', function() {
                 })
                 .then(session => {
                     expect(session).not.toBe(null);
-                    mockServer.stop(done);
+                    mockServer?.stop(done);
                 })
                 .catch(err => {
                     console.log(err);
@@ -72,7 +72,7 @@ describe('Test Connection module', function() {
                 connection.createSession(xcApiFileName).catch(error => {
                     // it refers explicitly to the unknown Api on the error message, not to some random crash
                     expect(error.message).toMatch(xcApiFileName);
-                    mockServer.stop(done);
+                    mockServer?.stop(done);
                 });
             });
 
@@ -90,7 +90,7 @@ describe('Test Connection module', function() {
             mockServer = new Server(serverUrl);
             const xcApiFileName = 'api.xcApi';
             mockServer.on('connection', server => {
-                mockServer.close(undefined);
+                mockServer?.close(undefined);
             });
             new XComponent()
                 .connect(serverUrl, new FakeErrorHandler(err => done()))
