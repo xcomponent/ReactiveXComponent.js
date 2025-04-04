@@ -1,4 +1,10 @@
-import { ParsedApiConfiguration, ApiCommunication, Component, State, StateMachine } from './parsedApiConfiguration';
+import {
+    ApiCommunication,
+    ParsedApiConfiguration,
+    Component,
+    State,
+    StateMachine,
+} from './parsedApiConfigurationTypes';
 
 export interface PublisherDetails {
     eventCode: number;
@@ -7,7 +13,7 @@ export interface PublisherDetails {
 
 export enum SubscriberEventType {
     Update,
-    Error
+    Error,
 }
 
 export interface ApiConfiguration {
@@ -44,17 +50,17 @@ export class DefaultApiConfiguration implements ApiConfiguration {
 
     getComponentCode(componentName: string): number {
         const component = this.findComponentByName(componentName);
-        return Number(component.attributes.id);
+        return Number(component.id);
     }
 
     getStateMachineCode(componentName: string, stateMachineName: string): number {
         const component = this.findComponentByName(componentName);
         const stateMachine = this.findStateMachineByName(component, stateMachineName);
-        return Number(stateMachine.attributes.id);
+        return Number(stateMachine.id);
     }
 
     private findStateMachineByName(component: Component, stateMachineName: string): StateMachine {
-        const stateMachine = this.findStateMachine(component, stm => stm.attributes.name === stateMachineName);
+        const stateMachine = this.findStateMachine(component, stm => stm.name === stateMachineName);
         if (!stateMachine) {
             throw new Error(`StateMachine '${stateMachineName}' not found`);
         }
@@ -62,7 +68,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findStateMachineByCode(component: Component, stateMachineCode: number): StateMachine {
-        const stateMachine = this.findStateMachine(component, stm => Number(stm.attributes.id) === stateMachineCode);
+        const stateMachine = this.findStateMachine(component, stm => Number(stm.id) === stateMachineCode);
         if (!stateMachine) {
             throw new Error(`StateMachine '${stateMachineCode}' not found`);
         }
@@ -78,7 +84,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findComponentByName(componentName: string): Component {
-        const result = this.findComponent(component => component.attributes.name === componentName);
+        const result = this.findComponent(component => component.name === componentName);
         if (!result) {
             throw new Error(`Component '${componentName}' not found`);
         }
@@ -86,7 +92,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findComponentByCode(componentCode: number): Component {
-        const result = this.findComponent(component => Number(component.attributes.id) === componentCode);
+        const result = this.findComponent(component => Number(component.id) === componentCode);
         if (!result) {
             throw new Error(`Component '${componentCode}' not found`);
         }
@@ -94,23 +100,30 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findComponent(predicate: (component: Component) => boolean): Component | undefined {
-        return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
+        const codesConverter = (this._config.deployment.codesConverter as unknown) as {
+            components: {
+                component: Component[];
+            };
+        };
+        const components = codesConverter.components.component;
+
+        return components.find(predicate);
     }
 
     private findStateMachine(
         component: Component,
         predicate: (stateMachine: StateMachine) => boolean
     ): StateMachine | undefined {
-        return component.stateMachines[0].stateMachine.find(predicate);
+        return component.stateMachines.stateMachine.find(predicate);
     }
 
     containsComponent(componentName: string): boolean {
-        const result = this.findComponent(component => component.attributes.name === componentName);
+        const result = this.findComponent(component => component.name === componentName);
         return result ? true : false;
     }
 
     containsStateMachine(componentName: string, stateMachineName: string): boolean {
-        const result = this.findComponent(component => component.attributes.name === componentName);
+        const result = this.findComponent(component => component.name === componentName);
         if (result) {
             return result.stateMachines[0].stateMachine.find(stm => stm.attributes.name === stateMachineName) != null;
         }
@@ -136,7 +149,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
 
         return {
             eventCode: Number(publisher.attributes.eventCode),
-            routingKey: publisher.topic[0].value
+            routingKey: publisher.topic[0].value,
         };
     }
 
@@ -195,6 +208,6 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         const stateMachine = this.findStateMachineByCode(component, stateMachineCode);
         const state = this.findStateByCode(stateMachine, stateCode);
 
-        return state.attributes.name;
+        return state.name;
     }
 }
