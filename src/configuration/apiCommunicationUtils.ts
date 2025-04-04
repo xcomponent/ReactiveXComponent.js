@@ -3,25 +3,30 @@ import { ApiCommunication, Topic } from './parsedApiConfigurationTypes';
 // Définir un type plus large pour couvrir les cas transformés depuis le XML
 export type RawCommunication = {
   attributes?: Partial<ApiCommunication['attributes']>;
+  componentCode?: string;
+  stateMachineCode?: string;
+  eventType?: string;
+  event?: string;
+  eventCode?: string;
   topic?: { value?: string; type?: string } | { value?: string; type?: string }[];
 };
 
 export function normalizeCommunication(input: RawCommunication): ApiCommunication {
-  const attr = input.attributes ?? {};
-
   return {
     attributes: {
-      componentCode: attr.componentCode ?? '',
-      stateMachineCode: attr.stateMachineCode,
-      eventType: attr.eventType,
-      event: attr.event,
-      eventCode: attr.eventCode,
+      componentCode: input.componentCode ?? input.attributes?.componentCode ?? '',
+      stateMachineCode: input.stateMachineCode ?? input.attributes?.stateMachineCode,
+      eventType: input.eventType ?? input.attributes?.eventType,
+      event: input.event ?? input.attributes?.event,
+      eventCode: input.eventCode ?? input.attributes?.eventCode,
     },
     topic: normalizeTopic(input.topic),
   };
 }
 
-function normalizeTopic(topic: { value?: string; type?: string } | { value?: string; type?: string }[] | undefined): [Topic] {
+function normalizeTopic(
+  topic: { value?: string; type?: string } | { value?: string; type?: string }[] | undefined
+): [Topic] {
   if (!topic) {
     return [{ value: '' }];
   }
