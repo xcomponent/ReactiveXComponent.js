@@ -78,10 +78,17 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findStateByCode(stateMachine: StateMachine, stateCode: number): State {
-        const result = stateMachine.states[0].State.find(state => Number(state.attributes.id) === stateCode);
+        const statesArray = stateMachine.states[0]?.State;
+    
+        if (!statesArray) {
+            throw new Error(`State '${stateCode}' not found`);
+        }
+    
+        const result = statesArray.find(state => Number(state.attributes.id) === stateCode);
         if (!result) {
             throw new Error(`State '${stateCode}' not found`);
         }
+    
         return result;
     }
 
