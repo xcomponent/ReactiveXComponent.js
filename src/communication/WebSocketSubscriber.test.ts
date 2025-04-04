@@ -9,6 +9,7 @@ import { verify, instance, mock, anything } from '../../node_modules/ts-mockito/
 import { WebSocketWrapper } from '../../src/communication/WebSocketWrapper';
 
 describe('Test xcWebSocketSubscriber module', function() {
+    let mockServer: Server | undefined;
     beforeEach(function() {
         // tslint:disable-next-line:no-any
         (<any>window).WebSocket = WebSocket;
@@ -16,8 +17,16 @@ describe('Test xcWebSocketSubscriber module', function() {
         (<any>window).isTestEnvironnement = true;
     });
 
+    
+    afterEach(() => {
+        if (mockServer) {
+            mockServer.close();
+            mockServer = undefined;
+        }
+    });
+
     describe('Test subscribe method', function() {
-        let subscriber, mockServer: Server, mockWebSocket;
+        let subscriber, mockWebSocket;
         beforeEach(function() {
             let serverUrl = 'wss://' + generateUUID();
             mockServer = new Server(serverUrl);
@@ -38,14 +47,14 @@ describe('Test xcWebSocketSubscriber module', function() {
                     expect(data.stateMachineRef.StateName).toEqual(Mock.correctReceivedData.stateMachineRef.StateName);
                     expect(data.stateMachineRef.send).toEqual(expect.any(Function));
                     expect(data.jsonMessage).toEqual(Mock.correctReceivedData.jsonMessage);
-                    mockServer.stop(done);
+                    mockServer?.stop(done);
                 };
                 // subscribe send a message (subscribe request)
                 subscriber.subscribe('component', 'stateMachine', { onStateMachineUpdate: stateMachineUpdateListener });
             };
 
             // tslint:disable-next-line:no-any
-            mockServer.on('connection', function(server: any) {
+            mockServer?.on('connection', function(server: any) {
                 // when subscribe request is received, we send send jsonData
                 // tslint:disable-next-line:no-any
                 server.on('message', function(subscribeRequest: any) {
@@ -103,7 +112,7 @@ describe('Test xcWebSocketSubscriber module', function() {
     });
 
     describe('Test getSnapshot method', function() {
-        let subscriber, mockServer: Server, mockWebSocket, privateTopics;
+        let subscriber, mockWebSocket, privateTopics;
         beforeEach(function() {
             let serverUrl = 'wss://' + generateUUID();
             mockServer = new Server(serverUrl);
@@ -117,7 +126,7 @@ describe('Test xcWebSocketSubscriber module', function() {
             let deserializer = new Deserializer();
 
             // tslint:disable-next-line:no-any
-            mockServer.on('connection', function(server: any) {
+            mockServer?.on('connection', function(server: any) {
                 let n = -3;
                 let topic: string = '';
 
@@ -164,7 +173,7 @@ describe('Test xcWebSocketSubscriber module', function() {
             mockWebSocket.onopen = function() {
                 subscriber
                     .getSnapshot('component', 'stateMachine', privateTopics)
-                    .then(items => mockServer.stop(done))
+                    .then(items => mockServer?.stop(done))
                     .catch(err => {
                         console.error(err);
                     });
