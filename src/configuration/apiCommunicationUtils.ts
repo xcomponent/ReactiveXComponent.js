@@ -2,7 +2,7 @@ import { ApiCommunication, Topic } from './parsedApiConfigurationTypes';
 
 // Définir un type plus large pour couvrir les cas transformés depuis le XML
 export type RawCommunication = {
-  attributes?: Partial<ApiCommunication['attributes'>];
+  attributes?: Partial<ApiCommunication['attributes']>;
   componentCode?: string;
   stateMachineCode?: string;
   eventType?: string;
