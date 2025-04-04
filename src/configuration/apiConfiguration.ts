@@ -1,4 +1,12 @@
-import { ParsedApiConfiguration, ApiCommunication, Component, State, StateMachine } from './parsedApiConfiguration';
+import {
+    ApiCommunication,
+    ParsedApiConfiguration,
+    Component,
+    State,
+    StateMachine,
+} from './parsedApiConfigurationTypes';
+
+import { normalizeCommunication } from './apiCommunicationUtils';
 
 export interface PublisherDetails {
     eventCode: number;
@@ -7,7 +15,7 @@ export interface PublisherDetails {
 
 export enum SubscriberEventType {
     Update,
-    Error
+    Error,
 }
 
 export interface ApiConfiguration {
@@ -44,17 +52,17 @@ export class DefaultApiConfiguration implements ApiConfiguration {
 
     getComponentCode(componentName: string): number {
         const component = this.findComponentByName(componentName);
-        return Number(component.attributes.id);
+        return Number(component.id);
     }
 
     getStateMachineCode(componentName: string, stateMachineName: string): number {
         const component = this.findComponentByName(componentName);
         const stateMachine = this.findStateMachineByName(component, stateMachineName);
-        return Number(stateMachine.attributes.id);
+        return Number(stateMachine.id);
     }
 
     private findStateMachineByName(component: Component, stateMachineName: string): StateMachine {
-        const stateMachine = this.findStateMachine(component, stm => stm.attributes.name === stateMachineName);
+        const stateMachine = this.findStateMachine(component, stm => stm.name === stateMachineName);
         if (!stateMachine) {
             throw new Error(`StateMachine '${stateMachineName}' not found`);
         }
@@ -62,7 +70,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findStateMachineByCode(component: Component, stateMachineCode: number): StateMachine {
-        const stateMachine = this.findStateMachine(component, stm => Number(stm.attributes.id) === stateMachineCode);
+        const stateMachine = this.findStateMachine(component, stm => Number(stm.id) === stateMachineCode);
         if (!stateMachine) {
             throw new Error(`StateMachine '${stateMachineCode}' not found`);
         }
@@ -70,15 +78,25 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findStateByCode(stateMachine: StateMachine, stateCode: number): State {
-        const result = stateMachine.states[0].State.find(state => Number(state.attributes.id) === stateCode);
+        const stateContainer = stateMachine.states;
+        const statesArray = Array.isArray(stateContainer?.State)
+            ? stateContainer.State
+            : stateContainer?.State
+                ? [stateContainer.State]
+                : [];
+    
+        const result = statesArray.find(state => Number(state.id) === stateCode);
+    
         if (!result) {
             throw new Error(`State '${stateCode}' not found`);
         }
+    
         return result;
     }
 
+
     private findComponentByName(componentName: string): Component {
-        const result = this.findComponent(component => component.attributes.name === componentName);
+        const result = this.findComponent(component => component.name === componentName);
         if (!result) {
             throw new Error(`Component '${componentName}' not found`);
         }
@@ -86,7 +104,7 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findComponentByCode(componentCode: number): Component {
-        const result = this.findComponent(component => Number(component.attributes.id) === componentCode);
+        const result = this.findComponent(component => Number(component.id) === componentCode);
         if (!result) {
             throw new Error(`Component '${componentCode}' not found`);
         }
@@ -94,25 +112,32 @@ export class DefaultApiConfiguration implements ApiConfiguration {
     }
 
     private findComponent(predicate: (component: Component) => boolean): Component | undefined {
-        return this._config.deployment.codesConverter[0].components[0].component.find(predicate);
+        const codesConverter = (this._config.deployment.codesConverter as unknown) as {
+            components: {
+                component: Component[];
+            };
+        };
+        const components = codesConverter.components.component;
+
+        return components.find(predicate);
     }
 
     private findStateMachine(
         component: Component,
         predicate: (stateMachine: StateMachine) => boolean
     ): StateMachine | undefined {
-        return component.stateMachines[0].stateMachine.find(predicate);
+        return component.stateMachines.stateMachine.find(predicate);
     }
 
     containsComponent(componentName: string): boolean {
-        const result = this.findComponent(component => component.attributes.name === componentName);
+        const result = this.findComponent(component => component.name === componentName);
         return result ? true : false;
     }
 
     containsStateMachine(componentName: string, stateMachineName: string): boolean {
-        const result = this.findComponent(component => component.attributes.name === componentName);
+        const result = this.findComponent(component => component.name === componentName);
         if (result) {
-            return result.stateMachines[0].stateMachine.find(stm => stm.attributes.name === stateMachineName) != null;
+            return result.stateMachines.stateMachine.find(stm => stm.name === stateMachineName) != null;
         }
         return false;
     }
@@ -133,10 +158,9 @@ export class DefaultApiConfiguration implements ApiConfiguration {
                 `publisher not found - component code: ${componentCode} - statemachine code: ${stateMachineCode} - message type: ${messageType} `
             );
         }
-
         return {
             eventCode: Number(publisher.attributes.eventCode),
-            routingKey: publisher.topic[0].value
+            routingKey: publisher.topic[0].value,
         };
     }
 
@@ -145,7 +169,12 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         stateMachineCode: number,
         messageType: string
     ): ApiCommunication | undefined {
-        return this._config.deployment.clientAPICommunication[0].publish.find(
+        const raw = this._config.deployment.clientAPICommunication.publish;
+
+        const publishArrayRaw = Array.isArray(raw) ? raw : [raw];
+        const publishArray = publishArrayRaw.map(normalizeCommunication);
+
+        return publishArray.find(
             pub =>
                 Number(pub.attributes.componentCode) === componentCode &&
                 Number(pub.attributes.stateMachineCode) === stateMachineCode &&
@@ -170,18 +199,24 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         stateMachineCode: number,
         type: SubscriberEventType
     ): ApiCommunication | undefined {
-        return this._config.deployment.clientAPICommunication[0].subscribe.find(
-            pub =>
-                Number(pub.attributes.componentCode) === componentCode &&
-                Number(pub.attributes.stateMachineCode) === stateMachineCode &&
-                pub.attributes.eventType === SubscriberEventType[type].toUpperCase()
+        const raw = this._config.deployment.clientAPICommunication.subscribe;
+        const subscribeArrayRaw = Array.isArray(raw) ? raw : [raw];
+        const subscribeArray = subscribeArrayRaw.map(normalizeCommunication);
+
+        return subscribeArray.find(
+            sub =>
+                Number(sub.attributes.componentCode) === componentCode &&
+                Number(sub.attributes.stateMachineCode) === stateMachineCode &&
+                sub.attributes.eventType === SubscriberEventType[type].toUpperCase()
         );
     }
 
     getSnapshotTopic(componentCode: number): string {
-        const snapshot = this._config.deployment.clientAPICommunication[0].snapshot.find(
-            pub => Number(pub.attributes.componentCode) === componentCode
-        );
+        const raw = this._config.deployment.clientAPICommunication.snapshot;
+        const snapshotArrayRaw = Array.isArray(raw) ? raw : [raw];
+        const snapshotArray = snapshotArrayRaw.map(normalizeCommunication);
+
+        const snapshot = snapshotArray.find(pub => Number(pub.attributes.componentCode) === componentCode);
 
         if (!snapshot) {
             throw new Error(`Snapshot topic not found - component code: ${componentCode}`);
@@ -195,6 +230,6 @@ export class DefaultApiConfiguration implements ApiConfiguration {
         const stateMachine = this.findStateMachineByCode(component, stateMachineCode);
         const state = this.findStateByCode(stateMachine, stateCode);
 
-        return state.attributes.name;
+        return state.name;
     }
 }

@@ -1,31 +1,28 @@
-import { parseString } from 'xml2js';
+
+import { ParsedApiConfiguration } from './parsedApiConfigurationTypes';
 import { DefaultApiConfiguration, ApiConfiguration } from './apiConfiguration';
-import { ParsedApiConfiguration } from './parsedApiConfiguration';
+import { parseXmlToJson } from '../utils/xmlParser';
 
 export interface ApiConfigurationParser {
-    parse(xmlConfig: string): Promise<ApiConfiguration>;
+  parse(xmlConfig: string): Promise<ApiConfiguration>;
 }
 
+// Remplace la dépendance à xml2js
 export class DefaultApiConfigurationParser implements ApiConfigurationParser {
-    parse(xmlConfig: string): Promise<ApiConfiguration> {
-        return new Promise((resolve, reject) => {
-            // tslint:disable-next-line:no-any
-            parseString(xmlConfig, { charkey: 'value', attrkey: 'attributes' }, function(err: any, result: any) {
-                if (err) {
-                    reject(err);
-                } else {
-                    const rawConfig = result as ParsedApiConfiguration;
-                    if (rawConfig) {
-                        try {
-                            resolve(new DefaultApiConfiguration(result));
-                        } catch (err) {
-                            reject(err);
-                        }
-                    } else {
-                        reject(new Error(`invalid configuration: ${xmlConfig}`));
-                    }
-                }
-            });
-        });
-    }
+  parse(xmlConfig: string): Promise<ApiConfiguration> {
+    return new Promise((resolve, reject) => {
+      try {
+        const result = parseXmlToJson(xmlConfig); // voir fonction ci-dessous
+        const rawConfig = result as ParsedApiConfiguration;
+
+        if (rawConfig?.deployment) {
+          resolve(new DefaultApiConfiguration(rawConfig));
+        } else {
+          reject(new Error('Invalid parsed XML structure'));
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 }
