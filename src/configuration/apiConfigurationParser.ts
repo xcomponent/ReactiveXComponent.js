@@ -11,6 +11,7 @@ export class DefaultApiConfigurationParser implements ApiConfigurationParser {
         return new Promise((resolve, reject) => {
             try {
                 const result = parseXmlToJson(xmlConfig);
+                console.log(JSON.stringify(result, null, 2));
                 const rawConfig = result as ParsedApiConfiguration;
                 resolve(new DefaultApiConfiguration(rawConfig));
             } catch (err) {
