@@ -25,16 +25,16 @@ export function normalizeCommunication(input: RawCommunication): ApiCommunicatio
 }
 
 function normalizeTopic(
-  topic: { value?: string; type?: string } | { value?: string; type?: string }[] | undefined
+  topic: { value?: string; type?: string; _?: string } | { value?: string; type?: string; _?: string }[] | undefined
 ): [Topic] {
   if (!topic) {
     return [{ value: '' }];
   }
 
   if (Array.isArray(topic)) {
-    const normalized = topic.map((t): Topic => ({ value: t.value ?? t.type ?? '' }));
+    const normalized = topic.map((t): Topic => ({ value: t._ ?? t.value ?? t.type ?? '' }));
     return normalized.length > 0 ? [normalized[0]] : [{ value: '' }];
   }
 
-  return [{ value: topic.value ?? topic.type ?? '' }];
+  return [{ value: topic._ ?? topic.value ?? topic.type ?? '' }];
 }
