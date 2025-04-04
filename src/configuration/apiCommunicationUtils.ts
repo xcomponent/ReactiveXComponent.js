@@ -31,21 +31,16 @@ function normalizeTopic(
     return [{ value: '' }];
   }
 
+  const getTopicValue = (t: { value?: string; type?: string; _?: string }): string =>
+    typeof t._ === 'string' ? t._ :
+    typeof t.value === 'string' ? t.value :
+    typeof t.type === 'string' ? t.type :
+    '';
+
   if (Array.isArray(topic)) {
-    const normalized = topic.map((t): Topic => ({
-      value: typeof t._ === 'string' ? t._ :
-             typeof t.value === 'string' ? t.value :
-             typeof t.type === 'string' ? t.type :
-             ''
-    }));
-    
+    const normalized = topic.map((t): Topic => ({ value: getTopicValue(t) }));
     return normalized.length > 0 ? [normalized[0]] : [{ value: '' }];
   }
 
-  return [{
-    value: typeof topic._ === 'string' ? topic._ :
-           typeof topic.value === 'string' ? topic.value :
-           typeof topic.type === 'string' ? topic.type :
-           ''
-  }];
+  return [{ value: getTopicValue(topic) }];
 }
