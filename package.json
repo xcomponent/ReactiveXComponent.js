@@ -1,6 +1,6 @@
 {
     "name": "reactivexcomponent.js",
-    "version": "7.0.6",
+    "version": "7.0.7",
     "description": "Javascript reactive client API for XComponent",
     "module": "dist/index.js",
     "main": "dist/index.js",
