@@ -261,7 +261,10 @@ export class WebSocketSubscriber {
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
         try {
-            items = JSON.parse(this.deserializer.decodeServerMessage(b64Data)!);
+            const raw = JSON.parse(this.deserializer.decodeServerMessage(b64Data)!);
+            if (raw.$values) {
+                items = raw.$values;
+            }
         } catch (e) {
             items = b64Data;
         }
