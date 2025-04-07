@@ -265,6 +265,9 @@ export class WebSocketSubscriber {
             if (raw.$values) {
                 items = raw.$values;
             }
+			else {
+				items = raw;
+			}
         } catch (e) {
             items = b64Data;
         }
