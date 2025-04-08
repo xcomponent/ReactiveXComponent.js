@@ -14,7 +14,7 @@
         "label-position": true,
         "no-any": true,
         "no-arg": true,
-        "no-bitwise": false,
+        "no-bitwise": true,
         "no-console": [
             false,
             "log",
