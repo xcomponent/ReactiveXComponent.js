@@ -19,11 +19,11 @@ import { StateMachineInstance } from '../interfaces/StateMachineInstance';
 import { StateMachineRef } from '../interfaces/StateMachineRef';
 import { StateMachineUpdateListener } from '../interfaces/StateMachineUpdateListener';
 import { generateUUID } from '../utils/uuid';
-import { Logger } from '../utils/Logger';
+// import { Logger } from '../utils/Logger';
 import { WebSocketWrapper } from './WebSocketWrapper';
 
 export class WebSocketSubscriber {
-    private logger = Logger.getLogger('WebSocketSubscriber');
+    // private logger = Logger.getLogger('WebSocketSubscriber');
     private stateMachineRefSendPublisher: WebSocketPublisher;
     private subscribedStateMachines: { [componentName: string]: Array<String> };
     private updates$: Observable<DeserializedData>;
@@ -256,7 +256,6 @@ export class WebSocketSubscriber {
     }
 
     public getJsonDataFromSnapshot(data: string, topic?: string): Array<StateMachineInstance> {
-        this.logger.debug('JsonData received from snapshot: ', { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
@@ -264,10 +263,9 @@ export class WebSocketSubscriber {
             const raw = JSON.parse(this.deserializer.decodeServerMessage(b64Data)!);
             if (raw.$values) {
                 items = raw.$values;
+            } else {
+                items = raw;
             }
-			else {
-				items = raw;
-			}
         } catch (e) {
             items = b64Data;
         }
@@ -286,7 +284,7 @@ export class WebSocketSubscriber {
     }
 
     public getJsonDataFromEvent(data: string, topic?: string): StateMachineInstance {
-        this.logger.debug('JsonData received from event: ', { data: data, topic: topic }, 2);
+        // this.logger.debug('JsonData received from event: ', { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let stateMachineRef = this.getStateMachineRef(
             jsonData.Header.StateMachineId,

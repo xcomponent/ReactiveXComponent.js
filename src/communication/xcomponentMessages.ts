@@ -1,4 +1,4 @@
-import { Logger } from '../utils/Logger';
+// import { Logger } from '../utils/Logger';
 
 import * as pako from 'pako';
 
@@ -71,17 +71,15 @@ export let getHeaderWithIncomingType = (): Header => {
 };
 
 export class Serializer {
-    private logger = Logger.getLogger('Serializer');
+    // private logger = Logger.getLogger('Serializer');
 
     public convertToWebsocketInputFormat(data: Data): string {
         let input = `${data.RoutingKey} ${data.ComponentCode} ${JSON.stringify(data.Event)}`;
-        this.logger.debug('Message send : ', input);
         return input;
     }
 
     public convertCommandDataToWebsocketInputFormat(commandData: CommandData): string {
         let input = `${commandData.Command} ${JSON.stringify(commandData.Data)}`;
-        this.logger.debug('Message send : ', input);
         return input;
     }
 }
