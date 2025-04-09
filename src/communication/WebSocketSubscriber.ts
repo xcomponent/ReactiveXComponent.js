@@ -256,7 +256,6 @@ export class WebSocketSubscriber {
     }
 
     public getJsonDataFromSnapshot(data: string, topic?: string): Array<StateMachineInstance> {
-        this.logger.debug('JsonData received from snapshot: ', { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let b64Data = JSON.parse(jsonData.JsonMessage).Items;
         let items;
@@ -286,7 +285,7 @@ export class WebSocketSubscriber {
     }
 
     public getJsonDataFromEvent(data: string, topic?: string): StateMachineInstance {
-        this.logger.debug('JsonData received from event: ', { data: data, topic: topic }, 2);
+       // this.logger.debug('JsonData received from event: ', { data: data, topic: topic }, 2);
         let jsonData = this.deserializer.getJsonData(data);
         let stateMachineRef = this.getStateMachineRef(
             jsonData.Header.StateMachineId,
